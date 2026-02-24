@@ -109,3 +109,4 @@ temp/
 .webdev/
 .manus-logs/
 attached_assets/
+.github/workflows/

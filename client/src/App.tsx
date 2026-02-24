@@ -6,20 +6,25 @@
 
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Router as WouterRouter } from "wouter";
+
+// Detect base path for GitHub Pages deployment
+const BASE_PATH = import.meta.env.BASE_URL?.replace(/\/$/, '') || '';
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AppProvider } from "./contexts/AppContext";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 
-function Router() {
+function AppRouter() {
   return (
-    <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/404" component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
+    <WouterRouter base={BASE_PATH}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </WouterRouter>
   );
 }
 
@@ -39,7 +44,7 @@ function App() {
                 },
               }}
             />
-            <Router />
+            <AppRouter />
           </TooltipProvider>
         </AppProvider>
       </ThemeProvider>
