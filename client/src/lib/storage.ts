@@ -5,7 +5,7 @@
 // ============================================================
 
 import type { AppState } from "./types";
-import { DEFAULT_BANDS, DEFAULT_BARS, DEFAULT_FOOTPLATES, DEFAULT_ACCESSORIES, DEFAULT_EXERCISES } from "./equipment-data";
+import { DEFAULT_BANDS, DEFAULT_BARS, DEFAULT_FOOTPLATES, DEFAULT_ACCESSORIES, DEFAULT_EXERCISES, GORILLA_GAINS_PROGRAM, GORILLA_GAINS_ROUTINES } from "./equipment-data";
 
 const STORAGE_KEY = "vive-la-resistance-v1";
 
@@ -25,6 +25,7 @@ export function getDefaultState(): AppState {
     gymProfiles: [],
     exerciseTemplates: DEFAULT_EXERCISES.map(e => ({ ...e })),
     routines: [],
+    programs: [GORILLA_GAINS_PROGRAM],
     workoutHistory: [],
     activeWorkout: null,
     resistanceLadder: [],
@@ -41,15 +42,32 @@ export function loadState(): AppState {
     const defaults = getDefaultState();
 
     // Merge with defaults to handle schema evolution
+    // For exercise templates: merge user's saved ones with any new defaults
+    const mergedExercises = (() => {
+      const saved = parsed.exerciseTemplates || [];
+      const savedIds = new Set(saved.map(e => e.id));
+      const newDefaults = defaults.exerciseTemplates.filter(e => !savedIds.has(e.id));
+      return saved.length ? [...saved, ...newDefaults] : defaults.exerciseTemplates;
+    })();
+
+    // For bands: merge user's saved ones with any new defaults (preserve owned state)
+    const mergedBands = (() => {
+      const saved = parsed.bands || [];
+      const savedIds = new Set(saved.map(b => b.id));
+      const newDefaults = defaults.bands.filter(b => !savedIds.has(b.id));
+      return saved.length ? [...saved, ...newDefaults] : defaults.bands;
+    })();
+
     return {
       ...defaults,
       ...parsed,
       userProfile: { ...defaults.userProfile, ...parsed.userProfile },
-      bands: parsed.bands?.length ? parsed.bands : defaults.bands,
+      bands: mergedBands,
       bars: parsed.bars?.length ? parsed.bars : defaults.bars,
       footplates: parsed.footplates?.length ? parsed.footplates : defaults.footplates,
       accessories: parsed.accessories?.length ? parsed.accessories : defaults.accessories,
-      exerciseTemplates: parsed.exerciseTemplates?.length ? parsed.exerciseTemplates : defaults.exerciseTemplates,
+      exerciseTemplates: mergedExercises,
+      programs: defaults.programs, // Always use latest program definitions
     };
   } catch {
     return getDefaultState();
@@ -76,11 +94,13 @@ export function exportToCSV(state: AppState): string {
   const headers = [
     "Date",
     "Workout",
+    "Intensity",
     "Exercise",
     "Set",
     "Band Combo",
+    "Doubled",
     "Spacers",
-    "Reps",
+    "Full Reps",
     "Partial Reps",
     "Isometric (s)",
     "RPE",
@@ -113,9 +133,11 @@ export function exportToCSV(state: AppState): string {
         rows.push([
           date,
           workout.routineName || "Free Workout",
+          workout.intensity || "",
           exercise.exerciseName,
           String(set.setNumber),
           bandNames || "None",
+          exercise.setup.doubled ? "Yes" : "No",
           String(set.spacers),
           String(set.reps),
           String(set.partialReps),

@@ -2,6 +2,7 @@
 // Vive la Resistance! — History & Analytics Tab
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Workout history, progression charts, CSV export
+// Shows intensity badges and separate full/partial rep counts
 // ============================================================
 
 import { useState, useMemo } from "react";
@@ -18,18 +19,24 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   BarChart3, Calendar, Download, Trash2, ChevronDown, Clock,
-  TrendingUp, Zap, Flame, Activity
+  TrendingUp, Zap, Flame, Activity, Target
 } from "lucide-react";
 import { downloadCSV } from "@/lib/storage";
 import { calculateSetJoules, estimateElongation, getPeakTension } from "@/lib/physics";
 import { toast } from "sonner";
-import type { Band } from "@/lib/types";
+import type { Band, IntensityLevel } from "@/lib/types";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar
 } from "recharts";
 
 const ANALYTICS_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/DZrBwwSrda96SBezQ91GLV/sandbox/mmcxzbXYIgxAqZLaMxBPDN-img-3_1771966181000_na1fn_YW5hbHl0aWNzLWFic3RyYWN0.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRFpyQnd3U3JkYTk2U0JlelE5MUdMVi9zYW5kYm94L21tY3h6YlhZSWd4QXFaTGFNeEJQRE4taW1nLTNfMTc3MTk2NjE4MTAwMF9uYTFmbl9ZVzVoYkhsMGFXTnpMV0ZpYzNSeVlXTjAuanBnP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=Z4kh~jeRxMenAGPuCZ38kwKQlaPXlJoazWykS1klMNQXvv6Q72R~8FC8MbEK7s1pk8wvJ~xd~y4b~NYsqRMUZ1NJxz9IfA8bDlrMuPPZoiBk3dVdQ0uz6CM-VhWf3yCCvVs75p6n4rxMGSQKI-AwqrtXHCPv5YmV83~SjIol9mlGhUgYe2XDVCEqeI2tnXxsOF0W~ED57xw3wB4~emwviC74iMiMIqupypcLYym9vP-Sv1rVI8ZkZ4ezwltfbF0ZH1u0qj0bJuCoPkyodST0VSkSx2uT4K8PV4JxFcJtZB8vPF9Eo-KPe1ZRI34RDS5NOvEmkPKzPuOaYm9N-9cxZQ__";
+
+const INTENSITY_STYLES: Record<IntensityLevel, { bg: string; text: string; icon: typeof Flame }> = {
+  heavy: { bg: "bg-red-500/15", text: "text-red-400", icon: Flame },
+  medium: { bg: "bg-amber-gold/15", text: "text-amber-gold", icon: Target },
+  light: { bg: "bg-sage-green/15", text: "text-sage-green", icon: Zap },
+};
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -91,13 +98,15 @@ export default function HistoryTab() {
       let totalJoules = 0;
       let maxTension = 0;
       let totalSets = 0;
-      let totalReps = 0;
+      let totalFullReps = 0;
+      let totalPartialReps = 0;
 
       for (const exercise of workout.exercises) {
         for (const set of exercise.sets) {
           if (!set.completed) continue;
           totalSets++;
-          totalReps += set.reps + set.partialReps;
+          totalFullReps += set.reps;
+          totalPartialReps += set.partialReps;
 
           const bands = set.bandIds
             .map(id => allBands.find(b => b.id === id))
@@ -130,7 +139,9 @@ export default function HistoryTab() {
         peakTension: Math.round(maxTension),
         totalJoules: Math.round(totalJoules),
         totalSets,
-        totalReps,
+        totalFullReps,
+        totalPartialReps,
+        totalReps: totalFullReps + totalPartialReps,
         duration: workout.durationSeconds,
       };
     });
@@ -293,10 +304,15 @@ export default function HistoryTab() {
             const completedSets = workout.exercises.reduce(
               (sum, ex) => sum + ex.sets.filter(s => s.completed).length, 0
             );
-            const totalReps = workout.exercises.reduce(
-              (sum, ex) => sum + ex.sets.filter(s => s.completed).reduce((rs, s) => rs + s.reps + s.partialReps, 0), 0
+            const totalFullReps = workout.exercises.reduce(
+              (sum, ex) => sum + ex.sets.filter(s => s.completed).reduce((rs, s) => rs + s.reps, 0), 0
+            );
+            const totalPartialReps = workout.exercises.reduce(
+              (sum, ex) => sum + ex.sets.filter(s => s.completed).reduce((rs, s) => rs + s.partialReps, 0), 0
             );
             const isExpanded = expandedWorkout === workout.id;
+            const intensity = workout.intensity;
+            const iStyle = intensity ? INTENSITY_STYLES[intensity] : null;
 
             return (
               <Collapsible
@@ -312,7 +328,18 @@ export default function HistoryTab() {
                           <Calendar className="w-4.5 h-4.5 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate">{workout.routineName}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold truncate">{workout.routineName}</p>
+                            {/* Intensity Badge */}
+                            {iStyle && intensity && (
+                              <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
+                                <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
+                                <span className={`text-[9px] font-bold uppercase tracking-wider ${iStyle.text}`}>
+                                  {intensity}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                             <span className="text-[11px] text-muted-foreground">
                               {formatDate(workout.startedAt)}
@@ -323,7 +350,18 @@ export default function HistoryTab() {
                             </span>
                             <span className="text-[11px] text-muted-foreground">·</span>
                             <span className="text-[11px] text-muted-foreground">
-                              {completedSets} sets · {totalReps} reps
+                              {completedSets} sets
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">·</span>
+                            <span className="text-[11px] font-mono tabular-nums text-foreground/70">
+                              {totalFullReps}
+                              <span className="text-muted-foreground/50">f</span>
+                              {totalPartialReps > 0 && (
+                                <>
+                                  <span className="text-primary/70">+{totalPartialReps}</span>
+                                  <span className="text-muted-foreground/50">p</span>
+                                </>
+                              )}
                             </span>
                           </div>
                         </div>
@@ -343,6 +381,11 @@ export default function HistoryTab() {
                               <p className="text-xs font-semibold text-foreground/80">{exercise.exerciseName}</p>
                               {exercise.setup.doubled && (
                                 <Badge variant="outline" className="text-[9px] h-4 border-primary/30 text-primary/60">2x</Badge>
+                              )}
+                              {exercise.targetReps && (
+                                <Badge variant="secondary" className="text-[9px] h-4 font-mono bg-accent text-muted-foreground">
+                                  {exercise.targetReps}r
+                                </Badge>
                               )}
                             </div>
                             {completedExSets.map(set => {
@@ -366,12 +409,21 @@ export default function HistoryTab() {
                                   {set.spacers > 0 && (
                                     <Badge variant="outline" className="text-[9px] h-4 border-primary/20 text-primary/50 px-1">SP</Badge>
                                   )}
-                                  <span className="font-mono tabular-nums ml-auto shrink-0">{set.reps}r</span>
+                                  {/* Full reps */}
+                                  <span className="font-mono tabular-nums ml-auto shrink-0">
+                                    {set.reps}<span className="text-muted-foreground/50">f</span>
+                                  </span>
+                                  {/* Partial reps */}
                                   {set.partialReps > 0 && (
-                                    <span className="font-mono tabular-nums text-primary shrink-0">+{set.partialReps}p</span>
+                                    <span className="font-mono tabular-nums text-primary shrink-0">
+                                      +{set.partialReps}<span className="text-primary/50">p</span>
+                                    </span>
                                   )}
+                                  {/* Isometric hold */}
                                   {set.isometricSeconds > 0 && (
-                                    <span className="font-mono tabular-nums text-sage-green shrink-0">{set.isometricSeconds}s</span>
+                                    <span className="font-mono tabular-nums text-sage-green shrink-0">
+                                      {set.isometricSeconds}<span className="text-sage-green/50">s</span>
+                                    </span>
                                   )}
                                 </div>
                               );

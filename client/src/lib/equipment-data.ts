@@ -1,13 +1,12 @@
 // ============================================================
 // Vive la Resistance! — Pre-loaded Equipment Database
 // Design: "Chalk & Iron" Premium Dark Athletic
-// Real-world VRT equipment specs from blueprint
+// Real-world VRT equipment specs + Gorilla Gains program
 // ============================================================
 
-import type { Band, Bar, Footplate, Accessory, ExerciseTemplate } from "./types";
+import type { Band, Bar, Footplate, Accessory, ExerciseTemplate, Program, Routine, RoutineExercise } from "./types";
 
 // --- BANDS ---
-// Pre-loaded with real manufacturer specs
 
 export const DEFAULT_BANDS: Band[] = [
   // Harambe System (38" loop)
@@ -62,32 +61,37 @@ export const DEFAULT_ACCESSORIES: Accessory[] = [
 ];
 
 // --- DEFAULT EXERCISE TEMPLATES ---
+// Gorilla Gains exercises have their correct doubled/singled defaults
 
 export const DEFAULT_EXERCISES: ExerciseTemplate[] = [
-  // Push
-  { id: "ex-chest-press", name: "Chest Press", category: "push", defaultSetup: { doubled: false }, notes: "Standing or floor press" },
-  { id: "ex-incline-press", name: "Incline Press", category: "push", defaultSetup: { doubled: false }, notes: "Angled press for upper chest" },
-  { id: "ex-overhead-press", name: "Overhead Press", category: "shoulders", defaultSetup: { doubled: false }, notes: "Standing military press" },
-  { id: "ex-tricep-pushdown", name: "Tricep Pushdown", category: "arms", defaultSetup: { doubled: false }, notes: "Anchor band overhead" },
+  // Push — Gorilla Gains
+  { id: "ex-bench-press", name: "Bench Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — primary chest movement" },
+  { id: "ex-overhead-press", name: "Overhead Press", category: "push", defaultSetup: { doubled: false }, notes: "Singled — standing military press" },
+  { id: "ex-tricep-extension", name: "Tricep Extension", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — overhead or pushdown" },
+  { id: "ex-incline-press", name: "Incline Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — angled press for upper chest" },
+  { id: "ex-chest-press", name: "Chest Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — standing or floor press" },
 
-  // Pull
-  { id: "ex-deadlift", name: "Deadlift", category: "pull", defaultSetup: { doubled: false }, notes: "Conventional or sumo stance" },
-  { id: "ex-bent-row", name: "Bent Over Row", category: "pull", defaultSetup: { doubled: false }, notes: "Overhand or underhand grip" },
-  { id: "ex-bicep-curl", name: "Bicep Curl", category: "arms", defaultSetup: { doubled: false }, notes: "Standing curl" },
+  // Pull — Gorilla Gains
+  { id: "ex-rdl", name: "Romanian Deadlift", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — stiff-leg hip hinge" },
+  { id: "ex-bent-row", name: "Bent-Over Row", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — overhand or underhand grip" },
+  { id: "ex-ferro-curl", name: "Ferro Curl", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — Harambe bicep curl variation" },
+  { id: "ex-shrugs", name: "Shrugs", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — trap isolation (optional)" , optional: true },
+  { id: "ex-deadlift", name: "Deadlift", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — conventional or sumo stance" },
+  { id: "ex-bicep-curl", name: "Bicep Curl", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — standing curl" },
+  { id: "ex-face-pull", name: "Face Pull", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — anchor at face height" },
 
-  // Legs
-  { id: "ex-squat", name: "Front Squat", category: "legs", defaultSetup: { doubled: true }, notes: "Band doubled for max tension" },
-  { id: "ex-back-squat", name: "Back Squat", category: "legs", defaultSetup: { doubled: true }, notes: "Use VA Overload Strap for deep squats" },
-  { id: "ex-rdl", name: "Romanian Deadlift", category: "legs", defaultSetup: { doubled: false }, notes: "Stiff-leg variation" },
-  { id: "ex-calf-raise", name: "Calf Raise", category: "legs", defaultSetup: { doubled: false }, notes: "Standing on footplate" },
+  // Legs — Gorilla Gains
+  { id: "ex-front-squat", name: "Front Squat", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — front rack position" },
+  { id: "ex-back-squat", name: "Back Squat", category: "legs", defaultSetup: { doubled: true }, notes: "Doubled — use VA Overload Strap for deep squats (optional)", optional: true },
+  { id: "ex-split-squat", name: "Split Squat", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — unilateral leg work (optional)", optional: true },
+  { id: "ex-calf-raise", name: "Calf Raise", category: "legs", defaultSetup: { doubled: true }, notes: "Doubled — standing on footplate" },
 
   // Core
-  { id: "ex-pallof-press", name: "Pallof Press", category: "core", defaultSetup: { doubled: false }, notes: "Anti-rotation core work" },
-  { id: "ex-ab-crunch", name: "Banded Crunch", category: "core", defaultSetup: { doubled: false }, notes: "Anchor band behind" },
+  { id: "ex-pallof-press", name: "Pallof Press", category: "core", defaultSetup: { doubled: false }, notes: "Singled — anti-rotation core work" },
+  { id: "ex-ab-crunch", name: "Banded Crunch", category: "core", defaultSetup: { doubled: false }, notes: "Singled — anchor band behind" },
 
   // Shoulders
-  { id: "ex-lateral-raise", name: "Lateral Raise", category: "shoulders", defaultSetup: { doubled: false }, notes: "Stand on band" },
-  { id: "ex-face-pull", name: "Face Pull", category: "shoulders", defaultSetup: { doubled: false }, notes: "Anchor at face height" },
+  { id: "ex-lateral-raise", name: "Lateral Raise", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — stand on band" },
 ];
 
 // --- BRAND GROUPS ---
@@ -97,3 +101,152 @@ export const BRAND_GROUPS = [
   { brand: "Serious Steel", bandIds: ["ss-white", "ss-yellow", "ss-green", "ss-black", "ss-red"] },
   { brand: "Undersun", bandIds: ["us-yellow", "us-green", "us-blue", "us-black", "us-red"] },
 ];
+
+// ============================================================
+// GORILLA GAINS PROGRAM — Pre-built routines and program data
+// Source: https://harambesystem.com/pages/gorillagainsworkout
+// ============================================================
+
+function makeRoutineExercise(
+  templateId: string,
+  targetSets: number,
+  targetReps: string,
+  doubled?: boolean,
+  optional?: boolean,
+): RoutineExercise {
+  const template = DEFAULT_EXERCISES.find(e => e.id === templateId);
+  return {
+    exerciseTemplateId: templateId,
+    targetSets,
+    targetReps,
+    setup: { doubled: doubled ?? template?.defaultSetup.doubled ?? false },
+    optional,
+  };
+}
+
+// Push Day exercises
+const GG_PUSH_EXERCISES = (reps: string): RoutineExercise[] => [
+  makeRoutineExercise("ex-bench-press", 1, reps, true),
+  makeRoutineExercise("ex-overhead-press", 1, reps, false),
+  makeRoutineExercise("ex-tricep-extension", 1, reps, true),
+  makeRoutineExercise("ex-front-squat", 1, reps, false),
+  makeRoutineExercise("ex-back-squat", 1, reps, true, true),
+  makeRoutineExercise("ex-split-squat", 1, reps, false, true),
+];
+
+// Pull Day exercises
+const GG_PULL_EXERCISES = (reps: string): RoutineExercise[] => [
+  makeRoutineExercise("ex-rdl", 1, reps, true),
+  makeRoutineExercise("ex-bent-row", 1, reps, true),
+  makeRoutineExercise("ex-ferro-curl", 1, reps, false),
+  makeRoutineExercise("ex-calf-raise", 1, reps, true),
+  makeRoutineExercise("ex-shrugs", 1, reps, true, true),
+];
+
+// Pre-built Gorilla Gains routines
+export const GORILLA_GAINS_ROUTINES: Routine[] = [
+  // Phase 1 routines (Medium only)
+  {
+    id: "gg-p1-medium-push",
+    name: "GG: Medium Push",
+    exercises: GG_PUSH_EXERCISES("15-30"),
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "gorilla-gains",
+    intensity: "medium",
+    dayType: "push",
+    isBuiltIn: true,
+  },
+  {
+    id: "gg-p1-medium-pull",
+    name: "GG: Medium Pull",
+    exercises: GG_PULL_EXERCISES("15-30"),
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "gorilla-gains",
+    intensity: "medium",
+    dayType: "pull",
+    isBuiltIn: true,
+  },
+  // Phase 2 additional routines
+  {
+    id: "gg-p2-heavy-push",
+    name: "GG: Heavy Push",
+    exercises: GG_PUSH_EXERCISES("8-15"),
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "gorilla-gains",
+    intensity: "heavy",
+    dayType: "push",
+    isBuiltIn: true,
+  },
+  {
+    id: "gg-p2-heavy-pull",
+    name: "GG: Heavy Pull",
+    exercises: GG_PULL_EXERCISES("8-15"),
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "gorilla-gains",
+    intensity: "heavy",
+    dayType: "pull",
+    isBuiltIn: true,
+  },
+  {
+    id: "gg-p2-light-push",
+    name: "GG: Light Push",
+    exercises: GG_PUSH_EXERCISES("30-40"),
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "gorilla-gains",
+    intensity: "light",
+    dayType: "push",
+    isBuiltIn: true,
+  },
+  {
+    id: "gg-p2-light-pull",
+    name: "GG: Light Pull",
+    exercises: GG_PULL_EXERCISES("30-40"),
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "gorilla-gains",
+    intensity: "light",
+    dayType: "pull",
+    isBuiltIn: true,
+  },
+];
+
+// The Gorilla Gains Program definition
+export const GORILLA_GAINS_PROGRAM: Program = {
+  id: "gorilla-gains",
+  name: "Gorilla Gains",
+  description: "A foundational hypertrophy system designed for the Harambe ecosystem. 10-20 min sessions, one set per exercise to failure, progressive overload via spacers and band stacking.",
+  source: "harambesystem.com",
+  phases: [
+    {
+      id: "gg-phase-1",
+      name: "Phase 1: The Foundation",
+      description: "3-day rotating cycle. Build base strength and learn the movements.",
+      weekRange: "Weeks 1-6",
+      schedule: [
+        { dayLabel: "Day 1", routineId: "gg-p1-medium-push", routineName: "Medium Push" },
+        { dayLabel: "Day 2", routineId: "gg-p1-medium-pull", routineName: "Medium Pull" },
+        { dayLabel: "Day 3", routineId: null, routineName: "Rest", isRest: true },
+      ],
+    },
+    {
+      id: "gg-phase-2",
+      name: "Phase 2: The Evolution",
+      description: "7-day weekly cycle with varied intensity to break plateaus.",
+      weekRange: "Week 7+",
+      schedule: [
+        { dayLabel: "Mon", routineId: "gg-p1-medium-push", routineName: "Medium Push" },
+        { dayLabel: "Tue", routineId: "gg-p1-medium-pull", routineName: "Medium Pull" },
+        { dayLabel: "Wed", routineId: "gg-p2-heavy-push", routineName: "Heavy Push" },
+        { dayLabel: "Thu", routineId: "gg-p2-heavy-pull", routineName: "Heavy Pull" },
+        { dayLabel: "Fri", routineId: "gg-p2-light-push", routineName: "Light Push" },
+        { dayLabel: "Sat", routineId: "gg-p2-light-pull", routineName: "Light Pull" },
+        { dayLabel: "Sun", routineId: null, routineName: "Rest", isRest: true },
+      ],
+    },
+  ],
+};

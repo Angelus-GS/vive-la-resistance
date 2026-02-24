@@ -96,19 +96,31 @@ export interface ExerciseTemplate {
     doubled?: boolean; // band doubled over bar
   };
   notes: string;
+  optional?: boolean; // marks optional exercises in programs
 }
+
+// --- Intensity Levels (Gorilla Gains) ---
+
+export type IntensityLevel = "medium" | "heavy" | "light";
+
+export const INTENSITY_REP_RANGES: Record<IntensityLevel, { min: number; max: number; label: string }> = {
+  medium: { min: 15, max: 30, label: "Medium (15-30 reps)" },
+  heavy: { min: 8, max: 15, label: "Heavy (8-15 reps)" },
+  light: { min: 30, max: 40, label: "Light (30-40 reps)" },
+};
 
 // --- Workout Routines ---
 
 export interface RoutineExercise {
   exerciseTemplateId: string;
   targetSets: number;
-  targetReps: string; // e.g. "8-12" or "AMRAP"
+  targetReps: string; // e.g. "8-15" or "15-30" or "AMRAP"
   setup: {
     barId?: string;
     footplateId?: string;
     doubled?: boolean;
   };
+  optional?: boolean;
 }
 
 export interface Routine {
@@ -117,6 +129,35 @@ export interface Routine {
   exercises: RoutineExercise[];
   createdAt: string;
   updatedAt: string;
+  programId?: string; // links to a program
+  intensity?: IntensityLevel;
+  dayType?: "push" | "pull"; // for program-based routines
+  isBuiltIn?: boolean; // true for Gorilla Gains pre-built routines
+}
+
+// --- Programs ---
+
+export interface ProgramPhase {
+  id: string;
+  name: string;
+  description: string;
+  weekRange: string; // e.g. "Weeks 1-6" or "Week 7+"
+  schedule: ProgramDay[];
+}
+
+export interface ProgramDay {
+  dayLabel: string; // e.g. "Day 1", "Monday"
+  routineId: string | null; // null = rest day
+  routineName: string;
+  isRest?: boolean;
+}
+
+export interface Program {
+  id: string;
+  name: string;
+  description: string;
+  phases: ProgramPhase[];
+  source?: string; // e.g. "harambesystem.com"
 }
 
 // --- Active Workout / Set Logging ---
@@ -127,7 +168,7 @@ export interface LoggedSet {
   bandComboIndex: number; // index into the user's resistance ladder
   bandIds: string[];
   spacers: number; // number of spacers applied
-  reps: number;
+  reps: number; // full ROM reps
   partialReps: number; // lengthened partials
   isometricSeconds: number; // overcoming isometric hold time
   rpe: number | null; // Rate of Perceived Exertion 1-10
@@ -147,6 +188,7 @@ export interface WorkoutExercise {
     doubled?: boolean;
   };
   sets: LoggedSet[];
+  targetReps?: string; // from routine, e.g. "15-30"
 }
 
 export interface Workout {
@@ -158,6 +200,7 @@ export interface Workout {
   completedAt: string | null;
   durationSeconds: number;
   notes: string;
+  intensity?: IntensityLevel;
 }
 
 // --- Analytics ---
@@ -182,6 +225,7 @@ export interface AppState {
   gymProfiles: GymProfile[];
   exerciseTemplates: ExerciseTemplate[];
   routines: Routine[];
+  programs: Program[];
   workoutHistory: Workout[];
   activeWorkout: Workout | null;
   resistanceLadder: BandCombo[];

@@ -5,7 +5,7 @@
 // ============================================================
 
 import React, { createContext, useContext, useCallback, useReducer, useEffect } from "react";
-import type { AppState, Workout, WorkoutExercise, LoggedSet, Routine, GymProfile, UserProfile, Band } from "@/lib/types";
+import type { AppState, Workout, WorkoutExercise, LoggedSet, Routine, GymProfile, UserProfile, Band, IntensityLevel } from "@/lib/types";
 import { loadState, saveState } from "@/lib/storage";
 import { generateResistanceLadder } from "@/lib/physics";
 import { nanoid } from "nanoid";
@@ -23,7 +23,7 @@ type Action =
   | { type: "ADD_ROUTINE"; payload: Routine }
   | { type: "UPDATE_ROUTINE"; payload: Routine }
   | { type: "DELETE_ROUTINE"; payload: string }
-  | { type: "START_WORKOUT"; payload: { routineId: string | null; routineName: string; exercises: WorkoutExercise[] } }
+  | { type: "START_WORKOUT"; payload: { routineId: string | null; routineName: string; exercises: WorkoutExercise[]; intensity?: IntensityLevel } }
   | { type: "ADD_EXERCISE_TO_WORKOUT"; payload: WorkoutExercise }
   | { type: "UPDATE_SET"; payload: { exerciseId: string; set: LoggedSet } }
   | { type: "ADD_SET"; payload: { exerciseId: string; set: LoggedSet } }
@@ -110,6 +110,7 @@ function reducer(state: AppState, action: Action): AppState {
         completedAt: null,
         durationSeconds: 0,
         notes: "",
+        intensity: action.payload.intensity,
       };
       return { ...state, activeWorkout: workout };
     }
@@ -308,5 +309,12 @@ export function useRoutines() {
     routines: state.routines,
     exercises: state.exerciseTemplates,
     dispatch,
+  };
+}
+
+export function usePrograms() {
+  const { state } = useApp();
+  return {
+    programs: state.programs,
   };
 }

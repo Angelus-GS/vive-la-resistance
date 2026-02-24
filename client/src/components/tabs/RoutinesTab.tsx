@@ -1,24 +1,33 @@
 // ============================================================
 // Vive la Resistance! — Routines Tab
 // Design: "Chalk & Iron" Premium Dark Athletic
-// Routine templates, exercise selection, start workout
+// Programs (Gorilla Gains), routine templates, start workout
 // ============================================================
 
-import { useState } from "react";
-import { useApp, useRoutines, useWorkout } from "@/contexts/AppContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo } from "react";
+import { useApp, useRoutines, useWorkout, usePrograms } from "@/contexts/AppContext";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogDescription,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Play, Trash2, Edit, Dumbbell, Zap, ChevronRight } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import {
+  Plus, Play, Trash2, Edit, Dumbbell, Zap, ChevronRight, ChevronDown,
+  Calendar, Flame, Target, Crown, Moon,
+} from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
-import type { Routine, RoutineExercise, WorkoutExercise, LoggedSet } from "@/lib/types";
+import { motion } from "framer-motion";
+import type { Routine, RoutineExercise, WorkoutExercise, LoggedSet, IntensityLevel, Program, ProgramPhase } from "@/lib/types";
+import { INTENSITY_REP_RANGES } from "@/lib/types";
+import { GORILLA_GAINS_ROUTINES } from "@/lib/equipment-data";
 
 const WORKOUT_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/DZrBwwSrda96SBezQ91GLV/sandbox/mmcxzbXYIgxAqZLaMxBPDN-img-2_1771966179000_na1fn_d29ya291dC1hdG1vc3BoZXJl.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRFpyQnd3U3JkYTk2U0JlelE5MUdMVi9zYW5kYm94L21tY3h6YlhZSWd4QXFaTGFNeEJQRE4taW1nLTJfMTc3MTk2NjE3OTAwMF9uYTFmbl9kMjl5YTI5MWRDMWhkRzF2YzNCb1pYSmwuanBnP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=iiMdiHzIw1GPHhtifr7-aIl4ElptzSilxpaAxJsWdOna5PBJaJTu4ME~OU4nFhKJrMzAKJb63WT~YLB5qgAqUb~BGlnB7rrWs2K3WGjsttiDgKnOzTk02EvlPwyv9KU0MuRFsSEVt0iJKo8wtjMFBi~3WKMX95HofZqI9snD1cL4i-mrKSQ8lwxtt6SYiP2nVQrm1oUNZrlPjzyFkaveRwby4s-aab17ZAdTBwiSF845AketzYhkQBSiIf6CbLEsNwj00vxLz9UcSc7ibuEBzKTlCoZEUOxN86IWrteaCBwS5rg0746cn22SKbdacnx7nLv0mkTR7nP-Mnk5-S~d3Q__";
 
@@ -30,6 +39,12 @@ const CATEGORY_COLORS: Record<string, string> = {
   arms: "bg-orange-500/20 text-orange-400",
   shoulders: "bg-cyan-500/20 text-cyan-400",
   other: "bg-muted text-muted-foreground",
+};
+
+const INTENSITY_COLORS: Record<IntensityLevel, { bg: string; text: string; icon: typeof Flame }> = {
+  heavy: { bg: "bg-red-500/15", text: "text-red-400", icon: Flame },
+  medium: { bg: "bg-amber-gold/15", text: "text-amber-gold", icon: Target },
+  light: { bg: "bg-sage-green/15", text: "text-sage-green", icon: Zap },
 };
 
 function createDefaultSet(setNumber: number): LoggedSet {
@@ -57,11 +72,20 @@ interface Props {
 export default function RoutinesTab({ onStartWorkout }: Props) {
   const { state, dispatch } = useApp();
   const { routines, exercises } = useRoutines();
+  const { programs } = usePrograms();
   const { activeWorkout } = useWorkout();
   const [showCreate, setShowCreate] = useState(false);
   const [routineName, setRoutineName] = useState("");
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
+  const [expandedProgram, setExpandedProgram] = useState<string | null>("gorilla-gains");
+  const [expandedPhase, setExpandedPhase] = useState<string | null>("gg-phase-1");
+
+  // User's custom routines (non-built-in)
+  const customRoutines = useMemo(
+    () => routines.filter(r => !r.isBuiltIn),
+    [routines]
+  );
 
   const handleCreateRoutine = () => {
     if (!routineName.trim()) {
@@ -120,16 +144,19 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
       return;
     }
 
-    const workoutExercises: WorkoutExercise[] = routine.exercises.map(re => {
-      const ex = exercises.find(e => e.id === re.exerciseTemplateId);
-      return {
-        id: nanoid(),
-        exerciseTemplateId: re.exerciseTemplateId,
-        exerciseName: ex?.name || "Unknown",
-        setup: { ...re.setup },
-        sets: Array.from({ length: re.targetSets }, (_, i) => createDefaultSet(i + 1)),
-      };
-    });
+    const workoutExercises: WorkoutExercise[] = routine.exercises
+      .filter(re => !re.optional) // skip optional exercises by default
+      .map(re => {
+        const ex = exercises.find(e => e.id === re.exerciseTemplateId);
+        return {
+          id: nanoid(),
+          exerciseTemplateId: re.exerciseTemplateId,
+          exerciseName: ex?.name || "Unknown",
+          setup: { ...re.setup },
+          sets: Array.from({ length: re.targetSets }, (_, i) => createDefaultSet(i + 1)),
+          targetReps: re.targetReps,
+        };
+      });
 
     dispatch({
       type: "START_WORKOUT",
@@ -137,10 +164,17 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
         routineId: routine.id,
         routineName: routine.name,
         exercises: workoutExercises,
+        intensity: routine.intensity,
       },
     });
     onStartWorkout();
     toast.success(`Started: ${routine.name}`);
+  };
+
+  const handleStartProgramRoutine = (routineId: string) => {
+    const routine = GORILLA_GAINS_ROUTINES.find(r => r.id === routineId);
+    if (!routine) return;
+    handleStartRoutine(routine);
   };
 
   const handleStartEmpty = () => {
@@ -194,7 +228,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
         <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
           <div>
             <h1 className="text-xl font-bold tracking-tight">Routines</h1>
-            <p className="text-xs text-muted-foreground">{routines.length} saved templates</p>
+            <p className="text-xs text-muted-foreground">{customRoutines.length} custom · {GORILLA_GAINS_ROUTINES.length} program</p>
           </div>
         </div>
       </div>
@@ -219,13 +253,246 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
         </CardContent>
       </Card>
 
-      {/* Routines List */}
-      {routines.length > 0 && (
+      {/* ============================================================ */}
+      {/* GORILLA GAINS PROGRAM SECTION */}
+      {/* ============================================================ */}
+      {programs.map(program => (
+        <div key={program.id} className="space-y-2">
+          <Collapsible
+            open={expandedProgram === program.id}
+            onOpenChange={() => setExpandedProgram(expandedProgram === program.id ? null : program.id)}
+          >
+            <CollapsibleTrigger className="w-full text-left">
+              <div className="flex items-center gap-3 px-1 py-1">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Crown className="w-4 h-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-sm font-bold tracking-tight">{program.name}</h2>
+                    <Badge variant="secondary" className="text-[9px] h-4 bg-primary/10 text-primary border-0">
+                      Program
+                    </Badge>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
+                    {program.description}
+                  </p>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0 ${expandedProgram === program.id ? "rotate-180" : ""}`} />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="space-y-3 mt-2">
+                {program.source && (
+                  <p className="text-[10px] text-muted-foreground/60 px-1">
+                    Source: {program.source}
+                  </p>
+                )}
+
+                {/* Intensity Legend */}
+                <div className="flex gap-2 px-1">
+                  {(["heavy", "medium", "light"] as IntensityLevel[]).map(level => {
+                    const style = INTENSITY_COLORS[level];
+                    const range = INTENSITY_REP_RANGES[level];
+                    return (
+                      <div key={level} className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${style.bg}`}>
+                        <style.icon className={`w-3 h-3 ${style.text}`} />
+                        <span className={`text-[10px] font-semibold ${style.text}`}>
+                          {level.charAt(0).toUpperCase() + level.slice(1)}
+                        </span>
+                        <span className={`text-[10px] font-mono ${style.text} opacity-70`}>
+                          {range.min}-{range.max}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Program Phases */}
+                {program.phases.map(phase => (
+                  <Collapsible
+                    key={phase.id}
+                    open={expandedPhase === phase.id}
+                    onOpenChange={() => setExpandedPhase(expandedPhase === phase.id ? null : phase.id)}
+                  >
+                    <Card className="bg-card border-border overflow-hidden">
+                      <CollapsibleTrigger className="w-full text-left">
+                        <CardHeader className="p-3 pb-2">
+                          <div className="flex items-center justify-between">
+                            <div className="min-w-0">
+                              <CardTitle className="text-xs font-bold">{phase.name}</CardTitle>
+                              <CardDescription className="text-[10px] mt-0.5">
+                                {phase.weekRange} · {phase.description}
+                              </CardDescription>
+                            </div>
+                            <ChevronDown className={`w-3.5 h-3.5 text-muted-foreground transition-transform duration-200 shrink-0 ml-2 ${expandedPhase === phase.id ? "rotate-180" : ""}`} />
+                          </div>
+                        </CardHeader>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <CardContent className="px-3 pb-3 pt-0 space-y-1.5">
+                          <Separator className="mb-2" />
+                          {/* Schedule Grid */}
+                          {phase.schedule.map((day, i) => {
+                            const routine = day.routineId
+                              ? GORILLA_GAINS_ROUTINES.find(r => r.id === day.routineId)
+                              : null;
+                            const intensity = routine?.intensity;
+                            const iStyle = intensity ? INTENSITY_COLORS[intensity] : null;
+
+                            return (
+                              <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.04 }}
+                                className={`flex items-center gap-2.5 p-2 rounded-lg transition-colors ${
+                                  day.isRest
+                                    ? "bg-muted/30"
+                                    : "bg-card hover:bg-accent/30"
+                                }`}
+                              >
+                                {/* Day label */}
+                                <span className="text-[11px] font-mono text-muted-foreground w-8 shrink-0 tabular-nums">
+                                  {day.dayLabel}
+                                </span>
+
+                                {day.isRest ? (
+                                  <div className="flex items-center gap-1.5 flex-1">
+                                    <Moon className="w-3.5 h-3.5 text-muted-foreground/50" />
+                                    <span className="text-xs text-muted-foreground/60 font-medium">Rest Day</span>
+                                  </div>
+                                ) : (
+                                  <>
+                                    {/* Intensity badge */}
+                                    {iStyle && (
+                                      <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
+                                        <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
+                                        <span className={`text-[9px] font-bold uppercase tracking-wider ${iStyle.text}`}>
+                                          {intensity}
+                                        </span>
+                                      </div>
+                                    )}
+
+                                    {/* Routine name */}
+                                    <span className="text-xs font-medium flex-1 truncate">
+                                      {day.routineName}
+                                    </span>
+
+                                    {/* Rep range */}
+                                    {intensity && (
+                                      <span className="text-[10px] font-mono text-muted-foreground tabular-nums shrink-0">
+                                        {INTENSITY_REP_RANGES[intensity].min}-{INTENSITY_REP_RANGES[intensity].max}r
+                                      </span>
+                                    )}
+
+                                    {/* Start button */}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 shrink-0 hover:bg-primary/10 hover:text-primary"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (day.routineId) handleStartProgramRoutine(day.routineId);
+                                      }}
+                                      disabled={!!activeWorkout}
+                                    >
+                                      <Play className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </>
+                                )}
+                              </motion.div>
+                            );
+                          })}
+
+                          {/* Exercises preview for this phase */}
+                          <Separator className="my-2" />
+                          <div className="space-y-2">
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                              Exercises in this phase
+                            </p>
+                            {/* Push Day */}
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-semibold text-amber-gold flex items-center gap-1">
+                                <Dumbbell className="w-3 h-3" /> Push Day
+                              </p>
+                              {GORILLA_GAINS_ROUTINES
+                                .find(r => r.id === (phase.id === "gg-phase-1" ? "gg-p1-medium-push" : "gg-p2-heavy-push"))
+                                ?.exercises.map((re, i) => {
+                                  const ex = exercises.find(e => e.id === re.exerciseTemplateId);
+                                  return (
+                                    <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
+                                      <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
+                                      <span className={`${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
+                                        {ex?.name || "?"}
+                                      </span>
+                                      <span className="text-[9px] text-muted-foreground/50 font-mono">
+                                        {re.setup.doubled ? "2x" : "1x"}
+                                      </span>
+                                      {re.optional && (
+                                        <Badge variant="outline" className="text-[8px] h-3.5 border-muted-foreground/20 text-muted-foreground/40 px-1">
+                                          opt
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                            {/* Pull Day */}
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-semibold text-blue-400 flex items-center gap-1">
+                                <Dumbbell className="w-3 h-3" /> Pull Day
+                              </p>
+                              {GORILLA_GAINS_ROUTINES
+                                .find(r => r.id === (phase.id === "gg-phase-1" ? "gg-p1-medium-pull" : "gg-p2-heavy-pull"))
+                                ?.exercises.map((re, i) => {
+                                  const ex = exercises.find(e => e.id === re.exerciseTemplateId);
+                                  return (
+                                    <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
+                                      <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
+                                      <span className={`${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
+                                        {ex?.name || "?"}
+                                      </span>
+                                      <span className="text-[9px] text-muted-foreground/50 font-mono">
+                                        {re.setup.doubled ? "2x" : "1x"}
+                                      </span>
+                                      {re.optional && (
+                                        <Badge variant="outline" className="text-[8px] h-3.5 border-muted-foreground/20 text-muted-foreground/40 px-1">
+                                          opt
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          </div>
+
+                          {/* Progression note */}
+                          <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                              <span className="font-semibold text-primary">Progression:</span> Perform one set per exercise to failure. When you hit the top of the rep range, add spacers or move up the band ladder.
+                            </p>
+                          </div>
+                        </CardContent>
+                      </CollapsibleContent>
+                    </Card>
+                  </Collapsible>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      ))}
+
+      {/* ============================================================ */}
+      {/* CUSTOM ROUTINES SECTION */}
+      {/* ============================================================ */}
+      {customRoutines.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">
-            Your Routines
+            Your Custom Routines
           </h2>
-          {routines.map(routine => (
+          {customRoutines.map(routine => (
             <Card key={routine.id} className="bg-card border-border">
               <CardContent className="p-3">
                 <div className="flex items-start gap-3">
@@ -300,12 +567,15 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
         <DialogTrigger asChild>
           <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
             <Plus className="w-4 h-4 mr-2" />
-            Create Routine
+            Create Custom Routine
           </Button>
         </DialogTrigger>
         <DialogContent className="bg-card border-border max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>{editingRoutine ? "Edit Routine" : "Create Routine"}</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Build a custom routine from available exercises
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
             <div>
@@ -338,10 +608,15 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                             checked={selectedExercises.includes(ex.id)}
                             onCheckedChange={() => toggleExercise(ex.id)}
                           />
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <span className="text-sm">{ex.name}</span>
                             <span className="text-xs text-muted-foreground ml-2">{ex.notes}</span>
                           </div>
+                          {ex.defaultSetup.doubled && (
+                            <Badge variant="outline" className="text-[9px] h-4 border-primary/30 text-primary/60 shrink-0">
+                              2x
+                            </Badge>
+                          )}
                         </label>
                       ))}
                     </div>
