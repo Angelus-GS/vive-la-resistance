@@ -350,26 +350,14 @@ export default function ProfileTab() {
             </Select>
           </div>
           <Separator />
-          <div className="flex items-center justify-between">
+          <div className="flex items-start gap-3 py-1">
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <div>
-              <Label className="text-sm">AMRAP Target</Label>
-              <p className="text-[11px] text-muted-foreground">Reps to trigger band progression</p>
+              <Label className="text-sm">Band Progression</Label>
+              <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
+                Automatic — when your reps exceed the prescribed range for an exercise (e.g. hitting 13 on an 8–12 range), the app suggests moving up the ladder.
+              </p>
             </div>
-            <Select
-              value={String(profile.amrapTargetReps)}
-              onValueChange={(v) => updateProfile({ amrapTargetReps: Number(v) })}
-            >
-              <SelectTrigger className="w-24 h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="8">8 reps</SelectItem>
-                <SelectItem value="10">10 reps</SelectItem>
-                <SelectItem value="12">12 reps</SelectItem>
-                <SelectItem value="15">15 reps</SelectItem>
-                <SelectItem value="20">20 reps</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
           <Separator />
           <div className="flex gap-2">

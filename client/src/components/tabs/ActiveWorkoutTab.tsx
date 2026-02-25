@@ -378,24 +378,24 @@ export default function ActiveWorkoutTab() {
       if (!set.completed) {
         setRestTimer(state.userProfile.restTimerSeconds);
 
-        // Check AMRAP progression trigger using the exercise's target reps or global setting
+        // Rep-range-based progression: trigger when reps exceed the exercise's prescribed max
         const exercise = activeWorkout?.exercises.find(e => e.id === exerciseId);
-        const targetMax = exercise?.targetReps
-          ? parseInt(exercise.targetReps.split("-")[1] || exercise.targetReps)
-          : state.userProfile.amrapTargetReps;
-
-        if (set.reps > targetMax && shouldProgressBand(targetMax, set.reps)) {
-          toast.success(
-            `${set.reps} full reps exceeded target of ${targetMax}! Consider moving up the ladder next session.`,
-            {
-              icon: <ArrowUpCircle className="w-4 h-4 text-primary" />,
-              duration: 5000,
-            }
-          );
+        if (exercise?.targetReps) {
+          const parts = exercise.targetReps.split("-");
+          const targetMax = parseInt(parts[parts.length - 1]) || 0;
+          if (targetMax > 0 && set.reps > targetMax && shouldProgressBand(targetMax, set.reps)) {
+            toast.success(
+              `${set.reps} reps exceeded the ${exercise.targetReps} range! Consider moving up the ladder next session.`,
+              {
+                icon: <ArrowUpCircle className="w-4 h-4 text-primary" />,
+                duration: 5000,
+              }
+            );
+          }
         }
       }
     },
-    [dispatch, state.userProfile.restTimerSeconds, state.userProfile.amrapTargetReps, activeWorkout]
+    [dispatch, state.userProfile.restTimerSeconds, activeWorkout]
   );
 
   const handleAddSet = useCallback(
