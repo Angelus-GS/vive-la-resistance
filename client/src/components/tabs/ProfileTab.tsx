@@ -21,6 +21,7 @@ import {
   Lightbulb, Shield, Wrench, Info
 } from "lucide-react";
 import { BRAND_GROUPS } from "@/lib/equipment-data";
+import { APP_VERSION } from "@shared/const";
 import { downloadCSV } from "@/lib/storage";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -96,7 +97,7 @@ export default function ProfileTab() {
             </p>
           </div>
           <Badge variant="secondary" className="text-[10px] font-mono">
-            v1.0
+            v{APP_VERSION}
           </Badge>
         </div>
       </div>
