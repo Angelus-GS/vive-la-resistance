@@ -176,15 +176,22 @@ function SetRow({
 
             <div className="flex-1 min-w-0 flex items-center gap-1.5 px-1">
               {combo ? (
-                <>
-                  <div className="flex gap-0.5 shrink-0">
-                    {combo.colorHexes.map((hex, j) => (
-                      <span key={j} className="w-3 h-3 rounded-full border border-white/10 shadow-sm"
-                        style={{ backgroundColor: hex }} />
-                    ))}
-                  </div>
-                  <span className="text-xs font-medium truncate">{combo.label}</span>
-                </>
+                combo.colorHexes.length > 0 ? (
+                  <>
+                    <div className="flex gap-0.5 shrink-0">
+                      {combo.colorHexes.map((hex, j) => (
+                        <span key={j} className="w-3 h-3 rounded-full border border-white/10 shadow-sm"
+                          style={{ backgroundColor: hex }} />
+                      ))}
+                    </div>
+                    <span className="text-xs font-medium truncate">{combo.label}</span>
+                  </>
+                ) : (
+                  <span className="text-xs text-muted-foreground/70 italic flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-full border border-dashed border-muted-foreground/30 shrink-0" />
+                    No Bands
+                  </span>
+                )
               ) : (
                 <span className="text-xs text-muted-foreground">No bands</span>
               )}
@@ -197,9 +204,14 @@ function SetRow({
           </div>
 
           {/* Tension range */}
-          {combo && (
+          {combo && combo.colorHexes.length > 0 && (
             <span className="text-[11px] font-mono text-primary shrink-0 tabular-nums">
               {combo.totalMinLbs}–{combo.totalMaxLbs}
+            </span>
+          )}
+          {combo && combo.colorHexes.length === 0 && (
+            <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">
+              0 lbs
             </span>
           )}
         </div>
@@ -317,7 +329,17 @@ function SetRow({
 export default function ActiveWorkoutTab() {
   const { state, dispatch } = useApp();
   const { activeWorkout } = useWorkout();
-  const { ladder, ownedBands } = useBands();
+  const { ladder: rawLadder, ownedBands } = useBands();
+
+  // Prepend a "No Bands" (bodyweight) option at index 0
+  const NO_BANDS_COMBO = useMemo(() => ({
+    bandIds: [] as string[],
+    totalMinLbs: 0,
+    totalMaxLbs: 0,
+    label: "No Bands",
+    colorHexes: [] as string[],
+  }), []);
+  const ladder = useMemo(() => [NO_BANDS_COMBO, ...rawLadder], [NO_BANDS_COMBO, rawLadder]);
   const { exercises: exerciseTemplates } = useRoutines();
   const [elapsed, setElapsed] = useState(0);
   const [restTimer, setRestTimer] = useState<number | null>(null);

@@ -93,6 +93,16 @@ export const DEFAULT_EXERCISES: ExerciseTemplate[] = [
 
   // Shoulders
   { id: "ex-lateral-raise", name: "Lateral Raise", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — stand on band" },
+
+  // HaramBro V3 — New exercises
+  { id: "ex-chest-fly", name: "Chest Flies", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — band chest fly" },
+  { id: "ex-z-press", name: "Z Press", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — seated overhead press with no back support" },
+  { id: "ex-close-grip-bench", name: "Close Grip Bench Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — narrow grip for tricep emphasis" },
+  { id: "ex-yates-row", name: "Yates Row", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — underhand supinated row for back thickness" },
+  { id: "ex-pendlay-row", name: "Pendlay Row", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — strict barbell row from floor" },
+  { id: "ex-one-arm-pulldown", name: "One-Arm Pull Down", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — unilateral lat pulldown, each arm" },
+  { id: "ex-narrow-front-squat", name: "Narrow Angled Front Squat", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — narrow stance front squat" },
+  { id: "ex-one-leg-rdl", name: "One-Legged RDL", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — single-leg Romanian deadlift, each leg" },
 ];
 
 // --- BRAND GROUPS ---
@@ -246,6 +256,112 @@ export const GORILLA_GAINS_PROGRAM: Program = {
         { dayLabel: "Thu", routineId: "gg-p2-heavy-pull", routineName: "Heavy Pull" },
         { dayLabel: "Fri", routineId: "gg-p2-light-push", routineName: "Light Push" },
         { dayLabel: "Sat", routineId: "gg-p2-light-pull", routineName: "Light Pull" },
+        { dayLabel: "Sun", routineId: null, routineName: "Rest", isRest: true },
+      ],
+    },
+  ],
+};
+
+// ============================================================
+// HARAMBRO V3 PROGRAM — 5-day body-part split
+// ============================================================
+
+export const HARAMBRO_V3_ROUTINES: Routine[] = [
+  // Monday: Chest & Push
+  {
+    id: "hb3-chest-push",
+    name: "HB3: Chest & Push",
+    exercises: [
+      makeRoutineExercise("ex-bench-press", 4, "8-12", true),
+      makeRoutineExercise("ex-chest-fly", 3, "12-15", true),
+      makeRoutineExercise("ex-tricep-extension", 3, "10-12", true),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "harambro-v3",
+    dayType: "chest",
+    isBuiltIn: true,
+  },
+  // Tuesday: Back Thickness
+  {
+    id: "hb3-back-thickness",
+    name: "HB3: Back Thickness",
+    exercises: [
+      makeRoutineExercise("ex-deadlift", 3, "6-10", true),
+      makeRoutineExercise("ex-yates-row", 3, "10-12", true),
+      makeRoutineExercise("ex-face-pull", 3, "15", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "harambro-v3",
+    dayType: "back",
+    isBuiltIn: true,
+  },
+  // Wednesday: Shoulders & Triceps
+  {
+    id: "hb3-shoulders-triceps",
+    name: "HB3: Shoulders & Triceps",
+    exercises: [
+      makeRoutineExercise("ex-z-press", 4, "8-12", false),
+      makeRoutineExercise("ex-lateral-raise", 3, "12-15", false),
+      makeRoutineExercise("ex-close-grip-bench", 3, "8-12", true),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "harambro-v3",
+    dayType: "shoulders",
+    isBuiltIn: true,
+  },
+  // Thursday: Upper Back & Biceps
+  {
+    id: "hb3-upper-back-biceps",
+    name: "HB3: Upper Back & Biceps",
+    exercises: [
+      makeRoutineExercise("ex-pendlay-row", 3, "8-10", true),
+      makeRoutineExercise("ex-one-arm-pulldown", 3, "10-12", false),
+      makeRoutineExercise("ex-ferro-curl", 4, "10-12", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "harambro-v3",
+    dayType: "upper-back",
+    isBuiltIn: true,
+  },
+  // Friday: Legs
+  {
+    id: "hb3-legs",
+    name: "HB3: Legs",
+    exercises: [
+      makeRoutineExercise("ex-narrow-front-squat", 4, "10-12", false),
+      makeRoutineExercise("ex-one-leg-rdl", 3, "10", false),
+      makeRoutineExercise("ex-calf-raise", 3, "15-20", true),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "harambro-v3",
+    dayType: "legs",
+    isBuiltIn: true,
+  },
+];
+
+export const HARAMBRO_V3_PROGRAM: Program = {
+  id: "harambro-v3",
+  name: "HaramBro V3",
+  description: "A 5-day body-part split for intermediate lifters. Traditional hypertrophy rep ranges with dedicated days for chest, back, shoulders, upper back & biceps, and legs.",
+  source: "harambesystem.com",
+  phases: [
+    {
+      id: "hb3-phase-1",
+      name: "Weekly Split",
+      description: "5-day body-part split with weekend rest. Multiple sets per exercise for volume-driven hypertrophy.",
+      weekRange: "Ongoing",
+      schedule: [
+        { dayLabel: "Mon", routineId: "hb3-chest-push", routineName: "Chest & Push" },
+        { dayLabel: "Tue", routineId: "hb3-back-thickness", routineName: "Back Thickness" },
+        { dayLabel: "Wed", routineId: "hb3-shoulders-triceps", routineName: "Shoulders & Triceps" },
+        { dayLabel: "Thu", routineId: "hb3-upper-back-biceps", routineName: "Upper Back & Biceps" },
+        { dayLabel: "Fri", routineId: "hb3-legs", routineName: "Legs" },
+        { dayLabel: "Sat", routineId: null, routineName: "Rest", isRest: true },
         { dayLabel: "Sun", routineId: null, routineName: "Rest", isRest: true },
       ],
     },

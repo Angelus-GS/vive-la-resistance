@@ -131,7 +131,7 @@ export interface Routine {
   updatedAt: string;
   programId?: string; // links to a program
   intensity?: IntensityLevel;
-  dayType?: "push" | "pull"; // for program-based routines
+  dayType?: "push" | "pull" | "chest" | "back" | "shoulders" | "upper-back" | "legs"; // for program-based routines
   isBuiltIn?: boolean; // true for Gorilla Gains pre-built routines
 }
 

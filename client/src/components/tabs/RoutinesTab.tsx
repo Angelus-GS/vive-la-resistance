@@ -27,7 +27,10 @@ import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
 import type { Routine, RoutineExercise, WorkoutExercise, LoggedSet, IntensityLevel, Program, ProgramPhase } from "@/lib/types";
 import { INTENSITY_REP_RANGES } from "@/lib/types";
-import { GORILLA_GAINS_ROUTINES } from "@/lib/equipment-data";
+import { GORILLA_GAINS_ROUTINES, HARAMBRO_V3_ROUTINES } from "@/lib/equipment-data";
+
+// Combined built-in routines from all programs
+const ALL_PROGRAM_ROUTINES = [...GORILLA_GAINS_ROUTINES, ...HARAMBRO_V3_ROUTINES];
 
 const WORKOUT_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/DZrBwwSrda96SBezQ91GLV/sandbox/mmcxzbXYIgxAqZLaMxBPDN-img-2_1771966179000_na1fn_d29ya291dC1hdG1vc3BoZXJl.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRFpyQnd3U3JkYTk2U0JlelE5MUdMVi9zYW5kYm94L21tY3h6YlhZSWd4QXFaTGFNeEJQRE4taW1nLTJfMTc3MTk2NjE3OTAwMF9uYTFmbl9kMjl5YTI5MWRDMWhkRzF2YzNCb1pYSmwuanBnP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=iiMdiHzIw1GPHhtifr7-aIl4ElptzSilxpaAxJsWdOna5PBJaJTu4ME~OU4nFhKJrMzAKJb63WT~YLB5qgAqUb~BGlnB7rrWs2K3WGjsttiDgKnOzTk02EvlPwyv9KU0MuRFsSEVt0iJKo8wtjMFBi~3WKMX95HofZqI9snD1cL4i-mrKSQ8lwxtt6SYiP2nVQrm1oUNZrlPjzyFkaveRwby4s-aab17ZAdTBwiSF845AketzYhkQBSiIf6CbLEsNwj00vxLz9UcSc7ibuEBzKTlCoZEUOxN86IWrteaCBwS5rg0746cn22SKbdacnx7nLv0mkTR7nP-Mnk5-S~d3Q__";
 
@@ -172,7 +175,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
   };
 
   const handleStartProgramRoutine = (routineId: string) => {
-    const routine = GORILLA_GAINS_ROUTINES.find(r => r.id === routineId);
+    const routine = ALL_PROGRAM_ROUTINES.find(r => r.id === routineId);
     if (!routine) return;
     handleStartRoutine(routine);
   };
@@ -228,7 +231,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
         <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
           <div>
             <h1 className="text-xl font-bold tracking-tight">Routines</h1>
-            <p className="text-xs text-muted-foreground">{customRoutines.length} custom · {GORILLA_GAINS_ROUTINES.length} program</p>
+            <p className="text-xs text-muted-foreground">{customRoutines.length} custom · {ALL_PROGRAM_ROUTINES.length} program</p>
           </div>
         </div>
       </div>
@@ -289,24 +292,26 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                   </p>
                 )}
 
-                {/* Intensity Legend */}
-                <div className="flex gap-2 px-1">
-                  {(["heavy", "medium", "light"] as IntensityLevel[]).map(level => {
-                    const style = INTENSITY_COLORS[level];
-                    const range = INTENSITY_REP_RANGES[level];
-                    return (
-                      <div key={level} className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${style.bg}`}>
-                        <style.icon className={`w-3 h-3 ${style.text}`} />
-                        <span className={`text-[10px] font-semibold ${style.text}`}>
-                          {level.charAt(0).toUpperCase() + level.slice(1)}
-                        </span>
-                        <span className={`text-[10px] font-mono ${style.text} opacity-70`}>
-                          {range.min}-{range.max}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
+                {/* Intensity Legend — only for programs that use intensity levels */}
+                {ALL_PROGRAM_ROUTINES.filter(r => r.programId === program.id).some(r => r.intensity) && (
+                  <div className="flex gap-2 px-1">
+                    {(["heavy", "medium", "light"] as IntensityLevel[]).map(level => {
+                      const style = INTENSITY_COLORS[level];
+                      const range = INTENSITY_REP_RANGES[level];
+                      return (
+                        <div key={level} className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${style.bg}`}>
+                          <style.icon className={`w-3 h-3 ${style.text}`} />
+                          <span className={`text-[10px] font-semibold ${style.text}`}>
+                            {level.charAt(0).toUpperCase() + level.slice(1)}
+                          </span>
+                          <span className={`text-[10px] font-mono ${style.text} opacity-70`}>
+                            {range.min}-{range.max}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Program Phases */}
                 {program.phases.map(phase => (
@@ -335,7 +340,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                           {/* Schedule Grid */}
                           {phase.schedule.map((day, i) => {
                             const routine = day.routineId
-                              ? GORILLA_GAINS_ROUTINES.find(r => r.id === day.routineId)
+                              ? ALL_PROGRAM_ROUTINES.find(r => r.id === day.routineId)
                               : null;
                             const intensity = routine?.intensity;
                             const iStyle = intensity ? INTENSITY_COLORS[intensity] : null;
@@ -379,10 +384,14 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                       {day.routineName}
                                     </span>
 
-                                    {/* Rep range */}
-                                    {intensity && (
+                                    {/* Rep range or exercise count */}
+                                    {intensity ? (
                                       <span className="text-[10px] font-mono text-muted-foreground tabular-nums shrink-0">
                                         {INTENSITY_REP_RANGES[intensity].min}-{INTENSITY_REP_RANGES[intensity].max}r
+                                      </span>
+                                    ) : routine && (
+                                      <span className="text-[10px] font-mono text-muted-foreground/60 tabular-nums shrink-0">
+                                        {routine.exercises.length} ex
                                       </span>
                                     )}
 
@@ -405,80 +414,75 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                             );
                           })}
 
-                          {/* Exercises preview for this phase */}
+                          {/* Exercises preview for this phase — dynamic for any program */}
                           <Separator className="my-2" />
                           <div className="space-y-2">
                             <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                               Exercises in this phase
                             </p>
-                            {/* Push Day */}
-                            <div className="space-y-1">
-                              <p className="text-[10px] font-semibold text-amber-gold flex items-center gap-1">
-                                <Dumbbell className="w-3 h-3" /> Push Day
-                              </p>
-                              {GORILLA_GAINS_ROUTINES
-                                .find(r => r.id === (phase.id === "gg-phase-1" ? "gg-p1-medium-push" : "gg-p2-heavy-push"))
-                                ?.exercises.map((re, i) => {
-                                  const ex = exercises.find(e => e.id === re.exerciseTemplateId);
+                            {/* Deduplicate routines shown: pick one representative routine per unique dayType/routineName */}
+                            {(() => {
+                              const seen = new Set<string>();
+                              return phase.schedule
+                                .filter(day => !day.isRest && day.routineId)
+                                .filter(day => {
+                                  const key = day.routineName;
+                                  if (seen.has(key)) return false;
+                                  seen.add(key);
+                                  return true;
+                                })
+                                .map((day, dayIdx) => {
+                                  const routine = ALL_PROGRAM_ROUTINES.find(r => r.id === day.routineId);
+                                  if (!routine) return null;
+                                  const DAY_COLORS: Record<string, string> = {
+                                    push: "text-amber-gold", pull: "text-blue-400", chest: "text-amber-gold",
+                                    back: "text-blue-400", shoulders: "text-cyan-400", "upper-back": "text-blue-300",
+                                    legs: "text-sage-green",
+                                  };
+                                  const dayColor = DAY_COLORS[routine.dayType || ""] || "text-muted-foreground";
                                   return (
-                                    <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
-                                      <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
-                                      <span className={`flex-1 ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
-                                        {ex?.name || "?"}
-                                      </span>
-                                      <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
-                                        re.setup.doubled
-                                          ? "bg-primary/10 text-primary/70"
-                                          : "text-muted-foreground/40"
-                                      }`}>
-                                        {re.setup.doubled ? "2x" : "1x"}
-                                      </span>
-                                      {re.optional && (
-                                        <Badge variant="outline" className="text-[8px] h-3.5 border-muted-foreground/20 text-muted-foreground/40 px-1">
-                                          opt
-                                        </Badge>
-                                      )}
+                                    <div key={dayIdx} className="space-y-1">
+                                      <p className={`text-[10px] font-semibold ${dayColor} flex items-center gap-1`}>
+                                        <Dumbbell className="w-3 h-3" /> {day.routineName}
+                                      </p>
+                                      {routine.exercises.map((re, i) => {
+                                        const ex = exercises.find(e => e.id === re.exerciseTemplateId);
+                                        return (
+                                          <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
+                                            <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
+                                            <span className={`flex-1 ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
+                                              {ex?.name || "?"}
+                                              {re.targetSets > 1 && (
+                                                <span className="text-muted-foreground/50 ml-1">
+                                                  {re.targetSets}x{re.targetReps}
+                                                </span>
+                                              )}
+                                            </span>
+                                            <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                                              re.setup.doubled
+                                                ? "bg-primary/10 text-primary/70"
+                                                : "text-muted-foreground/40"
+                                            }`}>
+                                              {re.setup.doubled ? "2x" : "1x"}
+                                            </span>
+                                            {re.optional && (
+                                              <Badge variant="outline" className="text-[8px] h-3.5 border-muted-foreground/20 text-muted-foreground/40 px-1">
+                                                opt
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        );
+                                      })}
                                     </div>
                                   );
-                                })}
-                            </div>
-                            {/* Pull Day */}
-                            <div className="space-y-1">
-                              <p className="text-[10px] font-semibold text-blue-400 flex items-center gap-1">
-                                <Dumbbell className="w-3 h-3" /> Pull Day
-                              </p>
-                              {GORILLA_GAINS_ROUTINES
-                                .find(r => r.id === (phase.id === "gg-phase-1" ? "gg-p1-medium-pull" : "gg-p2-heavy-pull"))
-                                ?.exercises.map((re, i) => {
-                                  const ex = exercises.find(e => e.id === re.exerciseTemplateId);
-                                  return (
-                                    <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
-                                      <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
-                                      <span className={`flex-1 ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
-                                        {ex?.name || "?"}
-                                      </span>
-                                      <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
-                                        re.setup.doubled
-                                          ? "bg-primary/10 text-primary/70"
-                                          : "text-muted-foreground/40"
-                                      }`}>
-                                        {re.setup.doubled ? "2x" : "1x"}
-                                      </span>
-                                      {re.optional && (
-                                        <Badge variant="outline" className="text-[8px] h-3.5 border-muted-foreground/20 text-muted-foreground/40 px-1">
-                                          opt
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                            </div>
+                                });
+                            })()}
                           </div>
 
                           {/* Progression note */}
                           <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
                             <p className="text-[10px] text-muted-foreground leading-relaxed">
-                              <span className="font-semibold text-primary">Progression:</span> Perform one set per exercise to failure. When you hit the top of the rep range, add spacers or move up the band ladder.
+                              <span className="font-semibold text-primary">Progression:</span> When you hit the top of the rep range, add spacers or move up the band ladder.
                             </p>
                           </div>
                         </CardContent>

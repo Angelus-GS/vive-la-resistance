@@ -399,18 +399,20 @@ export default function HistoryTab() {
                               const bands = set.bandIds
                                 .map(id => allBands.find(b => b.id === id))
                                 .filter(Boolean) as Band[];
-                              const bandLabel = bands.map(b => b.color).join(" + ") || "—";
+                              const bandLabel = bands.length > 0 ? bands.map(b => b.color).join(" + ") : "No Bands";
                               return (
                                 <div key={set.id} className="flex items-center gap-2 text-[11px] text-muted-foreground pl-3">
                                   <span className="font-mono w-5 tabular-nums text-muted-foreground/60">S{set.setNumber}</span>
                                   <div className="flex gap-0.5 shrink-0">
-                                    {bands.map((b, i) => (
+                                    {bands.length > 0 ? bands.map((b, i) => (
                                       <span
                                         key={i}
                                         className="w-2 h-2 rounded-full border border-white/10"
                                         style={{ backgroundColor: b.colorHex }}
                                       />
-                                    ))}
+                                    )) : (
+                                      <span className="w-2 h-2 rounded-full border border-dashed border-muted-foreground/30" />
+                                    )}
                                   </div>
                                   <span className="truncate flex-1">{bandLabel}</span>
                                   {set.spacers > 0 && (
