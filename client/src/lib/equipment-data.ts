@@ -24,6 +24,14 @@ export const DEFAULT_BANDS: Band[] = [
   { id: "ss-4-green", brand: "Serious Steel", color: "#4 Green", colorHex: "#2E7D32", label: "#4", minLbs: 50, maxLbs: 120, lengthInches: 37, widthMm: 44, owned: false },
   { id: "ss-5-gray", brand: "Serious Steel", color: "#5 Gray", colorHex: "#616161", label: "#5", minLbs: 60, maxLbs: 150, lengthInches: 37, widthMm: 64, owned: false },
 
+  // Serious Steel 41" Pull-Up Assist Bands (amazon.com/dp/B01LY5WJZ0)
+  { id: "ss41-0-orange", brand: "Serious Steel 41\"", color: "#0 Orange", colorHex: "#FF6B00", label: "#0", minLbs: 2, maxLbs: 15, lengthInches: 41, widthMm: 6, owned: false },
+  { id: "ss41-1-purple", brand: "Serious Steel 41\"", color: "#1 Purple", colorHex: "#7B2D8E", label: "#1", minLbs: 5, maxLbs: 35, lengthInches: 41, widthMm: 13, owned: false },
+  { id: "ss41-2-red", brand: "Serious Steel 41\"", color: "#2 Red", colorHex: "#D32F2F", label: "#2", minLbs: 10, maxLbs: 50, lengthInches: 41, widthMm: 21, owned: false },
+  { id: "ss41-3-blue", brand: "Serious Steel 41\"", color: "#3 Blue", colorHex: "#1976D2", label: "#3", minLbs: 25, maxLbs: 80, lengthInches: 41, widthMm: 29, owned: false },
+  { id: "ss41-4-green", brand: "Serious Steel 41\"", color: "#4 Green", colorHex: "#2E7D32", label: "#4", minLbs: 50, maxLbs: 120, lengthInches: 41, widthMm: 44, owned: false },
+  { id: "ss41-5-gray", brand: "Serious Steel 41\"", color: "#5 Gray", colorHex: "#616161", label: "#5", minLbs: 60, maxLbs: 150, lengthInches: 41, widthMm: 64, owned: false },
+
   // Undersun (41" loop)
   { id: "us-yellow", brand: "Undersun", color: "Yellow", colorHex: "#E8B830", label: "X-Light", minLbs: 5, maxLbs: 15, lengthInches: 41, widthMm: 6, owned: false },
   { id: "us-green", brand: "Undersun", color: "Green", colorHex: "#4A8C50", label: "Light", minLbs: 15, maxLbs: 35, lengthInches: 41, widthMm: 13, owned: false },

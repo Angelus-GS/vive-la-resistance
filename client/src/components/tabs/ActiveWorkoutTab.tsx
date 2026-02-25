@@ -688,29 +688,39 @@ export default function ActiveWorkoutTab() {
                     {category}
                   </p>
                   {exs.map(ex => (
-                    <button
-                      key={ex.id}
-                      onClick={() => handleAddExercise(ex.id)}
-                      className="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-accent/40 active:bg-accent/60 transition-colors text-left"
-                    >
-                      <Badge variant="secondary" className={`text-[10px] shrink-0 ${CATEGORY_COLORS[ex.category]}`}>
-                        {ex.category}
-                      </Badge>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium">{ex.name}</p>
-                        <p className="text-[11px] text-muted-foreground truncate">{ex.notes}</p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={`text-[9px] shrink-0 font-mono ${
-                          ex.defaultSetup.doubled
-                            ? "border-primary/40 bg-primary/10 text-primary"
-                            : "border-muted-foreground/20 text-muted-foreground/50"
-                        }`}
+                    <div key={ex.id} className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleAddExercise(ex.id)}
+                        className="flex-1 flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-accent/40 active:bg-accent/60 transition-colors text-left min-w-0"
                       >
-                        {ex.defaultSetup.doubled ? "2x Doubled" : "1x Single"}
-                      </Badge>
-                    </button>
+                        <Badge variant="secondary" className={`text-[10px] shrink-0 ${CATEGORY_COLORS[ex.category]}`}>
+                          {ex.category}
+                        </Badge>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{ex.name}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{ex.notes}</p>
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className={`text-[9px] shrink-0 font-mono ${
+                            ex.defaultSetup.doubled
+                              ? "border-primary/40 bg-primary/10 text-primary"
+                              : "border-muted-foreground/20 text-muted-foreground/50"
+                          }`}
+                        >
+                          {ex.defaultSetup.doubled ? "2x Doubled" : "1x Single"}
+                        </Badge>
+                      </button>
+                      {ex.videoUrl && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setVideoModal({ url: ex.videoUrl!, name: ex.name }); }}
+                          className="shrink-0 p-2 rounded-lg text-primary/60 hover:text-primary hover:bg-primary/10 transition-colors"
+                          title={`Watch ${ex.name} demo`}
+                        >
+                          <Video className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               ))}
