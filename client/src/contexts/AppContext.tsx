@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Global App State Context
+// Vive la Résistance! — Global App State Context
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Single source of truth, auto-persists to localStorage
 // ============================================================

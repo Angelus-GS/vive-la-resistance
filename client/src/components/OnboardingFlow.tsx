@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Onboarding Flow
+// Vive la Résistance! — Onboarding Flow
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Step 1: Height, Step 2: Select bands, Step 3: Review ladder
 // ============================================================
@@ -41,16 +41,16 @@ export default function OnboardingFlow() {
       <div className="relative h-44 overflow-hidden shrink-0">
         <img
           src={HERO_IMG}
-          alt="Resistance bands"
+          alt="Résistance bands"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/50 to-background" />
         <div className="absolute bottom-4 left-4 right-4">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Vive la Resistance!
+            Vive la Résistance!
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Variable Resistance Training Tracker
+            Variable Résistance Training Tracker
           </p>
         </div>
       </div>
@@ -163,7 +163,7 @@ export default function OnboardingFlow() {
                               </span>
                             </div>
                             <span className="text-xs font-mono text-muted-foreground tabular-nums">
-                              {band.minLbs}–{band.maxLbs}
+                              {band.minLbs}–{band.maxLbs} lbs
                             </span>
                           </label>
                         );
@@ -213,7 +213,7 @@ export default function OnboardingFlow() {
                           </div>
                           <span className="flex-1 text-sm truncate">{combo.label}</span>
                           <span className="text-xs font-mono text-primary tabular-nums">
-                            {combo.totalMinLbs}–{combo.totalMaxLbs}
+                            {combo.totalMinLbs}–{combo.totalMaxLbs} lbs
                           </span>
                         </div>
                       ))}

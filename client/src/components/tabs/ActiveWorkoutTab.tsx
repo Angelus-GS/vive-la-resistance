@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Active Workout Logger
+// Vive la Résistance! — Active Workout Logger
 // Design: "Chalk & Iron" Premium Dark Athletic
 // "Squat rack speed" — log sets with clear Full + Partial reps
 // ============================================================
@@ -569,11 +569,16 @@ export default function ActiveWorkoutTab() {
                 <CardTitle className="text-sm font-bold truncate">
                   {exercise.exerciseName}
                 </CardTitle>
-                {exercise.setup.doubled && (
-                  <Badge variant="outline" className="text-[9px] h-4 shrink-0 border-primary/30 text-primary/70">
-                    2x
-                  </Badge>
-                )}
+                <Badge
+                  variant="outline"
+                  className={`text-[9px] h-4 shrink-0 font-mono ${
+                    exercise.setup.doubled
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-muted-foreground/20 text-muted-foreground/60"
+                  }`}
+                >
+                  {exercise.setup.doubled ? "2x Doubled" : "1x Single"}
+                </Badge>
                 {/* Target reps badge from routine */}
                 {exercise.targetReps && (
                   <Badge variant="secondary" className="text-[9px] h-4 shrink-0 font-mono bg-accent text-muted-foreground">
@@ -659,9 +664,16 @@ export default function ActiveWorkoutTab() {
                         <p className="text-sm font-medium">{ex.name}</p>
                         <p className="text-[11px] text-muted-foreground truncate">{ex.notes}</p>
                       </div>
-                      {ex.defaultSetup.doubled && (
-                        <Badge variant="outline" className="text-[9px] shrink-0 border-primary/30 text-primary/60">2x</Badge>
-                      )}
+                      <Badge
+                        variant="outline"
+                        className={`text-[9px] shrink-0 font-mono ${
+                          ex.defaultSetup.doubled
+                            ? "border-primary/40 bg-primary/10 text-primary"
+                            : "border-muted-foreground/20 text-muted-foreground/50"
+                        }`}
+                      >
+                        {ex.defaultSetup.doubled ? "2x Doubled" : "1x Single"}
+                      </Badge>
                     </button>
                   ))}
                 </div>

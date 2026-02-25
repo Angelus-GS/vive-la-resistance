@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Core Data Types
+// Vive la Résistance! — Core Data Types
 // Design: "Chalk & Iron" Premium Dark Athletic
 // All IDs use nanoid for local-first uniqueness
 // ============================================================

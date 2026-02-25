@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Profile & Inventory Tab
+// Vive la Résistance! — Profile & Inventory Tab
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Height slider, band inventory, gym profiles, equipment tips, settings
 // ============================================================
@@ -139,7 +139,7 @@ export default function ProfileTab() {
             <Package className="w-4 h-4 text-primary" />
             <CardTitle className="text-sm">Band Inventory</CardTitle>
           </div>
-          <CardDescription className="text-xs">Select the bands you own to build your resistance ladder</CardDescription>
+          <CardDescription className="text-xs">Select the bands you own to build your résistance ladder</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           {BRAND_GROUPS.map(group => {
@@ -198,13 +198,13 @@ export default function ProfileTab() {
         </CardContent>
       </Card>
 
-      {/* Resistance Ladder Preview */}
+      {/* Résistance Ladder Preview */}
       {ladder.length > 0 && (
         <Card className="bg-card border-border">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CardTitle className="text-sm">Resistance Ladder</CardTitle>
+                <CardTitle className="text-sm">Résistance Ladder</CardTitle>
               </div>
               <Badge variant="outline" className="font-mono text-[10px]">
                 {ladder.length} combos

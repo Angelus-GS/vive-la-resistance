@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Band Physics Engine
+// Vive la Résistance! — Band Physics Engine
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Implements Hooke's Law with latex deviation, stacking
 // ladder generation, and Joules-based volume calculation.

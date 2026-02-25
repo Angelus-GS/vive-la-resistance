@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Pre-loaded Equipment Database
+// Vive la Résistance! — Pre-loaded Equipment Database
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Real-world VRT equipment specs + Gorilla Gains program
 // ============================================================
@@ -16,12 +16,13 @@ export const DEFAULT_BANDS: Band[] = [
   { id: "harambe-black", brand: "Harambe", color: "Black", colorHex: "#2A2A2A", label: "Heavy", minLbs: 40, maxLbs: 100, lengthInches: 38, widthMm: 32, owned: false },
   { id: "harambe-red", brand: "Harambe", color: "Red", colorHex: "#C43030", label: "Monster", minLbs: 60, maxLbs: 150, lengthInches: 38, widthMm: 44, owned: false },
 
-  // X3 / Serious Steel (41" loop)
-  { id: "ss-white", brand: "Serious Steel", color: "White", colorHex: "#E8E0D0", label: "Feather", minLbs: 3, maxLbs: 12, lengthInches: 41, widthMm: 6, owned: false },
-  { id: "ss-yellow", brand: "Serious Steel", color: "Yellow", colorHex: "#E8B830", label: "Light", minLbs: 8, maxLbs: 30, lengthInches: 41, widthMm: 13, owned: false },
-  { id: "ss-green", brand: "Serious Steel", color: "Green", colorHex: "#4A8C50", label: "Medium", minLbs: 20, maxLbs: 55, lengthInches: 41, widthMm: 22, owned: false },
-  { id: "ss-black", brand: "Serious Steel", color: "Black", colorHex: "#2A2A2A", label: "Heavy", minLbs: 35, maxLbs: 85, lengthInches: 41, widthMm: 32, owned: false },
-  { id: "ss-red", brand: "Serious Steel", color: "Red", colorHex: "#C43030", label: "Monster", minLbs: 50, maxLbs: 120, lengthInches: 41, widthMm: 44, owned: false },
+  // Serious Steel 37" Résistance Training Bands (amazon.com/dp/B0D5HWY811)
+  { id: "ss-0-orange", brand: "Serious Steel", color: "#0 Orange", colorHex: "#FF6B00", label: "#0", minLbs: 2, maxLbs: 15, lengthInches: 37, widthMm: 6, owned: false },
+  { id: "ss-1-purple", brand: "Serious Steel", color: "#1 Purple", colorHex: "#7B2D8E", label: "#1", minLbs: 5, maxLbs: 35, lengthInches: 37, widthMm: 13, owned: false },
+  { id: "ss-2-red", brand: "Serious Steel", color: "#2 Red", colorHex: "#D32F2F", label: "#2", minLbs: 10, maxLbs: 50, lengthInches: 37, widthMm: 21, owned: false },
+  { id: "ss-3-blue", brand: "Serious Steel", color: "#3 Blue", colorHex: "#1976D2", label: "#3", minLbs: 25, maxLbs: 80, lengthInches: 37, widthMm: 29, owned: false },
+  { id: "ss-4-green", brand: "Serious Steel", color: "#4 Green", colorHex: "#2E7D32", label: "#4", minLbs: 50, maxLbs: 120, lengthInches: 37, widthMm: 44, owned: false },
+  { id: "ss-5-gray", brand: "Serious Steel", color: "#5 Gray", colorHex: "#616161", label: "#5", minLbs: 60, maxLbs: 150, lengthInches: 37, widthMm: 64, owned: false },
 
   // Undersun (41" loop)
   { id: "us-yellow", brand: "Undersun", color: "Yellow", colorHex: "#E8B830", label: "X-Light", minLbs: 5, maxLbs: 15, lengthInches: 41, widthMm: 6, owned: false },
@@ -98,7 +99,7 @@ export const DEFAULT_EXERCISES: ExerciseTemplate[] = [
 
 export const BRAND_GROUPS = [
   { brand: "Harambe", bandIds: ["harambe-white", "harambe-yellow", "harambe-green", "harambe-black", "harambe-red"] },
-  { brand: "Serious Steel", bandIds: ["ss-white", "ss-yellow", "ss-green", "ss-black", "ss-red"] },
+  { brand: "Serious Steel 37\"", bandIds: ["ss-0-orange", "ss-1-purple", "ss-2-red", "ss-3-blue", "ss-4-green", "ss-5-gray"] },
   { brand: "Undersun", bandIds: ["us-yellow", "us-green", "us-blue", "us-black", "us-red"] },
 ];
 

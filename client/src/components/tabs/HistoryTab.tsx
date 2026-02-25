@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — History & Analytics Tab
+// Vive la Résistance! — History & Analytics Tab
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Workout history, progression charts, CSV export
 // Shows intensity badges and separate full/partial rep counts
@@ -379,9 +379,16 @@ export default function HistoryTab() {
                           <div key={exercise.id} className="space-y-1.5">
                             <div className="flex items-center gap-2">
                               <p className="text-xs font-semibold text-foreground/80">{exercise.exerciseName}</p>
-                              {exercise.setup.doubled && (
-                                <Badge variant="outline" className="text-[9px] h-4 border-primary/30 text-primary/60">2x</Badge>
-                              )}
+                              <Badge
+                                variant="outline"
+                                className={`text-[9px] h-3.5 font-mono ${
+                                  exercise.setup.doubled
+                                    ? "border-primary/40 bg-primary/10 text-primary"
+                                    : "border-muted-foreground/20 text-muted-foreground/50"
+                                }`}
+                              >
+                                {exercise.setup.doubled ? "2x" : "1x"}
+                              </Badge>
                               {exercise.targetReps && (
                                 <Badge variant="secondary" className="text-[9px] h-4 font-mono bg-accent text-muted-foreground">
                                   {exercise.targetReps}r

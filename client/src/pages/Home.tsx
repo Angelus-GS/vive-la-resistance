@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Main Home Page
+// Vive la Résistance! — Main Home Page
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Bottom tab bar navigation between 4 main sections
 // ============================================================
@@ -51,7 +51,7 @@ export default function Home() {
       <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/50 px-4 py-2.5">
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <h1 className="text-sm font-bold tracking-tight text-foreground">
-            Vive la Resistance<span className="text-primary">!</span>
+            Vive la Résistance<span className="text-primary">!</span>
           </h1>
           {state.activeWorkout && (
             <span className="flex items-center gap-1.5 text-[10px] text-sage-green font-medium">

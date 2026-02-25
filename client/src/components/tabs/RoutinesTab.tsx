@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Routines Tab
+// Vive la Résistance! — Routines Tab
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Programs (Gorilla Gains), routine templates, start workout
 // ============================================================
@@ -423,10 +423,14 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                   return (
                                     <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
                                       <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
-                                      <span className={`${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
+                                      <span className={`flex-1 ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
                                         {ex?.name || "?"}
                                       </span>
-                                      <span className="text-[9px] text-muted-foreground/50 font-mono">
+                                      <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                                        re.setup.doubled
+                                          ? "bg-primary/10 text-primary/70"
+                                          : "text-muted-foreground/40"
+                                      }`}>
                                         {re.setup.doubled ? "2x" : "1x"}
                                       </span>
                                       {re.optional && (
@@ -450,10 +454,14 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                   return (
                                     <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
                                       <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
-                                      <span className={`${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
+                                      <span className={`flex-1 ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
                                         {ex?.name || "?"}
                                       </span>
-                                      <span className="text-[9px] text-muted-foreground/50 font-mono">
+                                      <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                                        re.setup.doubled
+                                          ? "bg-primary/10 text-primary/70"
+                                          : "text-muted-foreground/40"
+                                      }`}>
                                         {re.setup.doubled ? "2x" : "1x"}
                                       </span>
                                       {re.optional && (
@@ -612,11 +620,13 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                             <span className="text-sm">{ex.name}</span>
                             <span className="text-xs text-muted-foreground ml-2">{ex.notes}</span>
                           </div>
-                          {ex.defaultSetup.doubled && (
-                            <Badge variant="outline" className="text-[9px] h-4 border-primary/30 text-primary/60 shrink-0">
-                              2x
-                            </Badge>
-                          )}
+                          <span className={`text-[9px] font-mono px-1 py-0.5 rounded shrink-0 ${
+                            ex.defaultSetup.doubled
+                              ? "bg-primary/10 text-primary/70"
+                              : "text-muted-foreground/40"
+                          }`}>
+                            {ex.defaultSetup.doubled ? "2x" : "1x"}
+                          </span>
                         </label>
                       ))}
                     </div>

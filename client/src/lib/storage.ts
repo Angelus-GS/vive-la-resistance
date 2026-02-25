@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — Local Storage Persistence Layer
+// Vive la Résistance! — Local Storage Persistence Layer
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Zero-latency, offline-first local data architecture
 // ============================================================

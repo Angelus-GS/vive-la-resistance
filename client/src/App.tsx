@@ -1,5 +1,5 @@
 // ============================================================
-// Vive la Resistance! — App Root
+// Vive la Résistance! — App Root
 // Design: "Chalk & Iron" Premium Dark Athletic
 // Warm charcoal darks, amber-gold accents, sage green success
 // ============================================================
