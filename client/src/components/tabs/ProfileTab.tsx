@@ -59,7 +59,7 @@ const EQUIPMENT_TIPS = [
 export default function ProfileTab() {
   const { state, dispatch } = useApp();
   const { profile, updateProfile } = useProfile();
-  const { allBands, toggleBand, ownedBands, ladder } = useBands();
+  const { allBands, toggleBand, ownedBands, ladder, bandMap } = useBands();
   const [openBrands, setOpenBrands] = useState<Record<string, boolean>>({});
   const [showTips, setShowTips] = useState(false);
   const [ladderShowAll, setLadderShowAll] = useState(false);
@@ -150,7 +150,7 @@ export default function ProfileTab() {
         </CardHeader>
         <CardContent className="space-y-2">
           {BRAND_GROUPS.map(group => {
-            const ownedCount = group.bandIds.filter(id => allBands.find(b => b.id === id)?.owned).length;
+            const ownedCount = group.bandIds.filter(id => bandMap.get(id)?.owned).length;
             return (
               <Collapsible
                 key={group.brand}
@@ -171,7 +171,7 @@ export default function ProfileTab() {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-0.5 mt-1">
                   {group.bandIds.map(bandId => {
-                    const band = allBands.find(b => b.id === bandId);
+                    const band = bandMap.get(bandId);
                     if (!band) return null;
                     return (
                       <label

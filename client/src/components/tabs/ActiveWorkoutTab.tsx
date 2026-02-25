@@ -341,7 +341,7 @@ export default function ActiveWorkoutTab() {
     colorHexes: [] as string[],
   }), []);
   const ladder = useMemo(() => [NO_BANDS_COMBO, ...rawLadder], [NO_BANDS_COMBO, rawLadder]);
-  const { exercises: exerciseTemplates } = useRoutines();
+  const { exercises: exerciseTemplates, exerciseTemplateMap } = useRoutines();
   const [elapsed, setElapsed] = useState(0);
   const [restTimer, setRestTimer] = useState<number | null>(null);
   const [showAddExercise, setShowAddExercise] = useState(false);
@@ -416,7 +416,7 @@ export default function ActiveWorkoutTab() {
 
   const handleAddExercise = useCallback(
     (exerciseTemplateId: string) => {
-      const template = exerciseTemplates.find(e => e.id === exerciseTemplateId);
+      const template = exerciseTemplateMap.get(exerciseTemplateId);
       if (!template) return;
 
       const exercise: WorkoutExercise = {
@@ -431,7 +431,7 @@ export default function ActiveWorkoutTab() {
       setExerciseSearch("");
       toast.success(`Added: ${template.name}`);
     },
-    [dispatch, exerciseTemplates]
+    [dispatch, exerciseTemplateMap]
   );
 
   const handleRemoveExercise = useCallback(
@@ -586,7 +586,7 @@ export default function ActiveWorkoutTab() {
 
       {/* Exercise Cards */}
       {activeWorkout.exercises.map(exercise => {
-        const template = exerciseTemplates.find((e: ExerciseTemplate) => e.id === exercise.exerciseTemplateId);
+        const template = exerciseTemplateMap.get(exercise.exerciseTemplateId);
         return (
           <Card key={exercise.id} className="bg-card border-border">
           <CardHeader className="pb-2 px-3 pt-3">

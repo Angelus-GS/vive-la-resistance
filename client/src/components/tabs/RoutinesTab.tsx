@@ -75,7 +75,7 @@ interface Props {
 
 export default function RoutinesTab({ onStartWorkout }: Props) {
   const { state, dispatch } = useApp();
-  const { routines, exercises } = useRoutines();
+  const { routines, exercises, exerciseTemplateMap } = useRoutines();
   const { programs } = usePrograms();
   const { activeWorkout } = useWorkout();
   const [showCreate, setShowCreate] = useState(false);
@@ -103,7 +103,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
     }
 
     const routineExercises: RoutineExercise[] = selectedExercises.map(exId => {
-      const ex = exercises.find(e => e.id === exId)!;
+      const ex = exerciseTemplateMap.get(exId)!;
       return {
         exerciseTemplateId: exId,
         targetSets: 3,
@@ -152,7 +152,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
     const workoutExercises: WorkoutExercise[] = routine.exercises
       .filter(re => !re.optional) // skip optional exercises by default
       .map(re => {
-        const ex = exercises.find(e => e.id === re.exerciseTemplateId);
+        const ex = exerciseTemplateMap.get(re.exerciseTemplateId);
         return {
           id: nanoid(),
           exerciseTemplateId: re.exerciseTemplateId,
@@ -217,12 +217,12 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
     );
   };
 
-  // Group exercises by category
-  const exercisesByCategory = exercises.reduce((acc, ex) => {
+  // Group exercises by category (memoized)
+  const exercisesByCategory = useMemo(() => exercises.reduce((acc, ex) => {
     if (!acc[ex.category]) acc[ex.category] = [];
     acc[ex.category].push(ex);
     return acc;
-  }, {} as Record<string, typeof exercises>);
+  }, {} as Record<string, typeof exercises>), [exercises]);
 
   return (
     <div className="space-y-4 p-4 max-w-lg mx-auto">
@@ -451,7 +451,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                         <Dumbbell className="w-3 h-3" /> {day.routineName}
                                       </p>
                                       {routine.exercises.map((re, i) => {
-                                        const ex = exercises.find(e => e.id === re.exerciseTemplateId);
+                                        const ex = exerciseTemplateMap.get(re.exerciseTemplateId);
                                         return (
                                           <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
                                             <span className={`w-1 h-1 rounded-full shrink-0 ${re.isDropSet ? "bg-red-400" : "bg-muted-foreground/40"}`} />
@@ -588,7 +588,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                     <p className="text-sm font-semibold truncate">{routine.name}</p>
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       {routine.exercises.slice(0, 4).map((re, i) => {
-                        const ex = exercises.find(e => e.id === re.exerciseTemplateId);
+                        const ex = exerciseTemplateMap.get(re.exerciseTemplateId);
                         return (
                           <Badge
                             key={i}

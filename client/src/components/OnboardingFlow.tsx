@@ -26,7 +26,7 @@ function formatHeight(inches: number): string {
 export default function OnboardingFlow() {
   const { dispatch } = useApp();
   const { profile, updateProfile } = useProfile();
-  const { allBands, toggleBand, ownedBands, ladder } = useBands();
+  const { allBands, toggleBand, ownedBands, ladder, bandMap } = useBands();
   const [step, setStep] = useState(0);
 
   const steps = [
@@ -132,12 +132,12 @@ export default function OnboardingFlow() {
                     <CardHeader className="pb-3">
                       <CardTitle className="text-base">{group.brand}</CardTitle>
                       <CardDescription>
-                        {allBands.find(b => b.id === group.bandIds[0])?.lengthInches}" loop bands
+                        {bandMap.get(group.bandIds[0])?.lengthInches}" loop bands
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-1">
                       {group.bandIds.map(bandId => {
-                        const band = allBands.find(b => b.id === bandId);
+                        const band = bandMap.get(bandId);
                         if (!band) return null;
                         return (
                           <label

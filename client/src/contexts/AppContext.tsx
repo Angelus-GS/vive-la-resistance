@@ -235,6 +235,8 @@ interface AppContextValue {
   state: AppState;
   dispatch: React.Dispatch<Action>;
   ownedBands: Band[];
+  bandMap: Map<string, Band>;
+  exerciseTemplateMap: Map<string, AppState["exerciseTemplates"][number]>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -245,14 +247,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return rebuildLadder(loaded);
   });
 
-  // Auto-save on every state change
+  // Auto-save with debounce to avoid writing on every keystroke/set update
   useEffect(() => {
-    saveState(state);
+    const timer = setTimeout(() => saveState(state), 300);
+    return () => clearTimeout(timer);
   }, [state]);
 
   const ownedBands = useMemo(() => state.bands.filter(b => b.owned), [state.bands]);
 
-  const contextValue = useMemo(() => ({ state, dispatch, ownedBands }), [state, dispatch, ownedBands]);
+  // O(1) lookup maps for bands and exercise templates
+  const bandMap = useMemo(() => {
+    const m = new Map<string, Band>();
+    for (const b of state.bands) m.set(b.id, b);
+    return m;
+  }, [state.bands]);
+
+  const exerciseTemplateMap = useMemo(() => {
+    const m = new Map<string, (typeof state.exerciseTemplates)[number]>();
+    for (const e of state.exerciseTemplates) m.set(e.id, e);
+    return m;
+  }, [state.exerciseTemplates]);
+
+  const contextValue = useMemo(() => ({ state, dispatch, ownedBands, bandMap, exerciseTemplateMap }), [state, dispatch, ownedBands, bandMap, exerciseTemplateMap]);
 
   return (
     <AppContext.Provider value={contextValue}>
@@ -277,7 +293,7 @@ export function useProfile() {
 }
 
 export function useBands() {
-  const { state, dispatch, ownedBands } = useApp();
+  const { state, dispatch, ownedBands, bandMap } = useApp();
   const toggleBand = useCallback(
     (id: string) => dispatch({ type: "TOGGLE_BAND_OWNED", payload: id }),
     [dispatch]
@@ -293,6 +309,7 @@ export function useBands() {
     ladder: state.resistanceLadder,
     toggleBand,
     setBandsOwned,
+    bandMap,
   };
 }
 
@@ -306,10 +323,11 @@ export function useWorkout() {
 }
 
 export function useRoutines() {
-  const { state, dispatch } = useApp();
+  const { state, dispatch, exerciseTemplateMap } = useApp();
   return {
     routines: state.routines,
     exercises: state.exerciseTemplates,
+    exerciseTemplateMap,
     dispatch,
   };
 }

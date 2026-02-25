@@ -74,7 +74,7 @@ function ChartTooltip({ active, payload, label }: any) {
 
 export default function HistoryTab() {
   const { state, dispatch } = useApp();
-  const { allBands } = useBands();
+  const { allBands, bandMap } = useBands();
   const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null);
 
   const handleExportCSV = () => {
@@ -109,7 +109,7 @@ export default function HistoryTab() {
           totalPartialReps += set.partialReps;
 
           const bands = set.bandIds
-            .map(id => allBands.find(b => b.id === id))
+            .map(id => bandMap.get(id))
             .filter(Boolean) as Band[];
 
           if (bands.length > 0) {
@@ -145,17 +145,20 @@ export default function HistoryTab() {
         duration: workout.durationSeconds,
       };
     });
-  }, [state.workoutHistory, allBands, state.userProfile.heightInches]);
+  }, [state.workoutHistory, bandMap, state.userProfile.heightInches]);
 
-  // Summary stats
-  const totalWorkouts = state.workoutHistory.length;
-  const totalVolume = analyticsData.reduce((s, d) => s + d.totalJoules, 0);
-  const avgDuration = totalWorkouts > 0
-    ? Math.round(analyticsData.reduce((s, d) => s + d.duration, 0) / totalWorkouts)
-    : 0;
-  const peakEver = analyticsData.length > 0
-    ? Math.max(...analyticsData.map(d => d.peakTension))
-    : 0;
+  // Summary stats (memoized)
+  const { totalWorkouts, totalVolume, avgDuration, peakEver } = useMemo(() => {
+    const tw = state.workoutHistory.length;
+    const tv = analyticsData.reduce((s, d) => s + d.totalJoules, 0);
+    const ad = tw > 0
+      ? Math.round(analyticsData.reduce((s, d) => s + d.duration, 0) / tw)
+      : 0;
+    const pe = analyticsData.length > 0
+      ? Math.max(...analyticsData.map(d => d.peakTension))
+      : 0;
+    return { totalWorkouts: tw, totalVolume: tv, avgDuration: ad, peakEver: pe };
+  }, [analyticsData, state.workoutHistory.length]);
 
   return (
     <div className="space-y-4 p-4 max-w-lg mx-auto">
@@ -397,7 +400,7 @@ export default function HistoryTab() {
                             </div>
                             {completedExSets.map(set => {
                               const bands = set.bandIds
-                                .map(id => allBands.find(b => b.id === id))
+                                .map(id => bandMap.get(id))
                                 .filter(Boolean) as Band[];
                               const bandLabel = bands.length > 0 ? bands.map(b => b.color).join(" + ") : "No Bands";
                               return (
