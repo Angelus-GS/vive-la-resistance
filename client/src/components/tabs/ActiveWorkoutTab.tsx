@@ -22,12 +22,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Plus, Minus, Check, Timer, Clock, Trash2, Play, Square,
-  Dumbbell, X, ArrowUpCircle, Search, Link2, Flame, Target, Zap,
+  Dumbbell, X, ArrowUpCircle, Search, Link2, Flame, Target, Zap, Video,
 } from "lucide-react";
+import VideoModal from "@/components/VideoModal";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import { motion, AnimatePresence } from "framer-motion";
-import type { LoggedSet, WorkoutExercise, IntensityLevel } from "@/lib/types";
+import type { LoggedSet, WorkoutExercise, IntensityLevel, ExerciseTemplate } from "@/lib/types";
 import { INTENSITY_REP_RANGES } from "@/lib/types";
 import { shouldProgressBand } from "@/lib/physics";
 
@@ -345,6 +346,7 @@ export default function ActiveWorkoutTab() {
   const [restTimer, setRestTimer] = useState<number | null>(null);
   const [showAddExercise, setShowAddExercise] = useState(false);
   const [exerciseSearch, setExerciseSearch] = useState("");
+  const [videoModal, setVideoModal] = useState<{ url: string; name: string } | null>(null);
 
   // Workout duration timer
   useEffect(() => {
@@ -583,7 +585,9 @@ export default function ActiveWorkoutTab() {
       </AnimatePresence>
 
       {/* Exercise Cards */}
-      {activeWorkout.exercises.map(exercise => (
+      {activeWorkout.exercises.map(exercise => {
+        const template = exerciseTemplates.find((e: ExerciseTemplate) => e.id === exercise.exerciseTemplateId);
+        return (
         <Card key={exercise.id} className="bg-card border-border">
           <CardHeader className="pb-2 px-3 pt-3">
             <div className="flex items-center justify-between">
@@ -591,6 +595,15 @@ export default function ActiveWorkoutTab() {
                 <CardTitle className="text-sm font-bold truncate">
                   {exercise.exerciseName}
                 </CardTitle>
+                {template?.videoUrl && (
+                  <button
+                    onClick={() => setVideoModal({ url: template.videoUrl!, name: exercise.exerciseName })}
+                    className="shrink-0 p-1 rounded-md text-primary/70 hover:text-primary hover:bg-primary/10 transition-colors"
+                    title="Watch exercise demo"
+                  >
+                    <Video className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <Badge
                   variant="outline"
                   className={`text-[9px] h-4 shrink-0 font-mono ${
@@ -638,7 +651,8 @@ export default function ActiveWorkoutTab() {
             </button>
           </CardContent>
         </Card>
-      ))}
+        );
+      })}
 
       {/* Add Exercise */}
       <Dialog open={showAddExercise} onOpenChange={open => {
@@ -711,6 +725,14 @@ export default function ActiveWorkoutTab() {
       </Dialog>
 
       <div className="h-4" />
+
+      {/* Video Modal */}
+      <VideoModal
+        isOpen={!!videoModal}
+        onClose={() => setVideoModal(null)}
+        videoUrl={videoModal?.url || ""}
+        exerciseName={videoModal?.name || ""}
+      />
     </div>
   );
 }

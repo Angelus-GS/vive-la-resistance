@@ -20,8 +20,9 @@ import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Plus, Play, Trash2, Edit, Dumbbell, Zap, ChevronRight, ChevronDown,
-  Calendar, Flame, Target, Crown, Moon,
+  Calendar, Flame, Target, Crown, Moon, Video,
 } from "lucide-react";
+import VideoModal from "@/components/VideoModal";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
@@ -83,6 +84,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
   const [expandedProgram, setExpandedProgram] = useState<string | null>("gorilla-gains");
   const [expandedPhase, setExpandedPhase] = useState<string | null>("gg-phase-1");
+  const [videoModal, setVideoModal] = useState<{ url: string; name: string } | null>(null);
 
   // User's custom routines (non-built-in)
   const customRoutines = useMemo(
@@ -458,6 +460,15 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                               {re.isDropSet && <span className="text-red-400 ml-0.5">*</span>}
                                               {re.perSide && <span className="text-muted-foreground/50 ml-0.5 text-[9px]">(each)</span>}
                                             </span>
+                                            {ex?.videoUrl && (
+                                              <button
+                                                onClick={() => setVideoModal({ url: ex.videoUrl!, name: ex.name })}
+                                                className="shrink-0 p-0.5 rounded text-primary/50 hover:text-primary hover:bg-primary/10 transition-colors"
+                                                title="Watch demo"
+                                              >
+                                                <Video className="w-3 h-3" />
+                                              </button>
+                                            )}
                                             <span className="text-[9px] font-mono text-muted-foreground/50 tabular-nums shrink-0 w-10 text-right">
                                               {re.targetReps}
                                             </span>
@@ -716,6 +727,14 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
       </Dialog>
 
       <div className="h-4" />
+
+      {/* Video Modal */}
+      <VideoModal
+        isOpen={!!videoModal}
+        onClose={() => setVideoModal(null)}
+        videoUrl={videoModal?.url || ""}
+        exerciseName={videoModal?.name || ""}
+      />
     </div>
   );
 }

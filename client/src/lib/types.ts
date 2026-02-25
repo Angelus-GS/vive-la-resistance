@@ -97,6 +97,7 @@ export interface ExerciseTemplate {
   };
   notes: string;
   optional?: boolean; // marks optional exercises in programs
+  videoUrl?: string; // YouTube video URL for exercise demo
 }
 
 // --- Intensity Levels (Gorilla Gains) ---
