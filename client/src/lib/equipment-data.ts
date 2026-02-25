@@ -136,6 +136,7 @@ export const DEFAULT_EXERCISES: ExerciseTemplate[] = [
 export const BRAND_GROUPS = [
   { brand: "Harambe", bandIds: ["harambe-white", "harambe-yellow", "harambe-green", "harambe-black", "harambe-red"] },
   { brand: "Serious Steel 37\"", bandIds: ["ss-0-orange", "ss-1-purple", "ss-2-red", "ss-3-blue", "ss-4-green", "ss-5-gray"] },
+  { brand: "Serious Steel 41\"", bandIds: ["ss41-0-orange", "ss41-1-purple", "ss41-2-red", "ss41-3-blue", "ss41-4-green", "ss41-5-gray"] },
   { brand: "Undersun", bandIds: ["us-yellow", "us-green", "us-blue", "us-black", "us-red"] },
 ];
 

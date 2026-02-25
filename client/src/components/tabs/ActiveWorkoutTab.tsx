@@ -588,7 +588,7 @@ export default function ActiveWorkoutTab() {
       {activeWorkout.exercises.map(exercise => {
         const template = exerciseTemplates.find((e: ExerciseTemplate) => e.id === exercise.exerciseTemplateId);
         return (
-        <Card key={exercise.id} className="bg-card border-border">
+          <Card key={exercise.id} className="bg-card border-border">
           <CardHeader className="pb-2 px-3 pt-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 min-w-0">

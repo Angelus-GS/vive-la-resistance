@@ -42,12 +42,22 @@ export function loadState(): AppState {
     const defaults = getDefaultState();
 
     // Merge with defaults to handle schema evolution
-    // For exercise templates: merge user's saved ones with any new defaults
+    // For exercise templates: merge user's saved ones with new defaults,
+    // and update existing templates with new fields (e.g., videoUrl)
     const mergedExercises = (() => {
       const saved = parsed.exerciseTemplates || [];
+      if (!saved.length) return defaults.exerciseTemplates;
+      const defaultMap = new Map(defaults.exerciseTemplates.map(e => [e.id, e]));
       const savedIds = new Set(saved.map(e => e.id));
+      // Update existing saved templates with new default fields (videoUrl, etc.)
+      const updated = saved.map(s => {
+        const def = defaultMap.get(s.id);
+        if (!def) return s;
+        return { ...def, ...s, videoUrl: def.videoUrl || s.videoUrl };
+      });
+      // Add any brand-new templates that don't exist in saved state
       const newDefaults = defaults.exerciseTemplates.filter(e => !savedIds.has(e.id));
-      return saved.length ? [...saved, ...newDefaults] : defaults.exerciseTemplates;
+      return [...updated, ...newDefaults];
     })();
 
     // For bands: merge user's saved ones with any new defaults (preserve owned state)
