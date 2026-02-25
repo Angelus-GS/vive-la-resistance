@@ -4,7 +4,7 @@
 // Single source of truth, auto-persists to localStorage
 // ============================================================
 
-import React, { createContext, useContext, useCallback, useReducer, useEffect } from "react";
+import React, { createContext, useContext, useCallback, useReducer, useEffect, useMemo } from "react";
 import type { AppState, Workout, WorkoutExercise, LoggedSet, Routine, GymProfile, UserProfile, Band, IntensityLevel } from "@/lib/types";
 import { loadState, saveState } from "@/lib/storage";
 import { generateResistanceLadder } from "@/lib/physics";
@@ -250,10 +250,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     saveState(state);
   }, [state]);
 
-  const ownedBands = state.bands.filter(b => b.owned);
+  const ownedBands = useMemo(() => state.bands.filter(b => b.owned), [state.bands]);
+
+  const contextValue = useMemo(() => ({ state, dispatch, ownedBands }), [state, dispatch, ownedBands]);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, ownedBands }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

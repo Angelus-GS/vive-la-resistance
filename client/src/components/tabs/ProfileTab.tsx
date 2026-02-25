@@ -4,7 +4,7 @@
 // Height slider, band inventory, gym profiles, equipment tips, settings
 // ============================================================
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useApp, useProfile, useBands } from "@/contexts/AppContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,12 @@ export default function ProfileTab() {
   const { allBands, toggleBand, ownedBands, ladder } = useBands();
   const [openBrands, setOpenBrands] = useState<Record<string, boolean>>({});
   const [showTips, setShowTips] = useState(false);
+  const [ladderShowAll, setLadderShowAll] = useState(false);
+  const LADDER_PREVIEW_COUNT = 30;
+  const visibleLadder = useMemo(
+    () => ladderShowAll ? ladder : ladder.slice(0, LADDER_PREVIEW_COUNT),
+    [ladder, ladderShowAll]
+  );
 
   const toggleBrandOpen = (brand: string) => {
     setOpenBrands(prev => ({ ...prev, [brand]: !prev[brand] }));
@@ -216,12 +222,9 @@ export default function ProfileTab() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-0.5 max-h-64 overflow-y-auto">
-            {ladder.map((combo, i) => (
-              <motion.div
+            {visibleLadder.map((combo, i) => (
+              <div
                 key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.02 }}
                 className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-accent/20 transition-colors"
               >
                 <span className="text-[10px] font-mono text-muted-foreground w-5 text-right shrink-0 tabular-nums">
@@ -240,8 +243,28 @@ export default function ProfileTab() {
                 <span className="text-[10px] font-mono text-primary shrink-0 tabular-nums">
                   {combo.totalMinLbs}–{combo.totalMaxLbs}
                 </span>
-              </motion.div>
+              </div>
             ))}
+            {!ladderShowAll && ladder.length > LADDER_PREVIEW_COUNT && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground mt-1"
+                onClick={() => setLadderShowAll(true)}
+              >
+                Show all {ladder.length} combos
+              </Button>
+            )}
+            {ladderShowAll && ladder.length > LADDER_PREVIEW_COUNT && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground mt-1"
+                onClick={() => setLadderShowAll(false)}
+              >
+                Show fewer
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
