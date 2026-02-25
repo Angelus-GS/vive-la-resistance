@@ -121,6 +121,8 @@ export interface RoutineExercise {
     doubled?: boolean;
   };
   optional?: boolean;
+  isDropSet?: boolean; // marked with * in HaramBro V3
+  perSide?: boolean; // unilateral exercises (each arm/leg)
 }
 
 export interface Routine {
@@ -131,8 +133,13 @@ export interface Routine {
   updatedAt: string;
   programId?: string; // links to a program
   intensity?: IntensityLevel;
-  dayType?: "push" | "pull" | "chest" | "back" | "shoulders" | "upper-back" | "legs"; // for program-based routines
+  dayType?: "push" | "pull" | "chest" | "back" | "shoulders" | "upper-back" | "legs" | "chest-push" | "back-pull" | "shoulder-tricep-push" | "biceps-pull" | "legs-push" | "light-pull"; // for program-based routines
   isBuiltIn?: boolean; // true for Gorilla Gains pre-built routines
+  challenge?: { // end-of-workout challenge (HaramBro V3)
+    name: string;
+    description: string;
+    sets: number;
+  };
 }
 
 // --- Programs ---
@@ -158,6 +165,13 @@ export interface Program {
   description: string;
   phases: ProgramPhase[];
   source?: string; // e.g. "harambesystem.com"
+  overview?: { // program-level guidance notes (HaramBro V3)
+    warmup?: string;
+    rest?: string;
+    cadence?: string;
+    failure?: string;
+    keepTension?: string;
+  };
 }
 
 // --- Active Workout / Set Logging ---

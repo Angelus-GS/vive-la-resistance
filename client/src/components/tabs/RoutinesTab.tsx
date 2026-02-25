@@ -438,6 +438,9 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                     push: "text-amber-gold", pull: "text-blue-400", chest: "text-amber-gold",
                                     back: "text-blue-400", shoulders: "text-cyan-400", "upper-back": "text-blue-300",
                                     legs: "text-sage-green",
+                                    "chest-push": "text-amber-gold", "back-pull": "text-blue-400",
+                                    "shoulder-tricep-push": "text-cyan-400", "biceps-pull": "text-purple-400",
+                                    "legs-push": "text-sage-green", "light-pull": "text-blue-300",
                                   };
                                   const dayColor = DAY_COLORS[routine.dayType || ""] || "text-muted-foreground";
                                   return (
@@ -449,14 +452,14 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                         const ex = exercises.find(e => e.id === re.exerciseTemplateId);
                                         return (
                                           <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
-                                            <span className="w-1 h-1 rounded-full bg-muted-foreground/40 shrink-0" />
+                                            <span className={`w-1 h-1 rounded-full shrink-0 ${re.isDropSet ? "bg-red-400" : "bg-muted-foreground/40"}`} />
                                             <span className={`flex-1 ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
                                               {ex?.name || "?"}
-                                              {re.targetSets > 1 && (
-                                                <span className="text-muted-foreground/50 ml-1">
-                                                  {re.targetSets}x{re.targetReps}
-                                                </span>
-                                              )}
+                                              {re.isDropSet && <span className="text-red-400 ml-0.5">*</span>}
+                                              {re.perSide && <span className="text-muted-foreground/50 ml-0.5 text-[9px]">(each)</span>}
+                                            </span>
+                                            <span className="text-[9px] font-mono text-muted-foreground/50 tabular-nums shrink-0 w-10 text-right">
+                                              {re.targetReps}
                                             </span>
                                             <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
                                               re.setup.doubled
@@ -473,18 +476,77 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                           </div>
                                         );
                                       })}
+                                      {/* Challenge section */}
+                                      {routine.challenge && (
+                                        <div className="flex items-center gap-2 pl-4 text-[11px] mt-1 pt-1 border-t border-dashed border-muted-foreground/20">
+                                          <span className="w-1 h-1 rounded-full bg-amber-gold shrink-0" />
+                                          <span className="text-amber-gold font-medium flex-1">
+                                            {routine.challenge.name}
+                                          </span>
+                                          <span className="text-[9px] font-mono text-muted-foreground/50">
+                                            {routine.challenge.sets} sets
+                                          </span>
+                                        </div>
+                                      )}
                                     </div>
                                   );
                                 });
                             })()}
                           </div>
 
-                          {/* Progression note */}
-                          <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">
-                              <span className="font-semibold text-primary">Progression:</span> When you hit the top of the rep range, add spacers or move up the band ladder.
-                            </p>
-                          </div>
+                          {/* Drop set legend if any routine has drop sets */}
+                          {(() => {
+                            const hasDropSets = phase.schedule.some(day => {
+                              if (day.isRest || !day.routineId) return false;
+                              const r = ALL_PROGRAM_ROUTINES.find(rt => rt.id === day.routineId);
+                              return r?.exercises.some(e => e.isDropSet);
+                            });
+                            return hasDropSets ? (
+                              <p className="text-[9px] text-muted-foreground/50 px-1 mt-1">
+                                <span className="text-red-400">*</span> = Drop set (reduce resistance, continue to failure)
+                              </p>
+                            ) : null;
+                          })()}
+
+                          {/* Overview tips for programs that have them */}
+                          {program.overview && (
+                            <div className="mt-2 p-2.5 rounded-lg bg-primary/5 border border-primary/10 space-y-1.5">
+                              {program.overview.warmup && (
+                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                  <span className="font-semibold text-primary">Warm-up:</span> {program.overview.warmup}
+                                </p>
+                              )}
+                              {program.overview.failure && (
+                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                  <span className="font-semibold text-primary">Failure:</span> {program.overview.failure}
+                                </p>
+                              )}
+                              {program.overview.rest && (
+                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                  <span className="font-semibold text-primary">Rest:</span> {program.overview.rest}
+                                </p>
+                              )}
+                              {program.overview.cadence && (
+                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                  <span className="font-semibold text-primary">Cadence:</span> {program.overview.cadence}
+                                </p>
+                              )}
+                              {program.overview.keepTension && (
+                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                  <span className="font-semibold text-primary">Keep tension:</span> {program.overview.keepTension}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Progression note for programs without overview */}
+                          {!program.overview && (
+                            <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
+                              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <span className="font-semibold text-primary">Progression:</span> When you hit the top of the rep range, add spacers or move up the band ladder.
+                              </p>
+                            </div>
+                          )}
                         </CardContent>
                       </CollapsibleContent>
                     </Card>

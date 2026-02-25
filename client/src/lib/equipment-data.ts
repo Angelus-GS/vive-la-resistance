@@ -94,15 +94,33 @@ export const DEFAULT_EXERCISES: ExerciseTemplate[] = [
   // Shoulders
   { id: "ex-lateral-raise", name: "Lateral Raise", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — stand on band" },
 
-  // HaramBro V3 — New exercises
-  { id: "ex-chest-fly", name: "Chest Flies", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — band chest fly" },
+  // HaramBro V3 — Exercises
+  { id: "ex-chest-fly", name: "Crossovers", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — band crossover / chest fly" },
   { id: "ex-z-press", name: "Z Press", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — seated overhead press with no back support" },
-  { id: "ex-close-grip-bench", name: "Close Grip Bench Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — narrow grip for tricep emphasis" },
+  { id: "ex-close-grip-bench", name: "Narrow Bench Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — narrow grip for tricep emphasis" },
   { id: "ex-yates-row", name: "Yates Row", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — underhand supinated row for back thickness" },
   { id: "ex-pendlay-row", name: "Pendlay Row", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — strict barbell row from floor" },
   { id: "ex-one-arm-pulldown", name: "One-Arm Pull Down", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — unilateral lat pulldown, each arm" },
-  { id: "ex-narrow-front-squat", name: "Narrow Angled Front Squat", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — narrow stance front squat" },
+  { id: "ex-narrow-front-squat", name: "Angled Narrow Front Squat", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — narrow stance angled front squat" },
   { id: "ex-one-leg-rdl", name: "One-Legged RDL", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — single-leg Romanian deadlift, each leg" },
+  { id: "ex-lawnmower-row", name: "Lawnmower Rows", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — one-arm row, each side" },
+  { id: "ex-wide-ferro-curl", name: "Wide Ferro Curls", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — wide-grip Ferro curl" },
+  { id: "ex-band-pull-apart", name: "Band Pull Aparts", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — rear delt pull apart" },
+  { id: "ex-front-raise", name: "Front Raises", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — front deltoid raise" },
+  { id: "ex-one-arm-ohp", name: "One-Arm Overhead Press", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — unilateral overhead press, each arm" },
+  { id: "ex-tricep-press", name: "Tricep Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — tricep press-down" },
+  { id: "ex-overhead-seated-ext", name: "Overhead Seated Tricep Extension", category: "push", defaultSetup: { doubled: false }, notes: "Singled — seated overhead tricep extension" },
+  { id: "ex-bicep-blaster-21s", name: "Bicep Blaster 21s", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — 7 bottom + 7 top + 7 full ROM = 21" },
+  { id: "ex-arnold-curl", name: "Arnold Curls", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — rotating curl variation" },
+  { id: "ex-angled-calf-raise", name: "Angled Calf Raises", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — calf raise at an angle" },
+  { id: "ex-diamond-pushup", name: "Diamond Push-ups", category: "push", defaultSetup: { doubled: false }, notes: "Bodyweight — to failure" },
+  { id: "ex-ferro-pushup", name: "Ferro Push-ups", category: "push", defaultSetup: { doubled: false }, notes: "Bodyweight — push-up challenge" },
+  { id: "ex-pullup", name: "Pull-ups", category: "pull", defaultSetup: { doubled: false }, notes: "Bodyweight — pull-up challenge" },
+  { id: "ex-chinup", name: "Chin-ups", category: "pull", defaultSetup: { doubled: false }, notes: "Bodyweight — underhand pull-up (optional/advanced)" },
+  { id: "ex-leg-raise", name: "Leg Raises", category: "core", defaultSetup: { doubled: false }, notes: "Bodyweight — hanging or lying leg raise (optional/advanced)" },
+  { id: "ex-pushup", name: "Push-ups", category: "push", defaultSetup: { doubled: false }, notes: "Bodyweight — to failure" },
+  { id: "ex-bent-row-supine", name: "Bent Rows (Supine)", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — underhand bent-over row" },
+  { id: "ex-bent-row-prone", name: "Bent Rows (Prone)", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — overhand bent-over row" },
 ];
 
 // --- BRAND GROUPS ---
@@ -124,6 +142,8 @@ function makeRoutineExercise(
   targetReps: string,
   doubled?: boolean,
   optional?: boolean,
+  isDropSet?: boolean,
+  perSide?: boolean,
 ): RoutineExercise {
   const template = DEFAULT_EXERCISES.find(e => e.id === templateId);
   return {
@@ -132,6 +152,8 @@ function makeRoutineExercise(
     targetReps,
     setup: { doubled: doubled ?? template?.defaultSetup.doubled ?? false },
     optional,
+    ...(isDropSet ? { isDropSet } : {}),
+    ...(perSide ? { perSide } : {}),
   };
 }
 
@@ -263,106 +285,185 @@ export const GORILLA_GAINS_PROGRAM: Program = {
 };
 
 // ============================================================
-// HARAMBRO V3 PROGRAM — 5-day body-part split
+// HARAMBRO V3 PROGRAM — 6-day push/pull body-part split
+// Source: HaramBro Workout Booklet Version 3 (HarambeSystem.com)
+// Schedule: Chest Push / Back Pull / Shoulder+Tricep Push /
+//           Biceps Pull / Legs Push / Light Pull / Rest
+// * = Drop set, † = Optional/Advanced
 // ============================================================
 
 export const HARAMBRO_V3_ROUTINES: Routine[] = [
-  // Monday: Chest & Push
+  // Day 1: Chest Push Day
   {
     id: "hb3-chest-push",
-    name: "HB3: Chest & Push",
+    name: "HB3: Chest Push",
     exercises: [
-      makeRoutineExercise("ex-bench-press", 4, "8-12", true),
-      makeRoutineExercise("ex-chest-fly", 3, "12-15", true),
-      makeRoutineExercise("ex-tricep-extension", 3, "10-12", true),
+      makeRoutineExercise("ex-bench-press", 1, "5-25", true),
+      makeRoutineExercise("ex-bench-press", 1, "5-25", true),
+      makeRoutineExercise("ex-bench-press", 1, "0-25", true, false, true),
+      makeRoutineExercise("ex-incline-press", 1, "15-30", true),
+      makeRoutineExercise("ex-incline-press", 1, "0-30", true, false, true),
+      makeRoutineExercise("ex-chest-fly", 1, "0-25", true, false, true),
+      makeRoutineExercise("ex-overhead-press", 1, "15-30", false),
+      makeRoutineExercise("ex-close-grip-bench", 1, "15-25", true),
+      makeRoutineExercise("ex-narrow-front-squat", 1, "15-20", false),
     ],
     createdAt: "2025-01-01T00:00:00Z",
     updatedAt: "2025-01-01T00:00:00Z",
     programId: "harambro-v3",
-    dayType: "chest",
+    dayType: "chest-push",
+    isBuiltIn: true,
+    challenge: {
+      name: "Ferro Push-Up Challenge",
+      description: "Do X push-ups, rest 1 minute, repeat",
+      sets: 5,
+    },
+  },
+  // Day 2: Back Pull Day
+  {
+    id: "hb3-back-pull",
+    name: "HB3: Back Pull",
+    exercises: [
+      makeRoutineExercise("ex-deadlift", 1, "5-15", true),  // no straps
+      makeRoutineExercise("ex-deadlift", 1, "5-15", true),
+      makeRoutineExercise("ex-bent-row-supine", 1, "5-15", true),
+      makeRoutineExercise("ex-bent-row-prone", 1, "5-15", true),
+      makeRoutineExercise("ex-bent-row-supine", 1, "5-15", true),
+      makeRoutineExercise("ex-bent-row-prone", 1, "5-15", true),
+      makeRoutineExercise("ex-lawnmower-row", 1, "5-15", false, false, false, true),
+      makeRoutineExercise("ex-lawnmower-row", 1, "0-25", false, false, true, true),
+      makeRoutineExercise("ex-one-arm-pulldown", 1, "8-15", false, false, false, true),
+      makeRoutineExercise("ex-wide-ferro-curl", 1, "8-25", false),
+      makeRoutineExercise("ex-calf-raise", 1, "20-40", true),
+      makeRoutineExercise("ex-shrugs", 1, "8-15", true),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "harambro-v3",
+    dayType: "back-pull",
+    isBuiltIn: true,
+    challenge: {
+      name: "Pull-up Challenge",
+      description: "Do X pull-ups, rest 1 minute, repeat",
+      sets: 5,
+    },
+  },
+  // Day 3: Shoulder+Triceps Push Day
+  {
+    id: "hb3-shoulder-tricep-push",
+    name: "HB3: Shoulder+Tricep Push",
+    exercises: [
+      makeRoutineExercise("ex-overhead-press", 1, "8-15", false),
+      makeRoutineExercise("ex-z-press", 1, "8-15", false, false, true),
+      makeRoutineExercise("ex-overhead-press", 1, "8-20", false),
+      makeRoutineExercise("ex-z-press", 1, "8-20", false, false, true),
+      makeRoutineExercise("ex-one-arm-ohp", 1, "8-15", false, false, false, true),
+      makeRoutineExercise("ex-band-pull-apart", 1, "20", false),
+      makeRoutineExercise("ex-lateral-raise", 1, "15-25", false),
+      makeRoutineExercise("ex-front-raise", 1, "15-25", false),
+      makeRoutineExercise("ex-bench-press", 1, "8-15", true),
+      makeRoutineExercise("ex-tricep-extension", 1, "15-25", true),
+      makeRoutineExercise("ex-overhead-seated-ext", 1, "8-25", false, false, true),
+      makeRoutineExercise("ex-tricep-press", 1, "8-25", true, false, true),
+      makeRoutineExercise("ex-front-squat", 1, "20", false),
+      makeRoutineExercise("ex-diamond-pushup", 1, "N/A", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "harambro-v3",
+    dayType: "shoulder-tricep-push",
     isBuiltIn: true,
   },
-  // Tuesday: Back Thickness
+  // Day 4: Biceps Pull Day
   {
-    id: "hb3-back-thickness",
-    name: "HB3: Back Thickness",
+    id: "hb3-biceps-pull",
+    name: "HB3: Biceps Pull",
     exercises: [
-      makeRoutineExercise("ex-deadlift", 3, "6-10", true),
-      makeRoutineExercise("ex-yates-row", 3, "10-12", true),
-      makeRoutineExercise("ex-face-pull", 3, "15", false),
+      makeRoutineExercise("ex-deadlift", 1, "20", true),
+      makeRoutineExercise("ex-bent-row", 1, "20", true),
+      makeRoutineExercise("ex-ferro-curl", 1, "10-20", false),
+      makeRoutineExercise("ex-ferro-curl", 1, "10-20", false, false, true),
+      makeRoutineExercise("ex-bicep-blaster-21s", 1, "21", false),
+      makeRoutineExercise("ex-ferro-curl", 1, "10-20", false),
+      makeRoutineExercise("ex-calf-raise", 1, "20-40", true),
+      makeRoutineExercise("ex-ferro-curl", 1, "15-25", false),
+      makeRoutineExercise("ex-arnold-curl", 1, "8-25", false),
+      makeRoutineExercise("ex-chinup", 1, "N/A", false, true),
+      makeRoutineExercise("ex-leg-raise", 1, "N/A", false, true),
     ],
     createdAt: "2025-01-01T00:00:00Z",
     updatedAt: "2025-01-01T00:00:00Z",
     programId: "harambro-v3",
-    dayType: "back",
+    dayType: "biceps-pull",
     isBuiltIn: true,
   },
-  // Wednesday: Shoulders & Triceps
+  // Day 5: Legs Push Day
   {
-    id: "hb3-shoulders-triceps",
-    name: "HB3: Shoulders & Triceps",
+    id: "hb3-legs-push",
+    name: "HB3: Legs Push",
     exercises: [
-      makeRoutineExercise("ex-z-press", 4, "8-12", false),
-      makeRoutineExercise("ex-lateral-raise", 3, "12-15", false),
-      makeRoutineExercise("ex-close-grip-bench", 3, "8-12", true),
+      makeRoutineExercise("ex-front-squat", 1, "5-15", false),
+      makeRoutineExercise("ex-front-squat", 1, "5-15", false),
+      makeRoutineExercise("ex-front-squat", 1, "0-25", false, false, true),
+      makeRoutineExercise("ex-back-squat", 1, "5-15", true),
+      makeRoutineExercise("ex-narrow-front-squat", 1, "5-15", false),
+      makeRoutineExercise("ex-narrow-front-squat", 1, "0-25", false, false, true),
+      makeRoutineExercise("ex-bench-press", 1, "15-25", true),
+      makeRoutineExercise("ex-overhead-seated-ext", 1, "15-25", false),
+      makeRoutineExercise("ex-overhead-press", 1, "15-25", false),
+      makeRoutineExercise("ex-pushup", 1, "N/A", false),
     ],
     createdAt: "2025-01-01T00:00:00Z",
     updatedAt: "2025-01-01T00:00:00Z",
     programId: "harambro-v3",
-    dayType: "shoulders",
+    dayType: "legs-push",
     isBuiltIn: true,
   },
-  // Thursday: Upper Back & Biceps
+  // Day 6: Light Pull Day
   {
-    id: "hb3-upper-back-biceps",
-    name: "HB3: Upper Back & Biceps",
+    id: "hb3-light-pull",
+    name: "HB3: Light Pull",
     exercises: [
-      makeRoutineExercise("ex-pendlay-row", 3, "8-10", true),
-      makeRoutineExercise("ex-one-arm-pulldown", 3, "10-12", false),
-      makeRoutineExercise("ex-ferro-curl", 4, "10-12", false),
+      makeRoutineExercise("ex-rdl", 1, "8-25", true),
+      makeRoutineExercise("ex-bent-row", 1, "8-25", true),
+      makeRoutineExercise("ex-ferro-curl", 1, "8-25", false),
+      makeRoutineExercise("ex-angled-calf-raise", 1, "15-25", false),
+      makeRoutineExercise("ex-angled-calf-raise", 1, "0-25", false, false, true),
     ],
     createdAt: "2025-01-01T00:00:00Z",
     updatedAt: "2025-01-01T00:00:00Z",
     programId: "harambro-v3",
-    dayType: "upper-back",
-    isBuiltIn: true,
-  },
-  // Friday: Legs
-  {
-    id: "hb3-legs",
-    name: "HB3: Legs",
-    exercises: [
-      makeRoutineExercise("ex-narrow-front-squat", 4, "10-12", false),
-      makeRoutineExercise("ex-one-leg-rdl", 3, "10", false),
-      makeRoutineExercise("ex-calf-raise", 3, "15-20", true),
-    ],
-    createdAt: "2025-01-01T00:00:00Z",
-    updatedAt: "2025-01-01T00:00:00Z",
-    programId: "harambro-v3",
-    dayType: "legs",
+    dayType: "light-pull",
     isBuiltIn: true,
   },
 ];
 
 export const HARAMBRO_V3_PROGRAM: Program = {
   id: "harambro-v3",
-  name: "HaramBro V3",
-  description: "A 5-day body-part split for intermediate lifters. Traditional hypertrophy rep ranges with dedicated days for chest, back, shoulders, upper back & biceps, and legs.",
-  source: "harambesystem.com",
+  name: "HaramBro Split V3",
+  description: "6-day push/pull body-part split. One set per exercise to failure with drop sets. High volume, high intensity.",
+  source: "HarambeSystem.com",
+  overview: {
+    warmup: "1-2 sets of 12 reps with light tension before the first movement of each day.",
+    rest: "Rest 2-3 minutes before squats and deadlifts, less for other movements. Rest only enough to change equipment before starting a drop set.",
+    cadence: "Lift with control. Jerking cheats the force curve of the bands and should be avoided.",
+    failure: "Aim to reach full failure with every set, and try to push out 1-2 partial reps at the end to ensure you\u2019re at failure.",
+    keepTension: "Do not let the band go slack during any movements.",
+  },
   phases: [
     {
       id: "hb3-phase-1",
-      name: "Weekly Split",
-      description: "5-day body-part split with weekend rest. Multiple sets per exercise for volume-driven hypertrophy.",
+      name: "7-Day Cycle",
+      description: "6 workout days + 1 rest day per cycle. Each set to failure.",
       weekRange: "Ongoing",
       schedule: [
-        { dayLabel: "Mon", routineId: "hb3-chest-push", routineName: "Chest & Push" },
-        { dayLabel: "Tue", routineId: "hb3-back-thickness", routineName: "Back Thickness" },
-        { dayLabel: "Wed", routineId: "hb3-shoulders-triceps", routineName: "Shoulders & Triceps" },
-        { dayLabel: "Thu", routineId: "hb3-upper-back-biceps", routineName: "Upper Back & Biceps" },
-        { dayLabel: "Fri", routineId: "hb3-legs", routineName: "Legs" },
-        { dayLabel: "Sat", routineId: null, routineName: "Rest", isRest: true },
-        { dayLabel: "Sun", routineId: null, routineName: "Rest", isRest: true },
+        { dayLabel: "Day 1", routineId: "hb3-chest-push", routineName: "Chest Push" },
+        { dayLabel: "Day 2", routineId: "hb3-back-pull", routineName: "Back Pull" },
+        { dayLabel: "Day 3", routineId: "hb3-shoulder-tricep-push", routineName: "Shoulder+Tricep Push" },
+        { dayLabel: "Day 4", routineId: "hb3-biceps-pull", routineName: "Biceps Pull" },
+        { dayLabel: "Day 5", routineId: "hb3-legs-push", routineName: "Legs Push" },
+        { dayLabel: "Day 6", routineId: "hb3-light-pull", routineName: "Light Pull" },
+        { dayLabel: "Day 7", routineId: null, routineName: "Rest", isRest: true },
       ],
     },
   ],
