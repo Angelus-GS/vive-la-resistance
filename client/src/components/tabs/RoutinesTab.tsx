@@ -275,11 +275,11 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h2 className="text-sm font-bold tracking-tight">{program.name}</h2>
-                    <Badge variant="secondary" className="text-[11px] h-4 bg-primary/10 text-primary border-0">
+                    <Badge variant="secondary" className="text-xs h-4 bg-primary/10 text-primary border-0">
                       Program
                     </Badge>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                     {program.description}
                   </p>
                 </div>
@@ -360,7 +360,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                 }`}
                               >
                                 {/* Day label */}
-                                <span className="text-[11px] font-mono text-muted-foreground w-8 shrink-0 tabular-nums">
+                                <span className="text-xs font-mono text-muted-foreground w-8 shrink-0 tabular-nums">
                                   {day.dayLabel}
                                 </span>
 
@@ -375,7 +375,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                     {iStyle && (
                                       <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
                                         <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
-                                        <span className={`text-[11px] font-bold uppercase tracking-wider ${iStyle.text}`}>
+                                        <span className={`text-xs font-bold uppercase tracking-wider ${iStyle.text}`}>
                                           {intensity}
                                         </span>
                                       </div>
@@ -453,7 +453,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                       {routine.exercises.map((re, i) => {
                                         const ex = exerciseTemplateMap.get(re.exerciseTemplateId);
                                         return (
-                                          <div key={i} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-2 pl-4 text-[11px] min-h-[22px]">
+                                          <div key={i} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-2 pl-4 text-xs min-h-[22px]">
                                             {/* Col 1: Dot indicator */}
                                             <span className={`w-1 h-1 rounded-full shrink-0 ${re.isDropSet ? "bg-red-400" : "bg-muted-foreground/40"}`} />
                                             {/* Col 2: Exercise name */}
@@ -484,7 +484,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                                 {re.setup.doubled ? "2x" : "1x"}
                                               </span>
                                               {re.optional ? (
-                                                <span className="w-[24px] text-center font-mono text-muted-foreground/35 border border-muted-foreground/15 rounded py-0.5 leading-none text-[10px]">
+                                                <span className="w-[24px] text-center font-mono text-muted-foreground/35 border border-muted-foreground/15 rounded py-0.5 leading-none text-xs">
                                                   opt
                                                 </span>
                                               ) : (
@@ -496,12 +496,12 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                       })}
                                       {/* Challenge section */}
                                       {routine.challenge && (
-                                        <div className="flex items-center gap-2 pl-4 text-[11px] mt-1 pt-1 border-t border-dashed border-muted-foreground/20">
+                                        <div className="flex items-center gap-2 pl-4 text-xs mt-1 pt-1 border-t border-dashed border-muted-foreground/20">
                                           <span className="w-1 h-1 rounded-full bg-amber-gold shrink-0" />
                                           <span className="text-amber-gold font-medium flex-1">
                                             {routine.challenge.name}
                                           </span>
-                                          <span className="text-[11px] font-mono text-muted-foreground/50">
+                                          <span className="text-xs font-mono text-muted-foreground/50">
                                             {routine.challenge.sets} sets
                                           </span>
                                         </div>
@@ -520,7 +520,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                               return r?.exercises.some(e => e.isDropSet);
                             });
                             return hasDropSets ? (
-                              <p className="text-[11px] text-muted-foreground/50 px-1 mt-1">
+                              <p className="text-xs text-muted-foreground/50 px-1 mt-1">
                                 <span className="text-red-400">*</span> = Drop set (reduce resistance, continue to failure)
                               </p>
                             ) : null;
@@ -704,7 +704,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                             <span className="text-sm">{ex.name}</span>
                             <span className="text-xs text-muted-foreground ml-2">{ex.notes}</span>
                           </div>
-                          <span className={`text-[11px] font-mono px-1 py-0.5 rounded shrink-0 ${
+                          <span className={`text-xs font-mono px-1 py-0.5 rounded shrink-0 ${
                             ex.defaultSetup.doubled
                               ? "bg-primary/10 text-primary/70"
                               : "text-muted-foreground/40"

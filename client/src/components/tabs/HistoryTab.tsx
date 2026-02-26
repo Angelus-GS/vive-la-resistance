@@ -341,26 +341,26 @@ export default function HistoryTab() {
                             {iStyle && intensity && (
                               <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
                                 <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
-                                <span className={`text-[11px] font-bold uppercase tracking-wider ${iStyle.text}`}>
+                                <span className={`text-xs font-bold uppercase tracking-wider ${iStyle.text}`}>
                                   {intensity}
                                 </span>
                               </div>
                             )}
                           </div>
                           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                            <span className="text-[11px] text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {formatDate(workout.startedAt)}
                             </span>
-                            <span className="text-[11px] text-muted-foreground">·</span>
-                            <span className="text-[11px] text-muted-foreground font-mono tabular-nums">
+                            <span className="text-xs text-muted-foreground">·</span>
+                            <span className="text-xs text-muted-foreground font-mono tabular-nums">
                               {formatDuration(workout.durationSeconds)}
                             </span>
-                            <span className="text-[11px] text-muted-foreground">·</span>
-                            <span className="text-[11px] text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">·</span>
+                            <span className="text-xs text-muted-foreground">
                               {completedSets} sets
                             </span>
-                            <span className="text-[11px] text-muted-foreground">·</span>
-                            <span className="text-[11px] font-mono tabular-nums text-foreground/70">
+                            <span className="text-xs text-muted-foreground">·</span>
+                            <span className="text-xs font-mono tabular-nums text-foreground/70">
                               {totalFullReps}
                               <span className="text-muted-foreground/50">f</span>
                               {totalPartialReps > 0 && (
@@ -388,7 +388,7 @@ export default function HistoryTab() {
                               <p className="text-xs font-semibold text-foreground/80">{exercise.exerciseName}</p>
                               <Badge
                                 variant="outline"
-                                className={`text-[11px] h-3.5 font-mono ${
+                                className={`text-xs h-3.5 font-mono ${
                                   exercise.setup.doubled
                                     ? "border-primary/40 bg-primary/10 text-primary"
                                     : "border-muted-foreground/20 text-muted-foreground/50"
@@ -397,7 +397,7 @@ export default function HistoryTab() {
                                 {exercise.setup.doubled ? "2x" : "1x"}
                               </Badge>
                               {exercise.targetReps && (
-                                <Badge variant="secondary" className="text-[11px] h-4 font-mono bg-accent text-muted-foreground">
+                                <Badge variant="secondary" className="text-xs h-4 font-mono bg-accent text-muted-foreground">
                                   {exercise.targetReps}r
                                 </Badge>
                               )}
@@ -408,7 +408,7 @@ export default function HistoryTab() {
                                 .filter(Boolean) as Band[];
                               const bandLabel = bands.length > 0 ? bands.map(b => getBandDisplayName(b)).join(" + ") : "No Bands";
                               return (
-                                <div key={set.id} className="flex items-center gap-2 text-[11px] text-muted-foreground pl-3">
+                                <div key={set.id} className="flex items-center gap-2 text-xs text-muted-foreground pl-3">
                                   <span className="font-mono w-5 tabular-nums text-muted-foreground/60">S{set.setNumber}</span>
                                   <div className="flex gap-0.5 shrink-0">
                                     {bands.length > 0 ? bands.map((b, i) => (
@@ -423,7 +423,7 @@ export default function HistoryTab() {
                                   </div>
                                   <span className="truncate flex-1">{bandLabel}</span>
                                   {set.spacers > 0 && (
-                                    <Badge variant="outline" className="text-[11px] h-4 border-primary/20 text-primary/50 px-1">SP</Badge>
+                                    <Badge variant="outline" className="text-xs h-4 border-primary/20 text-primary/50 px-1">SP</Badge>
                                   )}
                                   {/* Full reps */}
                                   <span className="font-mono tabular-nums ml-auto shrink-0">

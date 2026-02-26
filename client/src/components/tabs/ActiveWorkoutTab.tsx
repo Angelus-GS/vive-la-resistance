@@ -206,7 +206,7 @@ function SetRow({
 
           {/* Tension range */}
           {combo && combo.colorHexes.length > 0 && (
-            <span className="text-[11px] font-mono text-primary shrink-0 tabular-nums">
+            <span className="text-xs font-mono text-primary shrink-0 tabular-nums">
               {combo.totalMinLbs}–{combo.totalMaxLbs}
             </span>
           )}
@@ -311,7 +311,7 @@ function SetRow({
 
         {/* Row 3: Target rep range hint (only for first uncompleted set) */}
         {set.setNumber === 1 && !isCompleted && targetReps && (
-          <div className="flex items-center gap-2 text-[11px] text-muted-foreground/50 pl-9">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground/50 pl-9">
             <span>Target: <span className="font-mono text-primary/60">{targetReps}</span> reps</span>
             <span>·</span>
             <span>Full = full ROM</span>
@@ -510,7 +510,7 @@ export default function ActiveWorkoutTab() {
                 {iStyle && intensity && (
                   <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded shrink-0 ${iStyle.bg}`}>
                     <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
-                    <span className={`text-[11px] font-bold uppercase tracking-wider ${iStyle.text}`}>
+                    <span className={`text-xs font-bold uppercase tracking-wider ${iStyle.text}`}>
                       {intensity}
                     </span>
                   </div>
@@ -608,7 +608,7 @@ export default function ActiveWorkoutTab() {
                 )}
                 <Badge
                   variant="outline"
-                  className={`text-[11px] h-4 shrink-0 font-mono ${
+                  className={`text-xs h-4 shrink-0 font-mono ${
                     exercise.setup.doubled
                       ? "border-primary/40 bg-primary/10 text-primary"
                       : "border-muted-foreground/20 text-muted-foreground/60"
@@ -618,7 +618,7 @@ export default function ActiveWorkoutTab() {
                 </Badge>
                 {/* Target reps badge from routine */}
                 {exercise.targetReps && (
-                  <Badge variant="secondary" className="text-[11px] h-4 shrink-0 font-mono bg-accent text-muted-foreground">
+                  <Badge variant="secondary" className="text-xs h-4 shrink-0 font-mono bg-accent text-muted-foreground">
                     {exercise.targetReps}r
                   </Badge>
                 )}
@@ -704,7 +704,7 @@ export default function ActiveWorkoutTab() {
                         </div>
                         <Badge
                           variant="outline"
-                          className={`text-[11px] shrink-0 font-mono ${
+                          className={`text-xs shrink-0 font-mono ${
                             ex.defaultSetup.doubled
                               ? "border-primary/40 bg-primary/10 text-primary"
                               : "border-muted-foreground/20 text-muted-foreground/50"

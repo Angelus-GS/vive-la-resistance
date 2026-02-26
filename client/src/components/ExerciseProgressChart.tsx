@@ -58,7 +58,7 @@ function ProgressTooltip({ active, payload, label }: any) {
                 style={{ backgroundColor: hex }}
               />
             ))}
-            <span className="text-[11px] text-muted-foreground/70">
+            <span className="text-xs text-muted-foreground/70">
               {payload[0].payload.bandLabel}
             </span>
           </div>
@@ -72,7 +72,7 @@ function ProgressTooltip({ active, payload, label }: any) {
 function ProgressLegend({ payload }: any) {
   if (!payload?.length) return null;
   return (
-    <div className="flex items-center justify-center gap-4 mt-1 text-[11px]">
+    <div className="flex items-center justify-center gap-4 mt-1 text-xs">
       {payload.map((entry: any, i: number) => (
         <div key={i} className="flex items-center gap-1.5">
           <span
@@ -267,13 +267,13 @@ export default function ExerciseProgressChart() {
           <SelectContent className="max-h-64">
             {Object.entries(exerciseOptions).map(([category, exercises]) => (
               <SelectGroup key={category}>
-                <SelectLabel className="text-[11px] uppercase tracking-wider font-semibold text-primary/70">
+                <SelectLabel className="text-xs uppercase tracking-wider font-semibold text-primary/70">
                   {category}
                 </SelectLabel>
                 {exercises.map(ex => (
                   <SelectItem key={ex.id} value={ex.id} className="text-xs">
                     <span>{ex.name}</span>
-                    <span className="text-muted-foreground/50 ml-1.5 font-mono text-[11px]">
+                    <span className="text-muted-foreground/50 ml-1.5 font-mono text-xs">
                       ({ex.count}×)
                     </span>
                   </SelectItem>
@@ -301,27 +301,27 @@ export default function ExerciseProgressChart() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] text-muted-foreground truncate">
+              <p className="text-xs text-muted-foreground truncate">
                 {summary.currentBandLabel} · {summary.currentTension} lbs · {summary.currentReps} reps
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               {summary.tensionDelta !== 0 && (
-                <span className={`text-[11px] font-mono font-semibold ${
+                <span className={`text-xs font-mono font-semibold ${
                   summary.tensionDelta > 0 ? "text-sage-green" : "text-destructive/70"
                 }`}>
                   {summary.tensionDelta > 0 ? "+" : ""}{summary.tensionDelta} lbs
                 </span>
               )}
               {summary.repsDelta !== 0 && (
-                <span className={`text-[11px] font-mono font-semibold ${
+                <span className={`text-xs font-mono font-semibold ${
                   summary.repsDelta > 0 ? "text-primary" : "text-destructive/70"
                 }`}>
                   {summary.repsDelta > 0 ? "+" : ""}{summary.repsDelta} reps
                 </span>
               )}
               {summary.sessions > 0 && (
-                <span className="text-[11px] text-muted-foreground/50 font-mono">
+                <span className="text-xs text-muted-foreground/50 font-mono">
                   {summary.sessions}×
                 </span>
               )}

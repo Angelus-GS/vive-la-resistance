@@ -133,8 +133,8 @@ export default function ProfileTab() {
             max={84}
             step={1}
           />
-          <p className="text-[11px] text-muted-foreground">
-            {profile.heightInches}" / {(profile.heightInches * 2.54).toFixed(0)} cm — calibrates force calculations for your ROM
+<p className="text-xs text-muted-foreground">
+             {profile.heightInches}" / {(profile.heightInches * 2.54).toFixed(0)} cm — calibrates force calculations for your ROM
           </p>
         </CardContent>
       </Card>
@@ -192,7 +192,7 @@ export default function ProfileTab() {
                           <span className="text-sm font-medium">{band.color}</span>
                           <span className="text-xs text-muted-foreground ml-1.5">{band.label}</span>
                         </div>
-                        <span className="text-[11px] font-mono text-muted-foreground tabular-nums shrink-0">
+                        <span className="text-xs font-mono text-muted-foreground tabular-nums shrink-0">
                           {band.minLbs}–{band.maxLbs} lbs
                         </span>
                       </label>
@@ -292,7 +292,7 @@ export default function ProfileTab() {
                     <Icon className={`w-5 h-5 ${tip.color} shrink-0 mt-0.5`} />
                     <div>
                       <p className="text-xs font-semibold text-foreground">{tip.title}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">{tip.text}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{tip.text}</p>
                     </div>
                   </div>
                 );
@@ -330,7 +330,7 @@ export default function ProfileTab() {
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-sm">Rest Timer</Label>
-              <p className="text-[11px] text-muted-foreground">Default rest between sets</p>
+              <p className="text-xs text-muted-foreground">Default rest between sets</p>
             </div>
             <Select
               value={String(profile.restTimerSeconds)}
@@ -354,7 +354,7 @@ export default function ProfileTab() {
             <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <div>
               <Label className="text-sm">Band Progression</Label>
-              <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
+              <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
                 Automatic — when your reps exceed the prescribed range for an exercise (e.g. hitting 13 on an 8–12 range), the app suggests moving up the ladder.
               </p>
             </div>
