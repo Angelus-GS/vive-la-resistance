@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
 import type { Routine, RoutineExercise, WorkoutExercise, LoggedSet, IntensityLevel, Program, ProgramPhase } from "@/lib/types";
-import { INTENSITY_REP_RANGES } from "@/lib/types";
+import { INTENSITY_REP_RANGES, CATEGORY_REST_DEFAULTS, INTENSITY_REST_MULTIPLIERS } from "@/lib/types";
 import { GORILLA_GAINS_ROUTINES, HARAMBRO_V3_ROUTINES } from "@/lib/equipment-data";
 import { getLastExerciseHint } from "@/lib/physics";
 
@@ -176,6 +176,12 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
           : 0;
         const prefillBandIds = ladder[prefillComboIndex]?.bandIds ?? [];
 
+        // Compute per-exercise rest timer: exercise override > category default × intensity multiplier
+        const category = ex?.category || "other";
+        const baseRest = ex?.restTimerSeconds ?? CATEGORY_REST_DEFAULTS[category];
+        const intensityMult = routine.intensity ? INTENSITY_REST_MULTIPLIERS[routine.intensity] : 1.0;
+        const exerciseRest = Math.round(baseRest * intensityMult);
+
         return {
           id: nanoid(),
           exerciseTemplateId: re.exerciseTemplateId,
@@ -189,6 +195,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
           })),
           targetReps: re.targetReps,
           lastSessionHint: hint,
+          restTimerSeconds: exerciseRest,
         };
       });
 

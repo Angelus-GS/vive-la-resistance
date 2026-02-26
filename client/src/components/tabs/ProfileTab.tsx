@@ -18,8 +18,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Ruler, Package, Settings, ChevronDown, Trash2, Download,
-  Lightbulb, Shield, Wrench, Info
+  Lightbulb, Shield, Wrench, Info, BarChart3
 } from "lucide-react";
+import BandComparisonChart from "@/components/BandComparisonChart";
 import { BRAND_GROUPS } from "@/lib/equipment-data";
 import { APP_VERSION } from "@shared/const";
 import { downloadCSV } from "@/lib/storage";
@@ -265,6 +266,28 @@ export default function ProfileTab() {
                 Show fewer
               </Button>
             )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Band Comparison Chart */}
+      {ownedBands.length > 0 && (
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              <CardTitle className="text-sm">Tension Curves</CardTitle>
+            </div>
+            <CardDescription className="text-xs">
+              Peak tension per band at your height. Solid = shorter, dashed = longer loops.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <BandComparisonChart
+              ownedBands={ownedBands}
+              heightInches={profile.heightInches}
+              units={profile.units}
+            />
           </CardContent>
         </Card>
       )}

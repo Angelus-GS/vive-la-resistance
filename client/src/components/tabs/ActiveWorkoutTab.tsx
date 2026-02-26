@@ -433,12 +433,13 @@ export default function ActiveWorkoutTab() {
       };
       dispatch({ type: "UPDATE_SET", payload: { exerciseId, set: updated } });
 
-      // Start rest timer on completion
+      // Start rest timer on completion — use per-exercise timer if available, else global
       if (!set.completed) {
-        setRestTimer(state.userProfile.restTimerSeconds);
+        const exercise = activeWorkout?.exercises.find(e => e.id === exerciseId);
+        const restSeconds = exercise?.restTimerSeconds ?? state.userProfile.restTimerSeconds;
+        setRestTimer(restSeconds);
 
         // Rep-range-based progression: trigger when reps exceed the exercise's prescribed max
-        const exercise = activeWorkout?.exercises.find(e => e.id === exerciseId);
         if (exercise?.targetReps) {
           const parts = exercise.targetReps.split("-");
           const targetMax = parseInt(parts[parts.length - 1]) || 0;
@@ -679,6 +680,13 @@ export default function ActiveWorkoutTab() {
                 {exercise.targetReps && (
                   <Badge variant="secondary" className="text-xs h-4 shrink-0 font-mono bg-accent text-muted-foreground">
                     {exercise.targetReps}r
+                  </Badge>
+                )}
+                {/* Per-exercise rest timer badge */}
+                {exercise.restTimerSeconds && (
+                  <Badge variant="secondary" className="text-xs h-4 shrink-0 font-mono bg-accent/60 text-muted-foreground/80">
+                    <Timer className="w-2.5 h-2.5 mr-0.5" />
+                    {exercise.restTimerSeconds}s
                   </Badge>
                 )}
               </div>

@@ -98,11 +98,30 @@ export interface ExerciseTemplate {
   notes: string;
   optional?: boolean; // marks optional exercises in programs
   videoUrl?: string; // YouTube video URL for exercise demo
+  restTimerSeconds?: number; // per-exercise override (falls back to category default)
 }
 
 // --- Intensity Levels (Gorilla Gains) ---
 
 export type IntensityLevel = "medium" | "heavy" | "light";
+
+// Category-based rest timer defaults (seconds)
+export const CATEGORY_REST_DEFAULTS: Record<ExerciseCategory, number> = {
+  push: 90,
+  pull: 90,
+  legs: 90,
+  core: 60,
+  arms: 60,
+  shoulders: 75,
+  other: 60,
+};
+
+// Intensity-based rest timer multipliers
+export const INTENSITY_REST_MULTIPLIERS: Record<IntensityLevel, number> = {
+  heavy: 1.0,   // full rest for heavy
+  medium: 0.75, // shorter rest for medium
+  light: 0.5,   // minimal rest for light
+};
 
 export const INTENSITY_REP_RANGES: Record<IntensityLevel, { min: number; max: number; label: string }> = {
   medium: { min: 15, max: 30, label: "Medium (15-30 reps)" },
@@ -216,6 +235,7 @@ export interface WorkoutExercise {
   sets: LoggedSet[];
   targetReps?: string; // from routine, e.g. "15-30"
   lastSessionHint?: LastSessionHint; // populated from history when starting workout
+  restTimerSeconds?: number; // per-exercise rest timer (computed from category/intensity)
 }
 
 export interface Workout {
