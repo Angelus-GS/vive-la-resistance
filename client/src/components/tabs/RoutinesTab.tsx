@@ -453,37 +453,44 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                       {routine.exercises.map((re, i) => {
                                         const ex = exerciseTemplateMap.get(re.exerciseTemplateId);
                                         return (
-                                          <div key={i} className="flex items-center gap-2 pl-4 text-[11px]">
+                                          <div key={i} className="grid grid-cols-[auto_1fr_auto] items-center gap-x-2 pl-4 text-[11px] min-h-[22px]">
+                                            {/* Col 1: Dot indicator */}
                                             <span className={`w-1 h-1 rounded-full shrink-0 ${re.isDropSet ? "bg-red-400" : "bg-muted-foreground/40"}`} />
-                                            <span className={`flex-1 ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
+                                            {/* Col 2: Exercise name */}
+                                            <span className={`truncate ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
                                               {ex?.name || "?"}
                                               {re.isDropSet && <span className="text-red-400 ml-0.5">*</span>}
-                                              {re.perSide && <span className="text-muted-foreground/50 ml-0.5 text-[11px]">(each)</span>}
+                                              {re.perSide && <span className="text-muted-foreground/50 ml-0.5">(each)</span>}
                                             </span>
-                                            {ex?.videoUrl && (
-                                              <button
-                                                onClick={() => setVideoModal({ url: ex.videoUrl!, name: ex.name })}
-                                                className="shrink-0 p-0.5 rounded text-primary/50 hover:text-primary hover:bg-primary/10 transition-colors"
-                                                title="Watch demo"
-                                              >
-                                                <Video className="w-3 h-3" />
-                                              </button>
-                                            )}
-                                            <span className="text-[11px] font-mono text-muted-foreground/50 tabular-nums shrink-0 w-10 text-right">
-                                              {re.targetReps}
-                                            </span>
-                                            <span className={`text-[11px] font-mono px-1 py-0.5 rounded ${
-                                              re.setup.doubled
-                                                ? "bg-primary/10 text-primary/70"
-                                                : "text-muted-foreground/40"
-                                            }`}>
-                                              {re.setup.doubled ? "2x" : "1x"}
-                                            </span>
-                                            {re.optional && (
-                                              <Badge variant="outline" className="text-xs h-3.5 border-muted-foreground/20 text-muted-foreground/40 px-1">
-                                                opt
-                                              </Badge>
-                                            )}
+                                            {/* Col 3: Right-aligned metadata badges */}
+                                            <div className="flex items-center gap-1.5 shrink-0">
+                                              {ex?.videoUrl && (
+                                                <button
+                                                  onClick={() => setVideoModal({ url: ex.videoUrl!, name: ex.name })}
+                                                  className="p-0.5 rounded text-primary/40 hover:text-primary hover:bg-primary/10 transition-colors"
+                                                  title="Watch demo"
+                                                >
+                                                  <Video className="w-3 h-3" />
+                                                </button>
+                                              )}
+                                              <span className="font-mono text-muted-foreground/50 tabular-nums w-[38px] text-right">
+                                                {re.targetReps}
+                                              </span>
+                                              <span className={`font-mono w-[22px] text-center rounded py-0.5 leading-none ${
+                                                re.setup.doubled
+                                                  ? "bg-primary/10 text-primary/70"
+                                                  : "text-muted-foreground/30"
+                                              }`}>
+                                                {re.setup.doubled ? "2x" : "1x"}
+                                              </span>
+                                              {re.optional ? (
+                                                <span className="w-[24px] text-center font-mono text-muted-foreground/35 border border-muted-foreground/15 rounded py-0.5 leading-none text-[10px]">
+                                                  opt
+                                                </span>
+                                              ) : (
+                                                <span className="w-[24px]" />
+                                              )}
+                                            </div>
                                           </div>
                                         );
                                       })}

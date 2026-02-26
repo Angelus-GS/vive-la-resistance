@@ -499,15 +499,16 @@ export default function ActiveWorkoutTab() {
       {/* Workout Header */}
       <Card className="bg-card border-border overflow-hidden">
         <CardContent className="p-0">
-          <div className="flex items-center justify-between p-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
+          <div className="p-3 space-y-2">
+            {/* Top row: Name + Intensity badge + Cancel/Finish buttons */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <p className="text-sm font-bold tracking-tight truncate">
                   {activeWorkout.routineName}
                 </p>
                 {/* Intensity Badge */}
                 {iStyle && intensity && (
-                  <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
+                  <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded shrink-0 ${iStyle.bg}`}>
                     <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
                     <span className={`text-[11px] font-bold uppercase tracking-wider ${iStyle.text}`}>
                       {intensity}
@@ -515,28 +516,7 @@ export default function ActiveWorkoutTab() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2.5 mt-1">
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  <span className="font-mono tabular-nums">{formatDuration(elapsed)}</span>
-                </div>
-                <Badge variant="secondary" className="text-xs h-5">
-                  {activeWorkout.exercises.length} exercises
-                </Badge>
-                {totalSets > 0 && (
-                  <Badge variant="outline" className="text-xs h-5 font-mono">
-                    {completedSets}/{totalSets} sets
-                  </Badge>
-                )}
-                {/* Target rep range from intensity */}
-                {intensity && (
-                  <Badge variant="outline" className={`text-xs h-5 font-mono border-0 ${iStyle?.bg} ${iStyle?.text}`}>
-                    {INTENSITY_REP_RANGES[intensity].min}-{INTENSITY_REP_RANGES[intensity].max}r
-                  </Badge>
-                )}
-              </div>
-            </div>
-            <div className="flex gap-1.5 shrink-0">
+              <div className="flex gap-1.5 shrink-0">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="ghost" size="sm" className="text-destructive/70 hover:text-destructive text-xs h-8">
@@ -565,6 +545,28 @@ export default function ActiveWorkoutTab() {
               >
                 Finish
               </Button>
+              </div>
+            </div>
+            {/* Bottom row: Stats badges */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="w-3 h-3" />
+                <span className="font-mono tabular-nums">{formatDuration(elapsed)}</span>
+              </div>
+              <Badge variant="secondary" className="text-xs h-5">
+                {activeWorkout.exercises.length} exercises
+              </Badge>
+              {totalSets > 0 && (
+                <Badge variant="outline" className="text-xs h-5 font-mono">
+                  {completedSets}/{totalSets} sets
+                </Badge>
+              )}
+              {/* Target rep range from intensity */}
+              {intensity && (
+                <Badge variant="outline" className={`text-xs h-5 font-mono border-0 ${iStyle?.bg} ${iStyle?.text}`}>
+                  {INTENSITY_REP_RANGES[intensity].min}-{INTENSITY_REP_RANGES[intensity].max}r
+                </Badge>
+              )}
             </div>
           </div>
           {/* Progress bar */}

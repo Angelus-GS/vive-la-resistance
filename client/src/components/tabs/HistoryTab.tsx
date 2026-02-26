@@ -25,6 +25,7 @@ import { downloadCSV } from "@/lib/storage";
 import { calculateSetJoules, estimateElongation, getPeakTension } from "@/lib/physics";
 import { toast } from "sonner";
 import type { Band, IntensityLevel } from "@/lib/types";
+import ExerciseProgressChart from "@/components/ExerciseProgressChart";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar
@@ -296,6 +297,9 @@ export default function HistoryTab() {
           </Card>
         </>
       )}
+
+      {/* Exercise Progression Chart */}
+      {state.workoutHistory.length > 0 && <ExerciseProgressChart />}
 
       {/* Workout History List */}
       {state.workoutHistory.length > 0 ? (
