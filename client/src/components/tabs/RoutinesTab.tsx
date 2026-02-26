@@ -275,7 +275,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h2 className="text-sm font-bold tracking-tight">{program.name}</h2>
-                    <Badge variant="secondary" className="text-[9px] h-4 bg-primary/10 text-primary border-0">
+                    <Badge variant="secondary" className="text-[11px] h-4 bg-primary/10 text-primary border-0">
                       Program
                     </Badge>
                   </div>
@@ -289,7 +289,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
             <CollapsibleContent>
               <div className="space-y-3 mt-2">
                 {program.source && (
-                  <p className="text-[10px] text-muted-foreground/60 px-1">
+                  <p className="text-xs text-muted-foreground/60 px-1">
                     Source: {program.source}
                   </p>
                 )}
@@ -303,10 +303,10 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                       return (
                         <div key={level} className={`flex items-center gap-1.5 px-2 py-1 rounded-lg ${style.bg}`}>
                           <style.icon className={`w-3 h-3 ${style.text}`} />
-                          <span className={`text-[10px] font-semibold ${style.text}`}>
+                          <span className={`text-xs font-semibold ${style.text}`}>
                             {level.charAt(0).toUpperCase() + level.slice(1)}
                           </span>
-                          <span className={`text-[10px] font-mono ${style.text} opacity-70`}>
+                          <span className={`text-xs font-mono ${style.text} opacity-70`}>
                             {range.min}-{range.max}
                           </span>
                         </div>
@@ -328,7 +328,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                           <div className="flex items-center justify-between">
                             <div className="min-w-0">
                               <CardTitle className="text-xs font-bold">{phase.name}</CardTitle>
-                              <CardDescription className="text-[10px] mt-0.5">
+                              <CardDescription className="text-xs mt-0.5">
                                 {phase.weekRange} · {phase.description}
                               </CardDescription>
                             </div>
@@ -375,7 +375,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                     {iStyle && (
                                       <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
                                         <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
-                                        <span className={`text-[9px] font-bold uppercase tracking-wider ${iStyle.text}`}>
+                                        <span className={`text-[11px] font-bold uppercase tracking-wider ${iStyle.text}`}>
                                           {intensity}
                                         </span>
                                       </div>
@@ -388,11 +388,11 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
 
                                     {/* Rep range or exercise count */}
                                     {intensity ? (
-                                      <span className="text-[10px] font-mono text-muted-foreground tabular-nums shrink-0">
+                                      <span className="text-xs font-mono text-muted-foreground tabular-nums shrink-0">
                                         {INTENSITY_REP_RANGES[intensity].min}-{INTENSITY_REP_RANGES[intensity].max}r
                                       </span>
                                     ) : routine && (
-                                      <span className="text-[10px] font-mono text-muted-foreground/60 tabular-nums shrink-0">
+                                      <span className="text-xs font-mono text-muted-foreground/60 tabular-nums shrink-0">
                                         {routine.exercises.length} ex
                                       </span>
                                     )}
@@ -419,7 +419,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                           {/* Exercises preview for this phase — dynamic for any program */}
                           <Separator className="my-2" />
                           <div className="space-y-2">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                               Exercises in this phase
                             </p>
                             {/* Deduplicate routines shown: pick one representative routine per unique dayType/routineName */}
@@ -447,7 +447,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                   const dayColor = DAY_COLORS[routine.dayType || ""] || "text-muted-foreground";
                                   return (
                                     <div key={dayIdx} className="space-y-1">
-                                      <p className={`text-[10px] font-semibold ${dayColor} flex items-center gap-1`}>
+                                      <p className={`text-xs font-semibold ${dayColor} flex items-center gap-1`}>
                                         <Dumbbell className="w-3 h-3" /> {day.routineName}
                                       </p>
                                       {routine.exercises.map((re, i) => {
@@ -458,7 +458,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                             <span className={`flex-1 ${re.optional ? "text-muted-foreground/50 italic" : "text-foreground/80"}`}>
                                               {ex?.name || "?"}
                                               {re.isDropSet && <span className="text-red-400 ml-0.5">*</span>}
-                                              {re.perSide && <span className="text-muted-foreground/50 ml-0.5 text-[9px]">(each)</span>}
+                                              {re.perSide && <span className="text-muted-foreground/50 ml-0.5 text-[11px]">(each)</span>}
                                             </span>
                                             {ex?.videoUrl && (
                                               <button
@@ -469,10 +469,10 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                                 <Video className="w-3 h-3" />
                                               </button>
                                             )}
-                                            <span className="text-[9px] font-mono text-muted-foreground/50 tabular-nums shrink-0 w-10 text-right">
+                                            <span className="text-[11px] font-mono text-muted-foreground/50 tabular-nums shrink-0 w-10 text-right">
                                               {re.targetReps}
                                             </span>
-                                            <span className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                                            <span className={`text-[11px] font-mono px-1 py-0.5 rounded ${
                                               re.setup.doubled
                                                 ? "bg-primary/10 text-primary/70"
                                                 : "text-muted-foreground/40"
@@ -480,7 +480,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                               {re.setup.doubled ? "2x" : "1x"}
                                             </span>
                                             {re.optional && (
-                                              <Badge variant="outline" className="text-[8px] h-3.5 border-muted-foreground/20 text-muted-foreground/40 px-1">
+                                              <Badge variant="outline" className="text-xs h-3.5 border-muted-foreground/20 text-muted-foreground/40 px-1">
                                                 opt
                                               </Badge>
                                             )}
@@ -494,7 +494,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                           <span className="text-amber-gold font-medium flex-1">
                                             {routine.challenge.name}
                                           </span>
-                                          <span className="text-[9px] font-mono text-muted-foreground/50">
+                                          <span className="text-[11px] font-mono text-muted-foreground/50">
                                             {routine.challenge.sets} sets
                                           </span>
                                         </div>
@@ -513,7 +513,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                               return r?.exercises.some(e => e.isDropSet);
                             });
                             return hasDropSets ? (
-                              <p className="text-[9px] text-muted-foreground/50 px-1 mt-1">
+                              <p className="text-[11px] text-muted-foreground/50 px-1 mt-1">
                                 <span className="text-red-400">*</span> = Drop set (reduce resistance, continue to failure)
                               </p>
                             ) : null;
@@ -523,27 +523,27 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                           {program.overview && (
                             <div className="mt-2 p-2.5 rounded-lg bg-primary/5 border border-primary/10 space-y-1.5">
                               {program.overview.warmup && (
-                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
                                   <span className="font-semibold text-primary">Warm-up:</span> {program.overview.warmup}
                                 </p>
                               )}
                               {program.overview.failure && (
-                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
                                   <span className="font-semibold text-primary">Failure:</span> {program.overview.failure}
                                 </p>
                               )}
                               {program.overview.rest && (
-                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
                                   <span className="font-semibold text-primary">Rest:</span> {program.overview.rest}
                                 </p>
                               )}
                               {program.overview.cadence && (
-                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
                                   <span className="font-semibold text-primary">Cadence:</span> {program.overview.cadence}
                                 </p>
                               )}
                               {program.overview.keepTension && (
-                                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <p className="text-xs text-muted-foreground leading-relaxed">
                                   <span className="font-semibold text-primary">Keep tension:</span> {program.overview.keepTension}
                                 </p>
                               )}
@@ -553,7 +553,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                           {/* Progression note for programs without overview */}
                           {!program.overview && (
                             <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
-                              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                              <p className="text-xs text-muted-foreground leading-relaxed">
                                 <span className="font-semibold text-primary">Progression:</span> When you hit the top of the rep range, add spacers or move up the band ladder.
                               </p>
                             </div>
@@ -593,14 +593,14 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                           <Badge
                             key={i}
                             variant="secondary"
-                            className={`text-[10px] ${CATEGORY_COLORS[ex?.category || "other"]}`}
+                            className={`text-xs ${CATEGORY_COLORS[ex?.category || "other"]}`}
                           >
                             {ex?.name || "?"}
                           </Badge>
                         );
                       })}
                       {routine.exercises.length > 4 && (
-                        <Badge variant="secondary" className="text-[10px]">
+                        <Badge variant="secondary" className="text-xs">
                           +{routine.exercises.length - 4}
                         </Badge>
                       )}
@@ -681,7 +681,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                 <div className="space-y-3 pr-3">
                   {Object.entries(exercisesByCategory).map(([category, exs]) => (
                     <div key={category}>
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
                         {category}
                       </p>
                       {exs.map(ex => (
@@ -697,7 +697,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                             <span className="text-sm">{ex.name}</span>
                             <span className="text-xs text-muted-foreground ml-2">{ex.notes}</span>
                           </div>
-                          <span className={`text-[9px] font-mono px-1 py-0.5 rounded shrink-0 ${
+                          <span className={`text-[11px] font-mono px-1 py-0.5 rounded shrink-0 ${
                             ex.defaultSetup.doubled
                               ? "bg-primary/10 text-primary/70"
                               : "text-muted-foreground/40"

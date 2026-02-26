@@ -139,7 +139,7 @@ export default function VideoModal({ isOpen, onClose, videoUrl, exerciseName }: 
             </div>
 
             {/* Footer hint */}
-            <p className="text-[10px] text-muted-foreground/50 text-center mt-2 tracking-wide">
+            <p className="text-xs text-muted-foreground/50 text-center mt-2 tracking-wide">
               Press ESC or tap outside to close
             </p>
           </motion.div>

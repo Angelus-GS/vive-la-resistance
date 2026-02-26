@@ -96,7 +96,7 @@ function RestTimer({ defaultSeconds, onDone }: { defaultSeconds: number; onDone:
         <Timer className="w-4 h-4 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
       </div>
       <div className="flex-1">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Rest Timer</p>
+        <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Rest Timer</p>
         <p className="text-xl font-bold font-mono text-primary tracking-tight">{formatDuration(remaining)}</p>
       </div>
       <div className="flex gap-1.5">
@@ -211,7 +211,7 @@ function SetRow({
             </span>
           )}
           {combo && combo.colorHexes.length === 0 && (
-            <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">
+            <span className="text-xs font-mono text-muted-foreground/50 shrink-0">
               0 lbs
             </span>
           )}
@@ -223,7 +223,7 @@ function SetRow({
           <button
             onClick={() => !isCompleted && onUpdate({ ...set, spacers: set.spacers > 0 ? 0 : 1 })}
             disabled={isCompleted}
-            className={`h-7 px-2 rounded-lg text-[10px] font-mono flex items-center gap-1 transition-all shrink-0 ${
+            className={`h-7 px-2 rounded-lg text-xs font-mono flex items-center gap-1 transition-all shrink-0 ${
               set.spacers > 0
                 ? "bg-primary/15 text-primary border border-primary/25"
                 : "bg-accent/50 text-muted-foreground border border-transparent hover:border-border/50"
@@ -237,7 +237,7 @@ function SetRow({
 
           {/* Full Reps — clearly labeled */}
           <div className="flex items-center gap-1">
-            <label className="text-[10px] text-foreground/70 font-semibold tracking-wide">
+            <label className="text-xs text-foreground/70 font-semibold tracking-wide">
               Full
             </label>
             <Input
@@ -253,7 +253,7 @@ function SetRow({
 
           {/* Partial Reps — clearly labeled */}
           <div className="flex items-center gap-1">
-            <label className="text-[10px] text-primary/70 font-semibold tracking-wide">
+            <label className="text-xs text-primary/70 font-semibold tracking-wide">
               Part
             </label>
             <Input
@@ -269,7 +269,7 @@ function SetRow({
 
           {/* Isometric */}
           <div className="flex items-center gap-1">
-            <label className="text-[10px] text-sage-green/70 font-semibold tracking-wide">
+            <label className="text-xs text-sage-green/70 font-semibold tracking-wide">
               Iso
             </label>
             <Input
@@ -311,7 +311,7 @@ function SetRow({
 
         {/* Row 3: Target rep range hint (only for first uncompleted set) */}
         {set.setNumber === 1 && !isCompleted && targetReps && (
-          <div className="flex items-center gap-2 text-[9px] text-muted-foreground/50 pl-9">
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground/50 pl-9">
             <span>Target: <span className="font-mono text-primary/60">{targetReps}</span> reps</span>
             <span>·</span>
             <span>Full = full ROM</span>
@@ -509,7 +509,7 @@ export default function ActiveWorkoutTab() {
                 {iStyle && intensity && (
                   <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
                     <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
-                    <span className={`text-[9px] font-bold uppercase tracking-wider ${iStyle.text}`}>
+                    <span className={`text-[11px] font-bold uppercase tracking-wider ${iStyle.text}`}>
                       {intensity}
                     </span>
                   </div>
@@ -520,17 +520,17 @@ export default function ActiveWorkoutTab() {
                   <Clock className="w-3 h-3" />
                   <span className="font-mono tabular-nums">{formatDuration(elapsed)}</span>
                 </div>
-                <Badge variant="secondary" className="text-[10px] h-5">
+                <Badge variant="secondary" className="text-xs h-5">
                   {activeWorkout.exercises.length} exercises
                 </Badge>
                 {totalSets > 0 && (
-                  <Badge variant="outline" className="text-[10px] h-5 font-mono">
+                  <Badge variant="outline" className="text-xs h-5 font-mono">
                     {completedSets}/{totalSets} sets
                   </Badge>
                 )}
                 {/* Target rep range from intensity */}
                 {intensity && (
-                  <Badge variant="outline" className={`text-[10px] h-5 font-mono border-0 ${iStyle?.bg} ${iStyle?.text}`}>
+                  <Badge variant="outline" className={`text-xs h-5 font-mono border-0 ${iStyle?.bg} ${iStyle?.text}`}>
                     {INTENSITY_REP_RANGES[intensity].min}-{INTENSITY_REP_RANGES[intensity].max}r
                   </Badge>
                 )}
@@ -606,7 +606,7 @@ export default function ActiveWorkoutTab() {
                 )}
                 <Badge
                   variant="outline"
-                  className={`text-[9px] h-4 shrink-0 font-mono ${
+                  className={`text-[11px] h-4 shrink-0 font-mono ${
                     exercise.setup.doubled
                       ? "border-primary/40 bg-primary/10 text-primary"
                       : "border-muted-foreground/20 text-muted-foreground/60"
@@ -616,7 +616,7 @@ export default function ActiveWorkoutTab() {
                 </Badge>
                 {/* Target reps badge from routine */}
                 {exercise.targetReps && (
-                  <Badge variant="secondary" className="text-[9px] h-4 shrink-0 font-mono bg-accent text-muted-foreground">
+                  <Badge variant="secondary" className="text-[11px] h-4 shrink-0 font-mono bg-accent text-muted-foreground">
                     {exercise.targetReps}r
                   </Badge>
                 )}
@@ -684,7 +684,7 @@ export default function ActiveWorkoutTab() {
             <div className="space-y-3 pr-3">
               {Object.entries(exercisesByCategory).map(([category, exs]) => (
                 <div key={category}>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5 px-1">
+                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 px-1">
                     {category}
                   </p>
                   {exs.map(ex => (
@@ -693,16 +693,16 @@ export default function ActiveWorkoutTab() {
                         onClick={() => handleAddExercise(ex.id)}
                         className="flex-1 flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-accent/40 active:bg-accent/60 transition-colors text-left min-w-0"
                       >
-                        <Badge variant="secondary" className={`text-[10px] shrink-0 ${CATEGORY_COLORS[ex.category]}`}>
+                        <Badge variant="secondary" className={`text-xs shrink-0 ${CATEGORY_COLORS[ex.category]}`}>
                           {ex.category}
                         </Badge>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium">{ex.name}</p>
-                          <p className="text-[11px] text-muted-foreground truncate">{ex.notes}</p>
+                          <p className="text-xs text-muted-foreground truncate">{ex.notes}</p>
                         </div>
                         <Badge
                           variant="outline"
-                          className={`text-[9px] shrink-0 font-mono ${
+                          className={`text-[11px] shrink-0 font-mono ${
                             ex.defaultSetup.doubled
                               ? "border-primary/40 bg-primary/10 text-primary"
                               : "border-muted-foreground/20 text-muted-foreground/50"

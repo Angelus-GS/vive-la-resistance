@@ -102,7 +102,7 @@ export default function ProfileTab() {
               {ownedBands.length} bands · {ladder.length} combos
             </p>
           </div>
-          <Badge variant="secondary" className="text-[10px] font-mono">
+          <Badge variant="secondary" className="text-xs font-mono">
             v{APP_VERSION}
           </Badge>
         </div>
@@ -162,7 +162,7 @@ export default function ProfileTab() {
                     <span className="text-sm font-medium">{group.brand}</span>
                     <Badge
                       variant={ownedCount > 0 ? "default" : "secondary"}
-                      className={`text-[10px] ${ownedCount > 0 ? "bg-primary/20 text-primary border-primary/30" : ""}`}
+                      className={`text-xs ${ownedCount > 0 ? "bg-primary/20 text-primary border-primary/30" : ""}`}
                     >
                       {ownedCount}/{group.bandIds.length}
                     </Badge>
@@ -213,7 +213,7 @@ export default function ProfileTab() {
               <div className="flex items-center gap-2">
                 <CardTitle className="text-sm">Résistance Ladder</CardTitle>
               </div>
-              <Badge variant="outline" className="font-mono text-[10px]">
+              <Badge variant="outline" className="font-mono text-xs">
                 {ladder.length} combos
               </Badge>
             </div>
@@ -227,7 +227,7 @@ export default function ProfileTab() {
                 key={i}
                 className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-accent/20 transition-colors"
               >
-                <span className="text-[10px] font-mono text-muted-foreground w-5 text-right shrink-0 tabular-nums">
+                <span className="text-xs font-mono text-muted-foreground w-5 text-right shrink-0 tabular-nums">
                   {i + 1}
                 </span>
                 <div className="flex gap-0.5 shrink-0">
@@ -240,7 +240,7 @@ export default function ProfileTab() {
                   ))}
                 </div>
                 <span className="flex-1 text-xs truncate">{combo.label}</span>
-                <span className="text-[10px] font-mono text-primary shrink-0 tabular-nums">
+                <span className="text-xs font-mono text-primary shrink-0 tabular-nums">
                   {combo.totalMinLbs}–{combo.totalMaxLbs}
                 </span>
               </div>

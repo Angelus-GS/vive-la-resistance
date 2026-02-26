@@ -54,7 +54,7 @@ export default function Home() {
             Vive la Résistance<span className="text-primary">!</span>
           </h1>
           {state.activeWorkout && (
-            <span className="flex items-center gap-1.5 text-[10px] text-sage-green font-medium">
+            <span className="flex items-center gap-1.5 text-xs text-sage-green font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-sage-green animate-pulse" />
               Workout Active
             </span>
@@ -101,7 +101,7 @@ export default function Home() {
                   )}
                 </div>
                 <span
-                  className={`text-[10px] font-medium tracking-wide transition-opacity ${
+                  className={`text-xs font-medium tracking-wide transition-opacity ${
                     isActive ? "opacity-100" : "opacity-60"
                   }`}
                 >
