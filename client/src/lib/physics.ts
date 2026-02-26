@@ -190,41 +190,52 @@ export function getBandDisplayName(band: Band): string {
 
 /**
  * Generate all possible band combinations from owned bands.
- * For n bands, generates 2^n - 1 combinations (excluding empty set).
+ * Bands are grouped by loop length first — only bands of the same
+ * length can be stacked together (mixing 37" and 41" is impractical
+ * because different lengths create uneven tension curves).
  * Returns sorted by total min tension (lightest to heaviest).
  */
 export function generateResistanceLadder(ownedBands: Band[]): BandCombo[] {
   if (ownedBands.length === 0) return [];
 
+  // Group bands by loop length
+  const byLength = new Map<number, Band[]>();
+  for (const band of ownedBands) {
+    const group = byLength.get(band.lengthInches) || [];
+    group.push(band);
+    byLength.set(band.lengthInches, group);
+  }
+
   const combos: BandCombo[] = [];
-  const n = ownedBands.length;
 
-  // Generate all non-empty subsets using bitmask
-  for (let mask = 1; mask < (1 << n); mask++) {
-    const selectedBands: Band[] = [];
-    for (let i = 0; i < n; i++) {
-      if (mask & (1 << i)) {
-        selectedBands.push(ownedBands[i]);
+  // Generate combos per length group (no cross-length mixing)
+  for (const [, groupBands] of Array.from(byLength)) {
+    const n = groupBands.length;
+    for (let mask = 1; mask < (1 << n); mask++) {
+      const selectedBands: Band[] = [];
+      for (let i = 0; i < n; i++) {
+        if (mask & (1 << i)) {
+          selectedBands.push(groupBands[i]);
+        }
       }
+
+      const totalMin = selectedBands.reduce((s, b) => s + b.minLbs, 0);
+      const totalMax = selectedBands.reduce((s, b) => s + b.maxLbs, 0);
+      // Build label with brand prefix for disambiguation when needed
+      const label = selectedBands.map(b => {
+        const prefix = getBandShortPrefix(b);
+        return prefix ? `${prefix} ${b.color}` : b.color;
+      }).join(" + ");
+      const colorHexes = selectedBands.map(b => b.colorHex);
+
+      combos.push({
+        bandIds: selectedBands.map(b => b.id),
+        totalMinLbs: totalMin,
+        totalMaxLbs: totalMax,
+        label,
+        colorHexes,
+      });
     }
-
-    const totalMin = selectedBands.reduce((s, b) => s + b.minLbs, 0);
-    const totalMax = selectedBands.reduce((s, b) => s + b.maxLbs, 0);
-    // Build label with brand prefix for disambiguation when needed
-    // e.g. "SS37 #2 Red + Harambe Green" instead of just "#2 Red + Green"
-    const label = selectedBands.map(b => {
-      const prefix = getBandShortPrefix(b);
-      return prefix ? `${prefix} ${b.color}` : b.color;
-    }).join(" + ");
-    const colorHexes = selectedBands.map(b => b.colorHex);
-
-    combos.push({
-      bandIds: selectedBands.map(b => b.id),
-      totalMinLbs: totalMin,
-      totalMaxLbs: totalMax,
-      label,
-      colorHexes,
-    });
   }
 
   // Sort by total min tension, then by total max
