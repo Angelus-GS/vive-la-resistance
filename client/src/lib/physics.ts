@@ -5,7 +5,7 @@
 // ladder generation, and Joules-based volume calculation.
 // ============================================================
 
-import type { Band, BandCombo, UserProfile, Footplate } from "./types";
+import type { Band, BandCombo, UserProfile, Footplate, Workout, LastSessionHint } from "./types";
 
 /**
  * Calculate the spring constant k (lbs/inch) for a band
@@ -296,4 +296,84 @@ export function formatTension(
     return `${lbsToKg(lbs).toFixed(1)} kg`;
   }
   return `${lbs.toFixed(1)} lbs`;
+}
+
+// ============================================================
+// SMART PRE-FILL: History-based band/rep suggestions
+// ============================================================
+
+
+/**
+ * Look up the most recent completed workout containing a given exercise,
+ * and return a LastSessionHint with the band combo, best reps, and
+ * whether the user should consider progressing to the next combo.
+ *
+ * `ladder` should include the "No Bands" entry at index 0 (same as ActiveWorkoutTab).
+ * `workoutHistory` is expected newest-first (default order in state).
+ */
+export function getLastExerciseHint(
+  exerciseTemplateId: string,
+  targetReps: string | undefined,
+  workoutHistory: Workout[],
+  ladder: { bandIds: string[]; label: string }[],
+): LastSessionHint | undefined {
+  // Walk history newest-first
+  for (const workout of workoutHistory) {
+    const exercise = workout.exercises.find(
+      e => e.exerciseTemplateId === exerciseTemplateId
+    );
+    if (!exercise) continue;
+
+    // Find the best completed set (highest full reps)
+    const completedSets = exercise.sets.filter(s => s.completed);
+    if (completedSets.length === 0) continue;
+
+    const bestSet = completedSets.reduce((best, s) =>
+      s.reps > best.reps ? s : best
+    , completedSets[0]);
+
+    // Match the bandIds to a ladder index
+    // We compare sorted bandId arrays for equality
+    const sortedBestBandIds = [...bestSet.bandIds].sort();
+    let bandComboIndex = 0; // default to "No Bands"
+    for (let i = 0; i < ladder.length; i++) {
+      const sortedLadderIds = [...ladder[i].bandIds].sort();
+      if (
+        sortedLadderIds.length === sortedBestBandIds.length &&
+        sortedLadderIds.every((id, j) => id === sortedBestBandIds[j])
+      ) {
+        bandComboIndex = i;
+        break;
+      }
+    }
+
+    const bandLabel = ladder[bandComboIndex]?.label || "No Bands";
+
+    // Check if progression is warranted
+    let suggestUp = false;
+    let suggestedComboIndex: number | undefined;
+    if (targetReps) {
+      const parts = targetReps.split("-");
+      const targetMax = parseInt(parts[parts.length - 1]) || 0;
+      if (targetMax > 0 && bestSet.reps > targetMax) {
+        suggestUp = true;
+        if (bandComboIndex < ladder.length - 1) {
+          suggestedComboIndex = bandComboIndex + 1;
+        }
+      }
+    }
+
+    return {
+      date: workout.startedAt,
+      bandComboIndex,
+      bandLabel,
+      bestReps: bestSet.reps,
+      bestPartials: bestSet.partialReps,
+      spacers: bestSet.spacers,
+      suggestUp,
+      suggestedComboIndex,
+    };
+  }
+
+  return undefined;
 }

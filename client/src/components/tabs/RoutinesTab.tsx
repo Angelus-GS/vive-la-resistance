@@ -5,7 +5,7 @@
 // ============================================================
 
 import { useState, useMemo } from "react";
-import { useApp, useRoutines, useWorkout, usePrograms } from "@/contexts/AppContext";
+import { useApp, useRoutines, useWorkout, usePrograms, useBands } from "@/contexts/AppContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +29,7 @@ import { motion } from "framer-motion";
 import type { Routine, RoutineExercise, WorkoutExercise, LoggedSet, IntensityLevel, Program, ProgramPhase } from "@/lib/types";
 import { INTENSITY_REP_RANGES } from "@/lib/types";
 import { GORILLA_GAINS_ROUTINES, HARAMBRO_V3_ROUTINES } from "@/lib/equipment-data";
+import { getLastExerciseHint } from "@/lib/physics";
 
 // Combined built-in routines from all programs
 const ALL_PROGRAM_ROUTINES = [...GORILLA_GAINS_ROUTINES, ...HARAMBRO_V3_ROUTINES];
@@ -78,6 +79,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
   const { routines, exercises, exerciseTemplateMap } = useRoutines();
   const { programs } = usePrograms();
   const { activeWorkout } = useWorkout();
+  const { ladder: rawLadder } = useBands();
   const [showCreate, setShowCreate] = useState(false);
   const [routineName, setRoutineName] = useState("");
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
@@ -149,17 +151,44 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
       return;
     }
 
+    // Build ladder with "No Bands" at index 0 (same as ActiveWorkoutTab)
+    const NO_BANDS = { bandIds: [] as string[], label: "No Bands", totalMinLbs: 0, totalMaxLbs: 0, colorHexes: [] as string[] };
+    const ladder = [NO_BANDS, ...rawLadder];
+
     const workoutExercises: WorkoutExercise[] = routine.exercises
       .filter(re => !re.optional) // skip optional exercises by default
       .map(re => {
         const ex = exerciseTemplateMap.get(re.exerciseTemplateId);
+
+        // Smart pre-fill: look up last session for this exercise
+        const hint = getLastExerciseHint(
+          re.exerciseTemplateId,
+          re.targetReps,
+          state.workoutHistory,
+          ladder,
+        );
+
+        // Pre-fill sets with last band combo (or suggested next combo if progression warranted)
+        const prefillComboIndex = hint
+          ? (hint.suggestUp && hint.suggestedComboIndex !== undefined
+              ? hint.suggestedComboIndex
+              : hint.bandComboIndex)
+          : 0;
+        const prefillBandIds = ladder[prefillComboIndex]?.bandIds ?? [];
+
         return {
           id: nanoid(),
           exerciseTemplateId: re.exerciseTemplateId,
           exerciseName: ex?.name || "Unknown",
           setup: { ...re.setup },
-          sets: Array.from({ length: re.targetSets }, (_, i) => createDefaultSet(i + 1)),
+          sets: Array.from({ length: re.targetSets }, (_, i) => ({
+            ...createDefaultSet(i + 1),
+            bandComboIndex: prefillComboIndex,
+            bandIds: [...prefillBandIds],
+            spacers: hint?.spacers ?? 0,
+          })),
           targetReps: re.targetReps,
+          lastSessionHint: hint,
         };
       });
 

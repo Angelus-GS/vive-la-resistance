@@ -23,12 +23,13 @@ import {
 import {
   Plus, Minus, Check, Timer, Clock, Trash2, Play, Square,
   Dumbbell, X, ArrowUpCircle, Search, Link2, Flame, Target, Zap, Video,
+  History, TrendingUp,
 } from "lucide-react";
 import VideoModal from "@/components/VideoModal";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import { motion, AnimatePresence } from "framer-motion";
-import type { LoggedSet, WorkoutExercise, IntensityLevel, ExerciseTemplate } from "@/lib/types";
+import type { LoggedSet, WorkoutExercise, IntensityLevel, ExerciseTemplate, LastSessionHint } from "@/lib/types";
 import { INTENSITY_REP_RANGES } from "@/lib/types";
 import { shouldProgressBand } from "@/lib/physics";
 
@@ -108,6 +109,64 @@ function RestTimer({ defaultSeconds, onDone }: { defaultSeconds: number; onDone:
         </Button>
       </div>
     </motion.div>
+  );
+}
+
+// --- Last Session Hint Bar ---
+function LastSessionHintBar({
+  hint,
+  ladder,
+}: {
+  hint: LastSessionHint;
+  ladder: { label: string; colorHexes: string[]; totalMinLbs: number; totalMaxLbs: number; bandIds: string[] }[];
+}) {
+  const lastDate = new Date(hint.date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+
+  const suggestedCombo = hint.suggestedComboIndex !== undefined
+    ? ladder[hint.suggestedComboIndex]
+    : null;
+
+  return (
+    <div className={`rounded-lg px-3 py-2 text-xs space-y-1 ${
+      hint.suggestUp
+        ? "bg-primary/8 border border-primary/20"
+        : "bg-accent/50 border border-border/40"
+    }`}>
+      <div className="flex items-center gap-2">
+        <History className="w-3 h-3 text-muted-foreground/70 shrink-0" />
+        <span className="text-muted-foreground">
+          Last: <span className="font-mono text-foreground/80">{hint.bestReps}</span>
+          <span className="text-muted-foreground/50">f</span>
+          {hint.bestPartials > 0 && (
+            <><span className="text-muted-foreground/50"> + </span><span className="font-mono text-foreground/80">{hint.bestPartials}</span><span className="text-muted-foreground/50">p</span></>
+          )}
+          <span className="text-muted-foreground/50"> @ </span>
+          <span className="text-foreground/80">{hint.bandLabel}</span>
+          {hint.spacers > 0 && <span className="text-primary/60 ml-1">+SP</span>}
+        </span>
+        <span className="text-muted-foreground/40 ml-auto font-mono">{lastDate}</span>
+      </div>
+      {hint.suggestUp && suggestedCombo && (
+        <div className="flex items-center gap-2 text-primary">
+          <TrendingUp className="w-3 h-3 shrink-0" />
+          <span className="font-semibold">Progression suggested</span>
+          <span className="text-primary/60">→</span>
+          <div className="flex items-center gap-1">
+            {suggestedCombo.colorHexes.map((hex, i) => (
+              <span
+                key={i}
+                className="w-2.5 h-2.5 rounded-full border border-white/10"
+                style={{ backgroundColor: hex }}
+              />
+            ))}
+            <span className="font-mono text-primary/80">{suggestedCombo.label}</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -631,6 +690,10 @@ export default function ActiveWorkoutTab() {
             </div>
           </CardHeader>
           <CardContent className="px-3 pb-3 space-y-2">
+            {/* Last Session Hint */}
+            {exercise.lastSessionHint && (
+              <LastSessionHintBar hint={exercise.lastSessionHint} ladder={ladder} />
+            )}
             <AnimatePresence>
               {exercise.sets.map(set => (
                 <SetRow

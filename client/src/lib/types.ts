@@ -193,6 +193,17 @@ export interface LoggedSet {
   notes: string;
 }
 
+export interface LastSessionHint {
+  date: string;           // ISO date of last workout
+  bandComboIndex: number; // ladder index they used
+  bandLabel: string;      // human-readable band combo label
+  bestReps: number;       // max full reps in any completed set
+  bestPartials: number;   // partials on that best set
+  spacers: number;
+  suggestUp: boolean;     // true if reps exceeded target max → recommend next combo
+  suggestedComboIndex?: number; // the next combo up, if suggestUp is true
+}
+
 export interface WorkoutExercise {
   id: string;
   exerciseTemplateId: string;
@@ -204,6 +215,7 @@ export interface WorkoutExercise {
   };
   sets: LoggedSet[];
   targetReps?: string; // from routine, e.g. "15-30"
+  lastSessionHint?: LastSessionHint; // populated from history when starting workout
 }
 
 export interface Workout {
