@@ -17,7 +17,7 @@ import {
   ComposedChart, Area, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { estimateElongation, getPeakTension } from "@/lib/physics";
+import { estimateElongation, getPeakTension, getBandDisplayName } from "@/lib/physics";
 import type { Band } from "@/lib/types";
 
 // ---- Chart colors (Chalk & Iron palette) ----
@@ -207,7 +207,7 @@ export default function ExerciseProgressChart() {
           maxReps: maxRepsAtBest,
           totalReps,
           bandLabel: bestBands.length > 0
-            ? bestBands.map(b => b.color).join(" + ")
+            ? bestBands.map(b => getBandDisplayName(b)).join(" + ")
             : "No Bands",
           colorHexes: bestBands.map(b => b.colorHex),
           sets: completedSets.length,

@@ -160,6 +160,31 @@ export function calculateSetJoules(
 }
 
 // ============================================================
+// BAND LABEL HELPERS
+// ============================================================
+
+/**
+ * Returns a short brand prefix for bands that need disambiguation.
+ * Serious Steel 37" → "37\"", Serious Steel 41" → "41\""
+ * Other brands (Harambe, Undersun) get no prefix since their
+ * color names are already unique across the app.
+ */
+export function getBandShortPrefix(band: Band): string {
+  if (band.brand === "Serious Steel" && band.lengthInches === 37) return "37\"";
+  if (band.brand === "Serious Steel 41\"" && band.lengthInches === 41) return "41\"";
+  return "";
+}
+
+/**
+ * Returns a compact display name for a single band.
+ * e.g. '37" #2 Red' or just 'Green' for Harambe.
+ */
+export function getBandDisplayName(band: Band): string {
+  const prefix = getBandShortPrefix(band);
+  return prefix ? `${prefix} ${band.color}` : band.color;
+}
+
+// ============================================================
 // STACKING LADDER GENERATOR
 // ============================================================
 
@@ -185,7 +210,12 @@ export function generateResistanceLadder(ownedBands: Band[]): BandCombo[] {
 
     const totalMin = selectedBands.reduce((s, b) => s + b.minLbs, 0);
     const totalMax = selectedBands.reduce((s, b) => s + b.maxLbs, 0);
-    const label = selectedBands.map(b => `${b.color}`).join(" + ");
+    // Build label with brand prefix for disambiguation when needed
+    // e.g. "SS37 #2 Red + Harambe Green" instead of just "#2 Red + Green"
+    const label = selectedBands.map(b => {
+      const prefix = getBandShortPrefix(b);
+      return prefix ? `${prefix} ${b.color}` : b.color;
+    }).join(" + ");
     const colorHexes = selectedBands.map(b => b.colorHex);
 
     combos.push({

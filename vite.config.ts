@@ -151,12 +151,14 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
+const isGitHubPages = process.env.GITHUB_PAGES === 'true';
+
 const plugins = [
   react(),
   tailwindcss(),
   jsxLocPlugin(),
-  vitePluginManusRuntime(),
-  vitePluginManusDebugCollector(),
+  // Skip Manus-specific plugins for GitHub Pages builds
+  ...(!isGitHubPages ? [vitePluginManusRuntime(), vitePluginManusDebugCollector()] : []),
   VitePWA({
     registerType: "autoUpdate",
     includeAssets: ["favicon.ico", "apple-touch-icon.png", "icon-192x192.png", "icon-512x512.png"],
@@ -244,15 +246,7 @@ export default defineConfig({
     port: 3000,
     strictPort: false, // Will find next available port if 3000 is busy
     host: true,
-    allowedHosts: [
-      ".manuspre.computer",
-      ".manus.computer",
-      ".manus-asia.computer",
-      ".manuscomputer.ai",
-      ".manusvm.computer",
-      "localhost",
-      "127.0.0.1",
-    ],
+    allowedHosts: true,
     fs: {
       strict: true,
       deny: ["**/.*"],

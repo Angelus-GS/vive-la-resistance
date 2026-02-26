@@ -22,7 +22,7 @@ import {
   TrendingUp, Zap, Flame, Activity, Target
 } from "lucide-react";
 import { downloadCSV } from "@/lib/storage";
-import { calculateSetJoules, estimateElongation, getPeakTension } from "@/lib/physics";
+import { calculateSetJoules, estimateElongation, getPeakTension, getBandDisplayName } from "@/lib/physics";
 import { toast } from "sonner";
 import type { Band, IntensityLevel } from "@/lib/types";
 import ExerciseProgressChart from "@/components/ExerciseProgressChart";
@@ -406,7 +406,7 @@ export default function HistoryTab() {
                               const bands = set.bandIds
                                 .map(id => bandMap.get(id))
                                 .filter(Boolean) as Band[];
-                              const bandLabel = bands.length > 0 ? bands.map(b => b.color).join(" + ") : "No Bands";
+                              const bandLabel = bands.length > 0 ? bands.map(b => getBandDisplayName(b)).join(" + ") : "No Bands";
                               return (
                                 <div key={set.id} className="flex items-center gap-2 text-[11px] text-muted-foreground pl-3">
                                   <span className="font-mono w-5 tabular-nums text-muted-foreground/60">S{set.setNumber}</span>
