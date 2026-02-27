@@ -651,10 +651,11 @@ export default function ActiveWorkoutTab() {
         const template = exerciseTemplateMap.get(exercise.exerciseTemplateId);
         return (
           <Card key={exercise.id} className="bg-card border-border">
-          <CardHeader className="pb-2 px-3 pt-3">
-            <div className="flex items-center justify-between">
+          <CardHeader className="pb-2 px-3 pt-3 space-y-1.5">
+            {/* Row 1: Exercise name + video + delete */}
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <CardTitle className="text-sm font-bold truncate">
+                <CardTitle className="text-sm font-bold">
                   {exercise.exerciseName}
                 </CardTitle>
                 {template?.videoUrl && (
@@ -666,35 +667,38 @@ export default function ActiveWorkoutTab() {
                     <Video className="w-3.5 h-3.5" />
                   </button>
                 )}
-                <Badge
-                  variant="outline"
-                  className={`text-xs h-4 shrink-0 font-mono ${
-                    exercise.setup.doubled
-                      ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-muted-foreground/20 text-muted-foreground/60"
-                  }`}
-                >
-                  {exercise.setup.doubled ? "2x Doubled" : "1x Single"}
-                </Badge>
-                {/* Target reps badge from routine */}
-                {exercise.targetReps && (
-                  <Badge variant="secondary" className="text-xs h-4 shrink-0 font-mono bg-accent text-muted-foreground">
-                    {exercise.targetReps}r
-                  </Badge>
-                )}
-                {/* Per-exercise rest timer badge */}
-                {exercise.restTimerSeconds && (
-                  <Badge variant="secondary" className="text-xs h-4 shrink-0 font-mono bg-accent/60 text-muted-foreground/80">
-                    <Timer className="w-2.5 h-2.5 mr-0.5" />
-                    {exercise.restTimerSeconds}s
-                  </Badge>
-                )}
               </div>
               <Button variant="ghost" size="icon"
                 className="h-7 w-7 text-muted-foreground/40 hover:text-destructive shrink-0"
                 onClick={() => handleRemoveExercise(exercise.id)}>
                 <X className="w-3.5 h-3.5" />
               </Button>
+            </div>
+            {/* Row 2: Badges */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Badge
+                variant="outline"
+                className={`text-xs h-4 shrink-0 font-mono ${
+                  exercise.setup.doubled
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-muted-foreground/20 text-muted-foreground/60"
+                }`}
+              >
+                {exercise.setup.doubled ? "2x Doubled" : "1x Single"}
+              </Badge>
+              {/* Target reps badge from routine */}
+              {exercise.targetReps && (
+                <Badge variant="secondary" className="text-xs h-4 shrink-0 font-mono bg-accent text-muted-foreground">
+                  {exercise.targetReps}r
+                </Badge>
+              )}
+              {/* Per-exercise rest timer badge */}
+              {exercise.restTimerSeconds && (
+                <Badge variant="secondary" className="text-xs h-4 shrink-0 font-mono bg-accent/60 text-muted-foreground/80">
+                  <Timer className="w-2.5 h-2.5 mr-0.5" />
+                  {exercise.restTimerSeconds}s
+                </Badge>
+              )}
             </div>
           </CardHeader>
           <CardContent className="px-3 pb-3 space-y-2">
