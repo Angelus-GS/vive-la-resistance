@@ -433,18 +433,7 @@ function SetRow({
           </Button>
         </div>
 
-        {/* Row 3: Target rep range hint (only for first uncompleted set) */}
-        {set.setNumber === 1 && !isCompleted && targetReps && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground/50 pl-9">
-            <span>Target: <span className="font-mono text-primary/60">{targetReps}</span> reps</span>
-            <span>·</span>
-            <span>Full = full ROM</span>
-            <span>·</span>
-            <span>Part = lengthened partials</span>
-            <span>·</span>
-            <span>Iso = hold (sec)</span>
-          </div>
-        )}
+
       </div>
     </motion.div>
   );
@@ -710,6 +699,15 @@ export default function ActiveWorkoutTab() {
           <RestTimer defaultSeconds={restTimer} onDone={() => setRestTimer(null)} />
         )}
       </AnimatePresence>
+
+      {/* Column legend — shown once above all exercise cards */}
+      <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground/60">
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-foreground/50" /><span className="font-medium text-foreground/60">Full</span> = full ROM</span>
+        <span>·</span>
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary/60" /><span className="font-medium text-primary/60">Part</span> = lengthened partials</span>
+        <span>·</span>
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-sage-green/60" /><span className="font-medium text-sage-green/60">Iso</span> = hold (sec)</span>
+      </div>
 
       {/* Exercise Cards */}
       {activeWorkout.exercises.map(exercise => {
