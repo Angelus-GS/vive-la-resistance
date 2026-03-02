@@ -4,7 +4,7 @@
 // "Squat rack speed" — log sets with clear Full + Partial reps
 // ============================================================
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useApp, useWorkout, useBands, useRoutines } from "@/contexts/AppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,46 +65,111 @@ function createDefaultSet(setNumber: number, prevSet?: LoggedSet): LoggedSet {
   };
 }
 
-// --- Rest Timer Component ---
+// --- Rest Timer Component (wall-clock based for accuracy) ---
 function RestTimer({ defaultSeconds, onDone }: { defaultSeconds: number; onDone: () => void }) {
   const [remaining, setRemaining] = useState(defaultSeconds);
   const [isRunning, setIsRunning] = useState(true);
+  const [isDone, setIsDone] = useState(false);
+
+  // Wall-clock references for drift-free timing
+  const startTimeRef = useRef(Date.now());
+  const pausedElapsedRef = useRef(0); // accumulated elapsed when paused
 
   useEffect(() => {
-    if (!isRunning || remaining <= 0) {
-      if (remaining <= 0) onDone();
-      return;
-    }
-    const interval = setInterval(() => setRemaining(r => r - 1), 1000);
-    return () => clearInterval(interval);
-  }, [isRunning, remaining, onDone]);
+    if (!isRunning || isDone) return;
 
-  const progress = ((defaultSeconds - remaining) / defaultSeconds) * 100;
+    const tick = () => {
+      const now = Date.now();
+      const currentElapsed = pausedElapsedRef.current + (now - startTimeRef.current) / 1000;
+      const left = Math.max(0, defaultSeconds - currentElapsed);
+      setRemaining(Math.ceil(left));
+
+      if (left <= 0) {
+        setIsDone(true);
+        setRemaining(0);
+        // Vibrate if supported (mobile)
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      }
+    };
+
+    // Tick every 250ms for smoother updates and less drift perception
+    const interval = setInterval(tick, 250);
+    tick(); // immediate first tick
+    return () => clearInterval(interval);
+  }, [isRunning, isDone, defaultSeconds]);
+
+  const handlePauseResume = useCallback(() => {
+    if (isRunning) {
+      // Pausing: save accumulated elapsed
+      pausedElapsedRef.current += (Date.now() - startTimeRef.current) / 1000;
+    } else {
+      // Resuming: reset start time
+      startTimeRef.current = Date.now();
+    }
+    setIsRunning(!isRunning);
+  }, [isRunning]);
+
+  const handleSkip = useCallback(() => {
+    onDone();
+  }, [onDone]);
+
+  // SVG circle: circumference = 2 * PI * r
+  const circumference = 2 * Math.PI * 16; // r=16
+  const progressFraction = (defaultSeconds - remaining) / defaultSeconds;
+  const strokeDashoffset = circumference * (1 - progressFraction);
+
+  const isOvertime = isDone;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-primary/8 border border-primary/20 rounded-xl p-3 flex items-center gap-3"
+      className={`rounded-xl p-3 flex items-center gap-3 ${
+        isOvertime
+          ? "bg-sage-green/10 border border-sage-green/30"
+          : "bg-primary/8 border border-primary/20"
+      }`}
     >
       <div className="relative w-10 h-10 shrink-0">
         <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
           <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted/30" />
-          <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-primary"
-            strokeDasharray={`${progress} 100`} strokeLinecap="round" />
+          <circle
+            cx="18" cy="18" r="16" fill="none"
+            stroke="currentColor" strokeWidth="2.5"
+            className={isOvertime ? "text-sage-green" : "text-primary"}
+            strokeDasharray={circumference}
+            strokeDashoffset={isOvertime ? 0 : strokeDashoffset}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dashoffset 0.3s ease" }}
+          />
         </svg>
-        <Timer className="w-4 h-4 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+        {isOvertime
+          ? <Check className="w-4 h-4 text-sage-green absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          : <Timer className="w-4 h-4 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+        }
       </div>
       <div className="flex-1">
-        <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Rest Timer</p>
-        <p className="text-xl font-bold font-mono text-primary tracking-tight">{formatDuration(remaining)}</p>
+        <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+          {isOvertime ? "Rest Complete" : "Rest Timer"}
+        </p>
+        <p className={`text-xl font-bold font-mono tracking-tight ${
+          isOvertime ? "text-sage-green" : "text-primary"
+        }`}>
+          {isOvertime ? "0:00" : formatDuration(remaining)}
+        </p>
       </div>
       <div className="flex gap-1.5">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsRunning(!isRunning)}>
-          {isRunning ? <Square className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-        </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onDone}>
+        {!isOvertime && (
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handlePauseResume}>
+            {isRunning ? <Square className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+          </Button>
+        )}
+        <Button
+          variant="ghost" size="icon"
+          className={`h-8 w-8 ${isOvertime ? "text-sage-green hover:text-sage-green" : ""}`}
+          onClick={handleSkip}
+        >
           <X className="w-3.5 h-3.5" />
         </Button>
       </div>
