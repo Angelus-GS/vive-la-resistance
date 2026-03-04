@@ -28,6 +28,7 @@ import {
 import VideoModal from "@/components/VideoModal";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
+import { playBoxingBell } from "@/lib/boxing-bell";
 import { motion, AnimatePresence } from "framer-motion";
 import type { LoggedSet, WorkoutExercise, IntensityLevel, ExerciseTemplate, LastSessionHint } from "@/lib/types";
 import { INTENSITY_REP_RANGES } from "@/lib/types";
@@ -87,7 +88,8 @@ function RestTimer({ defaultSeconds, onDone }: { defaultSeconds: number; onDone:
       if (left <= 0) {
         setIsDone(true);
         setRemaining(0);
-        // Vibrate if supported (mobile)
+        // Boxing bell sound + vibrate
+        playBoxingBell();
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
       }
     };
