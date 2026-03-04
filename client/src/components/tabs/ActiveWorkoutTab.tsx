@@ -693,10 +693,12 @@ export default function ActiveWorkoutTab() {
         </CardContent>
       </Card>
 
-      {/* Rest Timer */}
+      {/* Rest Timer — sticky so it stays visible while scrolling through exercises */}
       <AnimatePresence>
         {restTimer !== null && (
-          <RestTimer defaultSeconds={restTimer} onDone={() => setRestTimer(null)} />
+          <div className="sticky top-0 z-20">
+            <RestTimer defaultSeconds={restTimer} onDone={() => setRestTimer(null)} />
+          </div>
         )}
       </AnimatePresence>
 
