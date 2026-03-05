@@ -1,3 +1,3 @@
 export const COOKIE_NAME = "app_session_id";
 export const ONE_YEAR_MS = 1000 * 60 * 60 * 24 * 365;
-export const APP_VERSION = "2.4";
+export const APP_VERSION = "2.4.1";
