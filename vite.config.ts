@@ -193,6 +193,7 @@ const plugins = [
     },
     workbox: {
       globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+      globIgnores: ["__manus__/**"],
       runtimeCaching: [
         {
           urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
