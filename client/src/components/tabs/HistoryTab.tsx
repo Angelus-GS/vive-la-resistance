@@ -79,15 +79,6 @@ export default function HistoryTab() {
     ? state.workoutHistory.find(w => w.id === selectedWorkoutId)
     : null;
 
-  if (selectedWorkout) {
-    return (
-      <WorkoutDetailView
-        workout={selectedWorkout}
-        onBack={() => setSelectedWorkoutId(null)}
-      />
-    );
-  }
-
   const handleExportCSV = () => {
     if (state.workoutHistory.length === 0) {
       toast.error("No workout history to export");
@@ -170,6 +161,16 @@ export default function HistoryTab() {
       : 0;
     return { totalWorkouts: tw, totalVolume: tv, avgDuration: ad, peakEver: pe };
   }, [analyticsData, state.workoutHistory.length]);
+
+  // Early return for detail view — MUST be after all hooks to avoid React hooks violation
+  if (selectedWorkout) {
+    return (
+      <WorkoutDetailView
+        workout={selectedWorkout}
+        onBack={() => setSelectedWorkoutId(null)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-4 p-4 max-w-lg mx-auto">
