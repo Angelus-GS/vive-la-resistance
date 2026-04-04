@@ -5,6 +5,7 @@
 // ============================================================
 
 import type { AppState } from "./types";
+import { DEFAULT_CATEGORY_REST_TIMERS } from "./types";
 import { DEFAULT_BANDS, DEFAULT_BARS, DEFAULT_FOOTPLATES, DEFAULT_ACCESSORIES, DEFAULT_EXERCISES, GORILLA_GAINS_PROGRAM, GORILLA_GAINS_ROUTINES, HARAMBRO_V3_PROGRAM, HARAMBRO_V3_ROUTINES } from "./equipment-data";
 
 const STORAGE_KEY = "vive-la-resistance-v1";
@@ -15,8 +16,10 @@ export function getDefaultState(): AppState {
       heightInches: 70, // 5'10"
       activeGymProfileId: null,
       restTimerSeconds: 120,
+      categoryRestTimers: { ...DEFAULT_CATEGORY_REST_TIMERS },
       amrapTargetReps: 12,
       units: "lbs",
+      keepScreenOn: true,
     },
     bands: DEFAULT_BANDS.map(b => ({ ...b })),
     bars: DEFAULT_BARS.map(b => ({ ...b })),
@@ -30,6 +33,8 @@ export function getDefaultState(): AppState {
     activeWorkout: null,
     resistanceLadder: [],
     onboardingComplete: false,
+    personalRecords: [],
+    customRoutines: [],
   };
 }
 
@@ -49,11 +54,20 @@ export function loadState(): AppState {
       if (!saved.length) return defaults.exerciseTemplates;
       const defaultMap = new Map(defaults.exerciseTemplates.map(e => [e.id, e]));
       const savedIds = new Set(saved.map(e => e.id));
-      // Update existing saved templates with new default fields (videoUrl, etc.)
+      // Migrate old categories to new system
+      const migrateCategory = (cat: string): string => {
+        switch (cat) {
+          case "push": case "pull": case "legs": return "compound";
+          case "arms": case "other": return "isolation";
+          default: return cat; // shoulders, core already correct
+        }
+      };
+      // Update existing saved templates with new default fields (videoUrl, category, etc.)
       const updated = saved.map(s => {
         const def = defaultMap.get(s.id);
-        if (!def) return s;
-        return { ...def, ...s, videoUrl: def.videoUrl || s.videoUrl };
+        if (!def) return { ...s, category: migrateCategory(s.category) as any };
+        // Use the default's category (already migrated) for known exercises
+        return { ...def, ...s, category: def.category, videoUrl: def.videoUrl || s.videoUrl };
       });
       // Add any brand-new templates that don't exist in saved state
       const newDefaults = defaults.exerciseTemplates.filter(e => !savedIds.has(e.id));
@@ -71,13 +85,23 @@ export function loadState(): AppState {
     return {
       ...defaults,
       ...parsed,
-      userProfile: { ...defaults.userProfile, ...parsed.userProfile },
+      userProfile: {
+        ...defaults.userProfile,
+        ...parsed.userProfile,
+        // Deep-merge categoryRestTimers so old saved states without it get defaults
+        categoryRestTimers: {
+          ...defaults.userProfile.categoryRestTimers,
+          ...(parsed.userProfile?.categoryRestTimers || {}),
+        },
+      },
       bands: mergedBands,
       bars: parsed.bars?.length ? parsed.bars : defaults.bars,
       footplates: parsed.footplates?.length ? parsed.footplates : defaults.footplates,
       accessories: parsed.accessories?.length ? parsed.accessories : defaults.accessories,
       exerciseTemplates: mergedExercises,
       programs: defaults.programs, // Always use latest program definitions
+      personalRecords: parsed.personalRecords || [],
+      customRoutines: parsed.customRoutines || [],
     };
   } catch {
     return getDefaultState();
@@ -126,14 +150,14 @@ export function exportToCSV(state: AppState): string {
     for (const exercise of workout.exercises) {
       for (const set of exercise.sets) {
         if (!set.completed) continue;
-        const bandNames = set.bandIds
+        const bandNames = (set.bandIds || [])
           .map(id => state.bands.find(b => b.id === id))
           .filter(Boolean)
           .map(b => `${b!.brand} ${b!.color}`)
           .join(" + ");
 
         // Calculate peak tension
-        const bands = set.bandIds
+        const bands = (set.bandIds || [])
           .map(id => state.bands.find(b => b.id === id))
           .filter(Boolean) as typeof state.bands;
         const totalMin = bands.reduce((s, b) => s + b.minLbs, 0);
@@ -147,15 +171,15 @@ export function exportToCSV(state: AppState): string {
           exercise.exerciseName,
           String(set.setNumber),
           bandNames || "None",
-          exercise.setup.doubled ? "Yes" : "No",
-          String(set.spacers),
-          String(set.reps),
-          String(set.partialReps),
-          String(set.isometricSeconds),
+          exercise.setup?.doubled ? "Yes" : "No",
+          String(set.spacers || 0),
+          String(set.reps || 0),
+          String(set.partialReps || 0),
+          String(set.isometricSeconds || 0),
           set.rpe != null ? String(set.rpe) : "",
           set.rir != null ? String(set.rir) : "",
           peakTension,
-          set.notes,
+          set.notes || "",
         ]);
       }
     }

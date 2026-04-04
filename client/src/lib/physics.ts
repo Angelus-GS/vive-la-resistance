@@ -70,6 +70,20 @@ export function getComboTension(
 }
 
 /**
+ * Calculate estimated peak tension for a band combo at a user's height.
+ * Uses the standard elongation model (45% of height) for single-loop bands.
+ * Returns tension in lbs.
+ */
+export function getComboTensionAtHeight(
+  bands: Band[],
+  heightInches: number,
+  doubled: boolean = false
+): number {
+  const elongation = estimateElongation(heightInches, doubled);
+  return getComboTension(bands, elongation);
+}
+
+/**
  * Calculate peak tension including bar weight and friction adjustment.
  */
 export function getPeakTension(
@@ -238,9 +252,17 @@ export function generateResistanceLadder(ownedBands: Band[]): BandCombo[] {
     }
   }
 
-  // Sort by total min tension, then by total max
+  // Sort by actual tension at a standard elongation (20 inches) to properly
+  // account for band length differences. Shorter bands (37") produce more
+  // tension than longer bands (41") at the same stretch, even if their
+  // min/max label values are identical.
+  const standardElongation = 20; // inches — typical mid-ROM stretch
   combos.sort((a, b) => {
-    if (a.totalMinLbs !== b.totalMinLbs) return a.totalMinLbs - b.totalMinLbs;
+    const bandsA = a.bandIds.map(id => ownedBands.find(b2 => b2.id === id)!).filter(Boolean);
+    const bandsB = b.bandIds.map(id => ownedBands.find(b2 => b2.id === id)!).filter(Boolean);
+    const tensionA = getComboTension(bandsA, standardElongation);
+    const tensionB = getComboTension(bandsB, standardElongation);
+    if (Math.abs(tensionA - tensionB) > 0.1) return tensionA - tensionB;
     return a.totalMaxLbs - b.totalMaxLbs;
   });
 
@@ -315,7 +337,8 @@ export function getLastExerciseHint(
   exerciseTemplateId: string,
   targetReps: string | undefined,
   workoutHistory: Workout[],
-  ladder: { bandIds: string[]; label: string }[],
+  ladder: { bandIds: string[]; label: string; totalMinLbs?: number; totalMaxLbs?: number }[],
+  allBands?: Band[],
 ): LastSessionHint | undefined {
   // Walk history newest-first
   for (const workout of workoutHistory) {
@@ -329,13 +352,14 @@ export function getLastExerciseHint(
     if (completedSets.length === 0) continue;
 
     const bestSet = completedSets.reduce((best, s) =>
-      s.reps > best.reps ? s : best
+      (s.reps || 0) > (best.reps || 0) ? s : best
     , completedSets[0]);
 
     // Match the bandIds to a ladder index
     // We compare sorted bandId arrays for equality
-    const sortedBestBandIds = [...bestSet.bandIds].sort();
+    const sortedBestBandIds = [...(bestSet.bandIds || [])].sort();
     let bandComboIndex = 0; // default to "No Bands"
+    let exactMatch = false;
     for (let i = 0; i < ladder.length; i++) {
       const sortedLadderIds = [...ladder[i].bandIds].sort();
       if (
@@ -343,7 +367,35 @@ export function getLastExerciseHint(
         sortedLadderIds.every((id, j) => id === sortedBestBandIds[j])
       ) {
         bandComboIndex = i;
+        exactMatch = true;
         break;
+      }
+    }
+
+    // If no exact match (e.g. user switched from latex to latex-free bands),
+    // find the closest combo in the new ladder by matching total tension.
+    if (!exactMatch && (bestSet.bandIds || []).length > 0 && allBands) {
+      // Try to compute the old combo's total tension from allBands (includes non-owned)
+      const oldBands = (bestSet.bandIds || []).map(id => allBands.find(b => b.id === id)).filter(Boolean) as Band[];
+      if (oldBands.length > 0) {
+        const oldMinTotal = oldBands.reduce((s, b) => s + b.minLbs, 0);
+        const oldMaxTotal = oldBands.reduce((s, b) => s + b.maxLbs, 0);
+        const oldMidpoint = (oldMinTotal + oldMaxTotal) / 2;
+
+        let bestDiff = Infinity;
+        let bestIdx = 0;
+        for (let i = 1; i < ladder.length; i++) { // skip index 0 (No Bands)
+          const combo = ladder[i] as { bandIds: string[]; label: string; totalMinLbs?: number; totalMaxLbs?: number };
+          const comboMin = combo.totalMinLbs ?? 0;
+          const comboMax = combo.totalMaxLbs ?? 0;
+          const comboMidpoint = (comboMin + comboMax) / 2;
+          const diff = Math.abs(comboMidpoint - oldMidpoint);
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            bestIdx = i;
+          }
+        }
+        if (bestIdx > 0) bandComboIndex = bestIdx;
       }
     }
 
@@ -355,7 +407,7 @@ export function getLastExerciseHint(
     if (targetReps) {
       const parts = targetReps.split("-");
       const targetMax = parseInt(parts[parts.length - 1]) || 0;
-      if (targetMax > 0 && bestSet.reps > targetMax) {
+      if (targetMax > 0 && (bestSet.reps || 0) > targetMax) {
         suggestUp = true;
         if (bandComboIndex < ladder.length - 1) {
           suggestedComboIndex = bandComboIndex + 1;
@@ -367,9 +419,9 @@ export function getLastExerciseHint(
       date: workout.startedAt,
       bandComboIndex,
       bandLabel,
-      bestReps: bestSet.reps,
-      bestPartials: bestSet.partialReps,
-      spacers: bestSet.spacers,
+      bestReps: bestSet.reps || 0,
+      bestPartials: bestSet.partialReps || 0,
+      spacers: bestSet.spacers || 0,
       suggestUp,
       suggestedComboIndex,
     };

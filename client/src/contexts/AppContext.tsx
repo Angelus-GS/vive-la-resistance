@@ -5,7 +5,7 @@
 // ============================================================
 
 import React, { createContext, useContext, useCallback, useReducer, useEffect, useMemo } from "react";
-import type { AppState, Workout, WorkoutExercise, LoggedSet, Routine, GymProfile, UserProfile, Band, IntensityLevel } from "@/lib/types";
+import type { AppState, Workout, WorkoutExercise, LoggedSet, Routine, GymProfile, UserProfile, Band, IntensityLevel, PersonalRecord } from "@/lib/types";
 import { loadState, saveState } from "@/lib/storage";
 import { generateResistanceLadder } from "@/lib/physics";
 import { nanoid } from "nanoid";
@@ -34,11 +34,48 @@ type Action =
   | { type: "DELETE_WORKOUT"; payload: string }
   | { type: "COMPLETE_ONBOARDING" }
   | { type: "REBUILD_LADDER" }
-  | { type: "RESET_ALL" };
+  | { type: "RESET_ALL" }
+  | { type: "ADD_CUSTOM_ROUTINE"; payload: Routine }
+  | { type: "UPDATE_CUSTOM_ROUTINE"; payload: Routine }
+  | { type: "DELETE_CUSTOM_ROUTINE"; payload: string };
 
 function rebuildLadder(state: AppState): AppState {
   const ownedBands = state.bands.filter(b => b.owned);
-  return { ...state, resistanceLadder: generateResistanceLadder(ownedBands) };
+  const newLadder = generateResistanceLadder(ownedBands);
+  let newState = { ...state, resistanceLadder: newLadder };
+
+  // If there's an active workout, remap all sets' bandComboIndex to the new ladder.
+  // The sets store bandIds (the source of truth), so we find the matching combo
+  // in the new ladder by comparing bandIds. The "No Bands" option is prepended
+  // at index 0 in the UI, so ladder indices here are offset by +1 in the UI.
+  if (newState.activeWorkout) {
+    const fullLadder = [{ bandIds: [] as string[], totalMinLbs: 0, totalMaxLbs: 0, label: "No Bands", colorHexes: [] as string[] }, ...newLadder];
+    const remappedExercises = newState.activeWorkout.exercises.map(ex => ({
+      ...ex,
+      sets: ex.sets.map(set => {
+        // If set has no bands, keep at index 0
+        if (!set.bandIds || set.bandIds.length === 0) return { ...set, bandComboIndex: 0 };
+        // Try to find exact match in new ladder by bandIds
+        const sortedSetBandIds = [...set.bandIds].sort();
+        const matchIndex = fullLadder.findIndex(combo => {
+          if (combo.bandIds.length !== sortedSetBandIds.length) return false;
+          const sortedCombo = [...combo.bandIds].sort();
+          return sortedCombo.every((id, i) => id === sortedSetBandIds[i]);
+        });
+        if (matchIndex >= 0) {
+          return { ...set, bandComboIndex: matchIndex };
+        }
+        // Band combo no longer available — reset to "No Bands" (index 0)
+        return { ...set, bandComboIndex: 0, bandIds: [] };
+      }),
+    }));
+    newState = {
+      ...newState,
+      activeWorkout: { ...newState.activeWorkout, exercises: remappedExercises },
+    };
+  }
+
+  return newState;
 }
 
 function reducer(state: AppState, action: Action): AppState {
@@ -199,10 +236,48 @@ function reducer(state: AppState, action: Action): AppState {
           (Date.now() - new Date(state.activeWorkout.startedAt).getTime()) / 1000
         ),
       };
+      // Detect new personal records
+      const newPRs: PersonalRecord[] = [];
+      const updatedRecords = [...state.personalRecords];
+      for (const exercise of completed.exercises) {
+        for (const set of exercise.sets) {
+          if (!set.completed || !set.reps) continue;
+          // Find existing PR for this exercise + band combo
+          const existingIdx = updatedRecords.findIndex(
+            pr => pr.exerciseTemplateId === exercise.exerciseTemplateId
+              && pr.bandComboIndex === set.bandComboIndex
+          );
+          const existing = existingIdx >= 0 ? updatedRecords[existingIdx] : null;
+          const isBetter = !existing
+            || (set.reps || 0) > existing.bestReps
+            || ((set.reps || 0) === existing.bestReps && (set.partialReps || 0) > existing.bestPartials);
+          if (isBetter) {
+            const pr: PersonalRecord = {
+              exerciseTemplateId: exercise.exerciseTemplateId,
+              bandComboIndex: set.bandComboIndex,
+              bandIds: [...(set.bandIds || [])],
+              bestReps: set.reps || 0,
+              bestPartials: set.partialReps || 0,
+              achievedAt: new Date().toISOString(),
+              workoutId: completed.id,
+            };
+            if (existingIdx >= 0) {
+              updatedRecords[existingIdx] = pr;
+            } else {
+              updatedRecords.push(pr);
+            }
+            // Only flag as "new PR" if there was a previous record to beat
+            if (existing) {
+              newPRs.push(pr);
+            }
+          }
+        }
+      }
       return {
         ...state,
         activeWorkout: null,
         workoutHistory: [completed, ...state.workoutHistory],
+        personalRecords: updatedRecords,
       };
     }
 
@@ -220,6 +295,20 @@ function reducer(state: AppState, action: Action): AppState {
 
     case "REBUILD_LADDER":
       return rebuildLadder(state);
+
+    case "ADD_CUSTOM_ROUTINE":
+      return { ...state, customRoutines: [...state.customRoutines, action.payload] };
+
+    case "UPDATE_CUSTOM_ROUTINE":
+      return {
+        ...state,
+        customRoutines: state.customRoutines.map(r =>
+          r.id === action.payload.id ? action.payload : r
+        ),
+      };
+
+    case "DELETE_CUSTOM_ROUTINE":
+      return { ...state, customRoutines: state.customRoutines.filter(r => r.id !== action.payload) };
 
     case "RESET_ALL":
       return rebuildLadder(loadState());
@@ -318,6 +407,7 @@ export function useWorkout() {
   return {
     activeWorkout: state.activeWorkout,
     history: state.workoutHistory,
+    personalRecords: state.personalRecords,
     dispatch,
   };
 }
@@ -336,5 +426,23 @@ export function usePrograms() {
   const { state } = useApp();
   return {
     programs: state.programs,
+  };
+}
+
+export function useCustomRoutines() {
+  const { state, dispatch, exerciseTemplateMap } = useApp();
+  return {
+    customRoutines: state.customRoutines,
+    exercises: state.exerciseTemplates,
+    exerciseTemplateMap,
+    dispatch,
+  };
+}
+
+export function usePersonalRecords() {
+  const { state } = useApp();
+  return {
+    personalRecords: state.personalRecords,
+    workoutHistory: state.workoutHistory,
   };
 }

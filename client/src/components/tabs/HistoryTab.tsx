@@ -10,22 +10,17 @@ import { useApp, useBands } from "@/contexts/AppContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  BarChart3, Calendar, Download, Trash2, ChevronDown, Clock,
+  BarChart3, Calendar, Download, ChevronRight, Clock,
   TrendingUp, Zap, Flame, Activity, Target
 } from "lucide-react";
 import { downloadCSV } from "@/lib/storage";
-import { calculateSetJoules, estimateElongation, getPeakTension, getBandDisplayName } from "@/lib/physics";
+import { calculateSetJoules, estimateElongation, getPeakTension } from "@/lib/physics";
 import { toast } from "sonner";
 import type { Band, IntensityLevel } from "@/lib/types";
 import ExerciseProgressChart from "@/components/ExerciseProgressChart";
+import WorkoutDetailView from "@/components/WorkoutDetailView";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar
@@ -76,7 +71,22 @@ function ChartTooltip({ active, payload, label }: any) {
 export default function HistoryTab() {
   const { state, dispatch } = useApp();
   const { allBands, bandMap } = useBands();
-  const [expandedWorkout, setExpandedWorkout] = useState<string | null>(null);
+
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
+
+  // If a workout is selected, show the detail view
+  const selectedWorkout = selectedWorkoutId
+    ? state.workoutHistory.find(w => w.id === selectedWorkoutId)
+    : null;
+
+  if (selectedWorkout) {
+    return (
+      <WorkoutDetailView
+        workout={selectedWorkout}
+        onBack={() => setSelectedWorkoutId(null)}
+      />
+    );
+  }
 
   const handleExportCSV = () => {
     if (state.workoutHistory.length === 0) {
@@ -106,28 +116,28 @@ export default function HistoryTab() {
         for (const set of exercise.sets) {
           if (!set.completed) continue;
           totalSets++;
-          totalFullReps += set.reps;
-          totalPartialReps += set.partialReps;
+          totalFullReps += (set.reps || 0);
+          totalPartialReps += (set.partialReps || 0);
 
-          const bands = set.bandIds
+          const bands = (set.bandIds || [])
             .map(id => bandMap.get(id))
             .filter(Boolean) as Band[];
 
           if (bands.length > 0) {
             const elongation = estimateElongation(
               state.userProfile.heightInches,
-              exercise.setup.doubled || false
+              exercise.setup?.doubled || false
             );
-            const tension = getPeakTension(bands, 0, null, elongation, set.spacers);
+            const tension = getPeakTension(bands, 0, null, elongation, set.spacers || 0);
             maxTension = Math.max(maxTension, tension);
 
             const joules = calculateSetJoules(
               bands, 0, null,
               state.userProfile.heightInches,
-              exercise.setup.doubled || false,
-              set.spacers,
-              set.reps,
-              set.partialReps
+              exercise.setup?.doubled || false,
+              set.spacers || 0,
+              set.reps || 0,
+              set.partialReps || 0
             );
             totalJoules += joules;
           }
@@ -312,174 +322,66 @@ export default function HistoryTab() {
               (sum, ex) => sum + ex.sets.filter(s => s.completed).length, 0
             );
             const totalFullReps = workout.exercises.reduce(
-              (sum, ex) => sum + ex.sets.filter(s => s.completed).reduce((rs, s) => rs + s.reps, 0), 0
+              (sum, ex) => sum + ex.sets.filter(s => s.completed).reduce((rs, s) => rs + (s.reps || 0), 0), 0
             );
             const totalPartialReps = workout.exercises.reduce(
-              (sum, ex) => sum + ex.sets.filter(s => s.completed).reduce((rs, s) => rs + s.partialReps, 0), 0
+              (sum, ex) => sum + ex.sets.filter(s => s.completed).reduce((rs, s) => rs + (s.partialReps || 0), 0), 0
             );
-            const isExpanded = expandedWorkout === workout.id;
             const intensity = workout.intensity;
             const iStyle = intensity ? INTENSITY_STYLES[intensity] : null;
 
             return (
-              <Collapsible
+              <Card
                 key={workout.id}
-                open={isExpanded}
-                onOpenChange={() => setExpandedWorkout(isExpanded ? null : workout.id)}
+                className="bg-card border-border cursor-pointer hover:border-primary/30 transition-colors active:bg-accent/30"
+                onClick={() => setSelectedWorkoutId(workout.id)}
               >
-                <Card className="bg-card border-border">
-                  <CollapsibleTrigger className="w-full text-left">
-                    <CardContent className="p-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0">
-                          <Calendar className="w-4.5 h-4.5 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-semibold truncate">{workout.routineName}</p>
-                            {/* Intensity Badge */}
-                            {iStyle && intensity && (
-                              <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
-                                <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
-                                <span className={`text-xs font-bold uppercase tracking-wider ${iStyle.text}`}>
-                                  {intensity}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                            <span className="text-xs text-muted-foreground">
-                              {formatDate(workout.startedAt)}
-                            </span>
-                            <span className="text-xs text-muted-foreground">·</span>
-                            <span className="text-xs text-muted-foreground font-mono tabular-nums">
-                              {formatDuration(workout.durationSeconds)}
-                            </span>
-                            <span className="text-xs text-muted-foreground">·</span>
-                            <span className="text-xs text-muted-foreground">
-                              {completedSets} sets
-                            </span>
-                            <span className="text-xs text-muted-foreground">·</span>
-                            <span className="text-xs font-mono tabular-nums text-foreground/70">
-                              {totalFullReps}
-                              <span className="text-muted-foreground/50">f</span>
-                              {totalPartialReps > 0 && (
-                                <>
-                                  <span className="text-primary/70">+{totalPartialReps}</span>
-                                  <span className="text-muted-foreground/50">p</span>
-                                </>
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                        <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-200 shrink-0 ${isExpanded ? "rotate-180" : ""}`} />
-                      </div>
-                    </CardContent>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <div className="px-3 pb-3 space-y-3">
-                      <Separator />
-                      {workout.exercises.map(exercise => {
-                        const completedExSets = exercise.sets.filter(s => s.completed);
-                        if (completedExSets.length === 0) return null;
-                        return (
-                          <div key={exercise.id} className="space-y-1.5">
-                            <div className="flex items-center gap-2">
-                              <p className="text-xs font-semibold text-foreground/80">{exercise.exerciseName}</p>
-                              <Badge
-                                variant="outline"
-                                className={`text-xs h-3.5 font-mono ${
-                                  exercise.setup.doubled
-                                    ? "border-primary/40 bg-primary/10 text-primary"
-                                    : "border-muted-foreground/20 text-muted-foreground/50"
-                                }`}
-                              >
-                                {exercise.setup.doubled ? "2x" : "1x"}
-                              </Badge>
-                              {exercise.targetReps && (
-                                <Badge variant="secondary" className="text-xs h-4 font-mono bg-accent text-muted-foreground">
-                                  {exercise.targetReps}r
-                                </Badge>
-                              )}
-                            </div>
-                            {completedExSets.map(set => {
-                              const bands = set.bandIds
-                                .map(id => bandMap.get(id))
-                                .filter(Boolean) as Band[];
-                              const bandLabel = bands.length > 0 ? bands.map(b => getBandDisplayName(b)).join(" + ") : "No Bands";
-                              return (
-                                <div key={set.id} className="flex items-center gap-2 text-xs text-muted-foreground pl-3">
-                                  <span className="font-mono w-5 tabular-nums text-muted-foreground/60">S{set.setNumber}</span>
-                                  <div className="flex gap-0.5 shrink-0">
-                                    {bands.length > 0 ? bands.map((b, i) => (
-                                      <span
-                                        key={i}
-                                        className="w-2 h-2 rounded-full border border-white/10"
-                                        style={{ backgroundColor: b.colorHex }}
-                                      />
-                                    )) : (
-                                      <span className="w-2 h-2 rounded-full border border-dashed border-muted-foreground/30" />
-                                    )}
-                                  </div>
-                                  <span className="truncate flex-1">{bandLabel}</span>
-                                  {set.spacers > 0 && (
-                                    <Badge variant="outline" className="text-xs h-4 border-primary/20 text-primary/50 px-1">SP</Badge>
-                                  )}
-                                  {/* Full reps */}
-                                  <span className="font-mono tabular-nums ml-auto shrink-0">
-                                    {set.reps}<span className="text-muted-foreground/50">f</span>
-                                  </span>
-                                  {/* Partial reps */}
-                                  {set.partialReps > 0 && (
-                                    <span className="font-mono tabular-nums text-primary shrink-0">
-                                      +{set.partialReps}<span className="text-primary/50">p</span>
-                                    </span>
-                                  )}
-                                  {/* Isometric hold */}
-                                  {set.isometricSeconds > 0 && (
-                                    <span className="font-mono tabular-nums text-sage-green shrink-0">
-                                      {set.isometricSeconds}<span className="text-sage-green/50">s</span>
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        );
-                      })}
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full text-xs text-destructive/50 hover:text-destructive mt-1"
-                          >
-                            <Trash2 className="w-3 h-3 mr-1" />
-                            Delete Workout
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-card border-border">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete this workout?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This will permanently remove this workout from your history. This action cannot be undone.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteWorkout(workout.id)}
-                              className="bg-destructive text-destructive-foreground"
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center shrink-0">
+                      <Calendar className="w-4.5 h-4.5 text-primary" />
                     </div>
-                  </CollapsibleContent>
-                </Card>
-              </Collapsible>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold truncate">{workout.routineName}</p>
+                        {iStyle && intensity && (
+                          <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded ${iStyle.bg}`}>
+                            <iStyle.icon className={`w-2.5 h-2.5 ${iStyle.text}`} />
+                            <span className={`text-xs font-bold uppercase tracking-wider ${iStyle.text}`}>
+                              {intensity}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                        <span className="text-xs text-muted-foreground">
+                          {formatDate(workout.startedAt)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <span className="text-xs text-muted-foreground font-mono tabular-nums">
+                          {formatDuration(workout.durationSeconds)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <span className="text-xs text-muted-foreground">
+                          {completedSets} sets
+                        </span>
+                        <span className="text-xs text-muted-foreground">·</span>
+                        <span className="text-xs font-mono tabular-nums text-foreground/70">
+                          {totalFullReps}
+                          <span className="text-muted-foreground/50">f</span>
+                          {totalPartialReps > 0 && (
+                            <>
+                              <span className="text-primary/70">+{totalPartialReps}</span>
+                              <span className="text-muted-foreground/50">p</span>
+                            </>
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

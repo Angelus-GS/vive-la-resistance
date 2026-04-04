@@ -118,7 +118,7 @@ export default function ExerciseProgressChart() {
           exerciseMap.set(exercise.exerciseTemplateId, {
             id: exercise.exerciseTemplateId,
             name: exercise.exerciseName,
-            category: exercise.setup.doubled ? "doubled" : "single",
+            category: exercise.setup?.doubled ? "doubled" : "single",
             count: 1,
           });
         }
@@ -131,7 +131,7 @@ export default function ExerciseProgressChart() {
 
     for (const [, ex] of Array.from(exerciseMap)) {
       const template = templateMap.get(ex.id);
-      const cat = template?.category || "other";
+      const cat = template?.category || "isolation";
       const catLabel = cat.charAt(0).toUpperCase() + cat.slice(1);
       if (!grouped[catLabel]) grouped[catLabel] = [];
       grouped[catLabel].push({ id: ex.id, name: ex.name, count: ex.count });
@@ -145,16 +145,20 @@ export default function ExerciseProgressChart() {
     return grouped;
   }, [state.workoutHistory, state.exerciseTemplates]);
 
+  // Auto-select first exercise if none selected
+  const allExercises = Object.values(exerciseOptions).flat();
+  const effectiveId = selectedExerciseId || (allExercises.length > 0 ? allExercises[0].id : "");
+
   // Compute chart data for the selected exercise
   const chartData = useMemo((): DataPoint[] => {
-    if (!selectedExerciseId) return [];
+    if (!effectiveId) return [];
 
     const workouts = [...state.workoutHistory].reverse(); // chronological order
     const points: DataPoint[] = [];
 
     for (const workout of workouts) {
       for (const exercise of workout.exercises) {
-        if (exercise.exerciseTemplateId !== selectedExerciseId) continue;
+        if (exercise.exerciseTemplateId !== effectiveId) continue;
 
         const completedSets = exercise.sets.filter(s => s.completed);
         if (completedSets.length === 0) continue;
@@ -166,31 +170,31 @@ export default function ExerciseProgressChart() {
         let totalReps = 0;
 
         for (const set of completedSets) {
-          const bands = set.bandIds
+          const bands = (set.bandIds || [])
             .map(id => bandMap.get(id))
             .filter(Boolean) as Band[];
 
-          totalReps += set.reps + set.partialReps;
+          totalReps += (set.reps || 0) + (set.partialReps || 0);
 
           if (bands.length > 0) {
             const elongation = estimateElongation(
               state.userProfile.heightInches,
-              exercise.setup.doubled || false
+              exercise.setup?.doubled || false
             );
-            const tension = getPeakTension(bands, 0, null, elongation, set.spacers);
+            const tension = getPeakTension(bands, 0, null, elongation, set.spacers || 0);
 
             if (tension > bestTension) {
               bestTension = tension;
               bestBands = bands;
-              maxRepsAtBest = set.reps;
-            } else if (tension === bestTension && set.reps > maxRepsAtBest) {
-              maxRepsAtBest = set.reps;
+              maxRepsAtBest = set.reps || 0;
+            } else if (tension === bestTension && (set.reps || 0) > maxRepsAtBest) {
+              maxRepsAtBest = set.reps || 0;
               bestBands = bands;
             }
           } else {
             // Bodyweight: track reps only
-            if (set.reps > maxRepsAtBest && bestTension === 0) {
-              maxRepsAtBest = set.reps;
+            if ((set.reps || 0) > maxRepsAtBest && bestTension === 0) {
+              maxRepsAtBest = set.reps || 0;
             }
           }
         }
@@ -216,15 +220,11 @@ export default function ExerciseProgressChart() {
     }
 
     return points;
-  }, [selectedExerciseId, state.workoutHistory, bandMap, state.userProfile.heightInches]);
+  }, [effectiveId, state.workoutHistory, bandMap, state.userProfile.heightInches]);
 
   // Don't render if no workout history
   const hasExercises = Object.keys(exerciseOptions).length > 0;
   if (!hasExercises) return null;
-
-  // Auto-select first exercise if none selected
-  const allExercises = Object.values(exerciseOptions).flat();
-  const effectiveId = selectedExerciseId || (allExercises.length > 0 ? allExercises[0].id : "");
 
   // Summary stats for the selected exercise
   const summary = useMemo(() => {
