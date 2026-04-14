@@ -37,7 +37,8 @@ type Action =
   | { type: "RESET_ALL" }
   | { type: "ADD_CUSTOM_ROUTINE"; payload: Routine }
   | { type: "UPDATE_CUSTOM_ROUTINE"; payload: Routine }
-  | { type: "DELETE_CUSTOM_ROUTINE"; payload: string };
+  | { type: "DELETE_CUSTOM_ROUTINE"; payload: string }
+  | { type: "IMPORT_WORKOUTS"; payload: Workout[] };
 
 function rebuildLadder(state: AppState): AppState {
   const ownedBands = state.bands.filter(b => b.owned);
@@ -309,6 +310,13 @@ function reducer(state: AppState, action: Action): AppState {
 
     case "DELETE_CUSTOM_ROUTINE":
       return { ...state, customRoutines: state.customRoutines.filter(r => r.id !== action.payload) };
+
+    case "IMPORT_WORKOUTS": {
+      // Merge imported workouts into history, sorted by date (newest first)
+      const merged = [...action.payload, ...state.workoutHistory];
+      merged.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+      return { ...state, workoutHistory: merged };
+    }
 
     case "RESET_ALL":
       return rebuildLadder(loadState());

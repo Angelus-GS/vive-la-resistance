@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import {
-  BarChart3, Calendar, Download, ChevronRight, Clock,
+  BarChart3, Calendar, Download, Upload, ChevronRight, Clock,
   TrendingUp, Zap, Flame, Activity, Target
 } from "lucide-react";
-import { downloadCSV } from "@/lib/storage";
+import { downloadCSV, importFromCSV, matchExerciseTemplates } from "@/lib/storage";
 import { calculateSetJoules, estimateElongation, getPeakTension } from "@/lib/physics";
 import { toast } from "sonner";
 import type { Band, IntensityLevel } from "@/lib/types";
@@ -86,6 +86,48 @@ export default function HistoryTab() {
     }
     downloadCSV(state);
     toast.success("CSV exported successfully");
+  };
+
+  const handleImportCSV = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".csv,text/csv";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const csv = ev.target?.result as string;
+        if (!csv) {
+          toast.error("Could not read file");
+          return;
+        }
+        try {
+          const result = importFromCSV(csv, allBands, state.workoutHistory);
+          if (result.errors.length > 0) {
+            result.errors.slice(0, 3).forEach(err => toast.error(err));
+          }
+          if (result.workouts.length === 0 && result.skipped === 0) {
+            toast.error("No workouts found in CSV");
+            return;
+          }
+          // Match exercise names to templates
+          const matched = matchExerciseTemplates(result.workouts, state.exerciseTemplates);
+          if (matched.length > 0) {
+            dispatch({ type: "IMPORT_WORKOUTS", payload: matched });
+          }
+          const parts: string[] = [];
+          if (result.imported > 0) parts.push(`${result.imported} workout${result.imported > 1 ? "s" : ""} imported`);
+          if (result.skipped > 0) parts.push(`${result.skipped} duplicate${result.skipped > 1 ? "s" : ""} skipped`);
+          toast.success(parts.join(", ") || "Import complete");
+        } catch (err) {
+          console.error("CSV import error:", err);
+          toast.error("Failed to parse CSV file");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
   };
 
   const handleDeleteWorkout = (id: string) => {
@@ -183,15 +225,26 @@ export default function HistoryTab() {
             <h1 className="text-xl font-bold tracking-tight">History & Analytics</h1>
             <p className="text-xs text-muted-foreground">{totalWorkouts} workouts logged</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-xs h-7"
-            onClick={handleExportCSV}
-          >
-            <Download className="w-3 h-3 mr-1" />
-            CSV
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7"
+              onClick={handleImportCSV}
+            >
+              <Upload className="w-3 h-3 mr-1" />
+              Import
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs h-7"
+              onClick={handleExportCSV}
+            >
+              <Download className="w-3 h-3 mr-1" />
+              CSV
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -4,7 +4,7 @@
 // Zero-latency, offline-first local data architecture
 // ============================================================
 
-import type { AppState } from "./types";
+import type { AppState, Workout, WorkoutExercise, LoggedSet, Band } from "./types";
 import { DEFAULT_CATEGORY_REST_TIMERS } from "./types";
 import { DEFAULT_BANDS, DEFAULT_BARS, DEFAULT_FOOTPLATES, DEFAULT_ACCESSORIES, DEFAULT_EXERCISES, GORILLA_GAINS_PROGRAM, GORILLA_GAINS_ROUTINES, HARAMBRO_V3_PROGRAM, HARAMBRO_V3_ROUTINES } from "./equipment-data";
 
@@ -202,4 +202,324 @@ export function downloadCSV(state: AppState): void {
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+// ---- CSV Parsing Helpers ----
+
+/** Parse a CSV string into rows of string arrays, handling quoted fields */
+function parseCSVRows(csv: string): string[][] {
+  const rows: string[][] = [];
+  let current = "";
+  let inQuotes = false;
+  let row: string[] = [];
+
+  for (let i = 0; i < csv.length; i++) {
+    const ch = csv[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < csv.length && csv[i + 1] === '"') {
+          current += '"';
+          i++; // skip escaped quote
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        row.push(current.trim());
+        current = "";
+      } else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && i + 1 < csv.length && csv[i + 1] === '\n') i++;
+        row.push(current.trim());
+        if (row.some(cell => cell.length > 0)) rows.push(row);
+        row = [];
+        current = "";
+      } else {
+        current += ch;
+      }
+    }
+  }
+  // Last row
+  row.push(current.trim());
+  if (row.some(cell => cell.length > 0)) rows.push(row);
+  return rows;
+}
+
+/** Match a band combo string like "Harambe Red + Harambe Green" to band IDs */
+function matchBandIds(bandComboStr: string, allBands: Band[]): string[] {
+  if (!bandComboStr || bandComboStr === "None" || bandComboStr === "No Bands") return [];
+  const parts = bandComboStr.split("+").map(s => s.trim());
+  const ids: string[] = [];
+  for (const part of parts) {
+    // Try matching "Brand Color" pattern
+    const band = allBands.find(b => `${b.brand} ${b.color}` === part);
+    if (band) {
+      ids.push(band.id);
+    } else {
+      // Fuzzy match: try color only
+      const colorMatch = allBands.find(b => b.color.toLowerCase() === part.toLowerCase());
+      if (colorMatch) ids.push(colorMatch.id);
+    }
+  }
+  return ids;
+}
+
+/**
+ * Import workouts from a CSV string (matching the export format).
+ * Groups rows by Date + Workout name to reconstruct Workout objects.
+ * Returns { workouts, skipped, errors } for user feedback.
+ */
+export function importFromCSV(
+  csv: string,
+  allBands: Band[],
+  existingHistory: Workout[]
+): { workouts: Workout[]; imported: number; skipped: number; errors: string[] } {
+  const { nanoid } = (() => {
+    // Simple ID generator for imports (no need for full nanoid)
+    let counter = 0;
+    return { nanoid: () => `import-${Date.now()}-${counter++}` };
+  })();
+
+  const rows = parseCSVRows(csv);
+  if (rows.length < 2) {
+    return { workouts: [], imported: 0, skipped: 0, errors: ["CSV file is empty or has no data rows"] };
+  }
+
+  // Parse header row to find column indices
+  const header = rows[0].map(h => h.toLowerCase().trim());
+  const col = (name: string): number => {
+    const variants: Record<string, string[]> = {
+      date: ["date"],
+      workout: ["workout", "routine"],
+      intensity: ["intensity"],
+      exercise: ["exercise"],
+      set: ["set"],
+      bandcombo: ["band combo", "bands", "band_combo"],
+      doubled: ["doubled"],
+      spacers: ["spacers"],
+      fullreps: ["full reps", "full_reps", "reps"],
+      partialreps: ["partial reps", "partial_reps", "partials"],
+      isometric: ["isometric (s)", "isometric", "iso"],
+      rpe: ["rpe"],
+      rir: ["rir"],
+      peaktension: ["peak tension (lbs)", "peak tension", "tension"],
+      notes: ["notes"],
+    };
+    const names = variants[name] || [name];
+    for (const n of names) {
+      const idx = header.indexOf(n);
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  };
+
+  const dateIdx = col("date");
+  const workoutIdx = col("workout");
+  const intensityIdx = col("intensity");
+  const exerciseIdx = col("exercise");
+  const setIdx = col("set");
+  const bandComboIdx = col("bandcombo");
+  const doubledIdx = col("doubled");
+  const spacersIdx = col("spacers");
+  const fullRepsIdx = col("fullreps");
+  const partialRepsIdx = col("partialreps");
+  const isometricIdx = col("isometric");
+  const rpeIdx = col("rpe");
+  const rirIdx = col("rir");
+  const notesIdx = col("notes");
+
+  if (dateIdx < 0 || exerciseIdx < 0) {
+    return { workouts: [], imported: 0, skipped: 0, errors: ["CSV must have at least 'Date' and 'Exercise' columns"] };
+  }
+
+  const errors: string[] = [];
+
+  // Group rows by workout (Date + Workout name)
+  type WorkoutGroup = {
+    date: string;
+    workoutName: string;
+    intensity: string;
+    exercises: Map<string, { name: string; doubled: boolean; sets: any[] }>;
+  };
+
+  const workoutGroups: WorkoutGroup[] = [];
+  let currentGroup: WorkoutGroup | null = null;
+
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const date = row[dateIdx] || "";
+    const workoutName = workoutIdx >= 0 ? (row[workoutIdx] || "Free Workout") : "Free Workout";
+    const intensity = intensityIdx >= 0 ? (row[intensityIdx] || "") : "";
+    const exerciseName = row[exerciseIdx] || "";
+
+    if (!date || !exerciseName) {
+      errors.push(`Row ${i + 1}: missing date or exercise name, skipped`);
+      continue;
+    }
+
+    // Check if this row belongs to a new workout group
+    const groupKey = `${date}|${workoutName}`;
+    if (!currentGroup || `${currentGroup.date}|${currentGroup.workoutName}` !== groupKey) {
+      currentGroup = {
+        date,
+        workoutName,
+        intensity,
+        exercises: new Map(),
+      };
+      workoutGroups.push(currentGroup);
+    }
+
+    // Get or create exercise entry
+    if (!currentGroup.exercises.has(exerciseName)) {
+      currentGroup.exercises.set(exerciseName, {
+        name: exerciseName,
+        doubled: doubledIdx >= 0 ? (row[doubledIdx] || "").toLowerCase() === "yes" : false,
+        sets: [],
+      });
+    }
+    const exercise = currentGroup.exercises.get(exerciseName)!;
+
+    // Parse set data
+    const bandComboStr = bandComboIdx >= 0 ? (row[bandComboIdx] || "") : "";
+    const bandIds = matchBandIds(bandComboStr, allBands);
+    const fullReps = fullRepsIdx >= 0 ? parseInt(row[fullRepsIdx] || "0", 10) || 0 : 0;
+    const partialReps = partialRepsIdx >= 0 ? parseInt(row[partialRepsIdx] || "0", 10) || 0 : 0;
+    const isometricSec = isometricIdx >= 0 ? parseInt(row[isometricIdx] || "0", 10) || 0 : 0;
+    const spacers = spacersIdx >= 0 ? parseInt(row[spacersIdx] || "0", 10) || 0 : 0;
+    const rpe = rpeIdx >= 0 && row[rpeIdx] ? parseFloat(row[rpeIdx]) : null;
+    const rir = rirIdx >= 0 && row[rirIdx] ? parseInt(row[rirIdx], 10) : null;
+    const notes = notesIdx >= 0 ? (row[notesIdx] || "") : "";
+    const setNum = setIdx >= 0 ? parseInt(row[setIdx] || "1", 10) || (exercise.sets.length + 1) : (exercise.sets.length + 1);
+
+    exercise.sets.push({
+      setNumber: setNum,
+      bandIds,
+      spacers,
+      reps: fullReps,
+      partialReps,
+      isometricSeconds: isometricSec,
+      rpe: isNaN(rpe as number) ? null : rpe,
+      rir: isNaN(rir as number) ? null : rir,
+      notes,
+    });
+  }
+
+  // Build existing workout fingerprints for dedup
+  const existingFingerprints = new Set(
+    existingHistory.map(w => {
+      const d = new Date(w.startedAt).toLocaleDateString();
+      return `${d}|${w.routineName}`;
+    })
+  );
+
+  // Convert groups to Workout objects
+  const importedWorkouts: Workout[] = [];
+  let skipped = 0;
+
+  for (const group of workoutGroups) {
+    // Dedup check
+    const fingerprint = `${group.date}|${group.workoutName}`;
+    if (existingFingerprints.has(fingerprint)) {
+      skipped++;
+      continue;
+    }
+
+    // Parse the date string into an ISO date
+    let startedAt: string;
+    try {
+      const parsed = new Date(group.date);
+      if (isNaN(parsed.getTime())) throw new Error("Invalid date");
+      // Set to noon to avoid timezone issues
+      parsed.setHours(12, 0, 0, 0);
+      startedAt = parsed.toISOString();
+    } catch {
+      errors.push(`Could not parse date "${group.date}", skipped workout`);
+      continue;
+    }
+
+    const exercises: WorkoutExercise[] = [];
+    for (const [, exData] of Array.from(group.exercises)) {
+      const sets: LoggedSet[] = exData.sets.map((s, idx) => ({
+        id: nanoid(),
+        setNumber: s.setNumber || idx + 1,
+        bandComboIndex: 0, // Will be recalculated if needed
+        bandIds: s.bandIds,
+        spacers: s.spacers,
+        reps: s.reps,
+        partialReps: s.partialReps,
+        isometricSeconds: s.isometricSeconds,
+        rpe: s.rpe,
+        rir: s.rir,
+        completed: true, // All imported sets are completed (CSV only exports completed)
+        timestamp: startedAt,
+        notes: s.notes,
+      }));
+
+      exercises.push({
+        id: nanoid(),
+        exerciseTemplateId: nanoid(), // Will be matched below
+        exerciseName: exData.name,
+        setup: {
+          doubled: exData.doubled,
+        },
+        sets,
+      });
+    }
+
+    // Parse intensity
+    const intensityLower = group.intensity.toLowerCase();
+    const intensity = (intensityLower === "heavy" || intensityLower === "medium" || intensityLower === "light")
+      ? intensityLower as "heavy" | "medium" | "light"
+      : undefined;
+
+    const workout: Workout = {
+      id: nanoid(),
+      routineId: null,
+      routineName: group.workoutName,
+      exercises,
+      startedAt,
+      completedAt: startedAt, // Same as started since we don't know actual end time
+      durationSeconds: 0,
+      notes: "",
+      intensity,
+    };
+
+    importedWorkouts.push(workout);
+  }
+
+  return {
+    workouts: importedWorkouts,
+    imported: importedWorkouts.length,
+    skipped,
+    errors,
+  };
+}
+
+/**
+ * Match imported exercise names to existing exercise templates.
+ * Updates exerciseTemplateId on each imported exercise.
+ */
+export function matchExerciseTemplates(
+  workouts: Workout[],
+  templates: AppState["exerciseTemplates"]
+): Workout[] {
+  const templateMap = new Map<string, string>(); // lowercase name -> template ID
+  for (const t of templates) {
+    templateMap.set(t.name.toLowerCase(), t.id);
+  }
+
+  return workouts.map(w => ({
+    ...w,
+    exercises: w.exercises.map(ex => {
+      const matchedId = templateMap.get(ex.exerciseName.toLowerCase());
+      return {
+        ...ex,
+        exerciseTemplateId: matchedId || ex.exerciseTemplateId,
+      };
+    }),
+  }));
 }
