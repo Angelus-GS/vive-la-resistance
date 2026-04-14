@@ -16,15 +16,7 @@ export const DEFAULT_BANDS: Band[] = [
   { id: "harambe-black", brand: "Harambe", color: "Black", colorHex: "#2A2A2A", label: "Heavy", minLbs: 40, maxLbs: 100, lengthInches: 38, widthMm: 32, owned: false },
   { id: "harambe-red", brand: "Harambe", color: "Red", colorHex: "#C43030", label: "Monster", minLbs: 60, maxLbs: 150, lengthInches: 38, widthMm: 44, owned: false },
 
-  // Serious Steel 37" Résistance Training Bands (amazon.com/dp/B0D5HWY811)
-  { id: "ss-0-orange", brand: "Serious Steel", color: "#0 Orange", colorHex: "#FF6B00", label: "#0", minLbs: 2, maxLbs: 15, lengthInches: 37, widthMm: 6, owned: false },
-  { id: "ss-1-purple", brand: "Serious Steel", color: "#1 Purple", colorHex: "#7B2D8E", label: "#1", minLbs: 5, maxLbs: 35, lengthInches: 37, widthMm: 13, owned: false },
-  { id: "ss-2-red", brand: "Serious Steel", color: "#2 Red", colorHex: "#D32F2F", label: "#2", minLbs: 10, maxLbs: 50, lengthInches: 37, widthMm: 21, owned: false },
-  { id: "ss-3-blue", brand: "Serious Steel", color: "#3 Blue", colorHex: "#1976D2", label: "#3", minLbs: 25, maxLbs: 80, lengthInches: 37, widthMm: 29, owned: false },
-  { id: "ss-4-green", brand: "Serious Steel", color: "#4 Green", colorHex: "#2E7D32", label: "#4", minLbs: 50, maxLbs: 120, lengthInches: 37, widthMm: 44, owned: false },
-  { id: "ss-5-gray", brand: "Serious Steel", color: "#5 Gray", colorHex: "#616161", label: "#5", minLbs: 60, maxLbs: 150, lengthInches: 37, widthMm: 64, owned: false },
-
-  // Serious Steel 41" Pull-Up Assist Bands (amazon.com/dp/B01LY5WJZ0)
+  // Serious Steel 41" Pull-Up Assist Bands (amazon.com/dp/B01LY5WJZ0) — 41" loops are lighter at same width
   { id: "ss41-0-orange", brand: "Serious Steel 41\"", color: "#0 Orange", colorHex: "#FF6B00", label: "#0", minLbs: 2, maxLbs: 15, lengthInches: 41, widthMm: 6, owned: false },
   { id: "ss41-1-purple", brand: "Serious Steel 41\"", color: "#1 Purple", colorHex: "#7B2D8E", label: "#1", minLbs: 5, maxLbs: 35, lengthInches: 41, widthMm: 13, owned: false },
   { id: "ss41-2-red", brand: "Serious Steel 41\"", color: "#2 Red", colorHex: "#D32F2F", label: "#2", minLbs: 10, maxLbs: 50, lengthInches: 41, widthMm: 21, owned: false },
@@ -38,6 +30,21 @@ export const DEFAULT_BANDS: Band[] = [
   { id: "us-blue", brand: "Undersun", color: "Blue", colorHex: "#3070B0", label: "Medium", minLbs: 25, maxLbs: 65, lengthInches: 41, widthMm: 22, owned: false },
   { id: "us-black", brand: "Undersun", color: "Black", colorHex: "#2A2A2A", label: "Heavy", minLbs: 40, maxLbs: 80, lengthInches: 41, widthMm: 32, owned: false },
   { id: "us-red", brand: "Undersun", color: "Red", colorHex: "#C43030", label: "X-Heavy", minLbs: 50, maxLbs: 120, lengthInches: 41, widthMm: 44, owned: false },
+
+  // Serious Steel 41" Non-Latex / Latex Free Bands (amazon.com/dp/B0FB111V8K) — same specs as SS 41", synthetic rubber
+  { id: "sslf-0-tan", brand: "SS 41\" Latex-Free", color: "#0 Lime", colorHex: "#D4D88C", label: "#0", minLbs: 3, maxLbs: 25, lengthInches: 41, widthMm: 6, owned: false },
+  { id: "sslf-1-gray", brand: "SS 41\" Latex-Free", color: "#1 Sand", colorHex: "#C8B078", label: "#1", minLbs: 5, maxLbs: 45, lengthInches: 41, widthMm: 13, owned: false },
+  { id: "sslf-2-charcoal", brand: "SS 41\" Latex-Free", color: "#2 Mocha", colorHex: "#7A6E60", label: "#2", minLbs: 10, maxLbs: 85, lengthInches: 41, widthMm: 21, owned: false },
+  { id: "sslf-3-olive", brand: "SS 41\" Latex-Free", color: "#3 Gray", colorHex: "#505050", label: "#3", minLbs: 15, maxLbs: 130, lengthInches: 41, widthMm: 32, owned: false },
+  { id: "sslf-4-black", brand: "SS 41\" Latex-Free", color: "#4 Black", colorHex: "#1A1A1A", label: "#4", minLbs: 20, maxLbs: 170, lengthInches: 41, widthMm: 44, owned: false },
+
+  // Serious Steel 37" Résistance Training Bands (amazon.com/dp/B0D5HWY811) — shorter loop = higher tension
+  { id: "ss-0-orange", brand: "Serious Steel", color: "#0 Orange", colorHex: "#FF6B00", label: "#0", minLbs: 2, maxLbs: 15, lengthInches: 37, widthMm: 6, owned: false },
+  { id: "ss-1-purple", brand: "Serious Steel", color: "#1 Purple", colorHex: "#7B2D8E", label: "#1", minLbs: 5, maxLbs: 35, lengthInches: 37, widthMm: 13, owned: false },
+  { id: "ss-2-red", brand: "Serious Steel", color: "#2 Red", colorHex: "#D32F2F", label: "#2", minLbs: 10, maxLbs: 50, lengthInches: 37, widthMm: 21, owned: false },
+  { id: "ss-3-blue", brand: "Serious Steel", color: "#3 Blue", colorHex: "#1976D2", label: "#3", minLbs: 25, maxLbs: 80, lengthInches: 37, widthMm: 29, owned: false },
+  { id: "ss-4-green", brand: "Serious Steel", color: "#4 Green", colorHex: "#2E7D32", label: "#4", minLbs: 50, maxLbs: 120, lengthInches: 37, widthMm: 44, owned: false },
+  { id: "ss-5-gray", brand: "Serious Steel", color: "#5 Gray", colorHex: "#616161", label: "#5", minLbs: 60, maxLbs: 150, lengthInches: 37, widthMm: 64, owned: false },
 ];
 
 // --- BARS ---
@@ -73,27 +80,27 @@ export const DEFAULT_ACCESSORIES: Accessory[] = [
 // Gorilla Gains exercises have their correct doubled/singled defaults
 
 export const DEFAULT_EXERCISES: ExerciseTemplate[] = [
-  // Push — Gorilla Gains
-  { id: "ex-bench-press", name: "Bench Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — primary chest movement", videoUrl: "https://youtu.be/5X_gPGYWYuA" },
-  { id: "ex-overhead-press", name: "Overhead Press", category: "push", defaultSetup: { doubled: false }, notes: "Singled — standing military press", videoUrl: "https://youtu.be/85C75KNm7Qo" },
-  { id: "ex-tricep-extension", name: "Tricep Extension", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — overhead or pushdown", videoUrl: "https://youtu.be/SMRkz6vuBe0" },
-  { id: "ex-incline-press", name: "Incline Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — angled press for upper chest", videoUrl: "https://www.youtube.com/shorts/KeBeIc8CMw4" },
-  { id: "ex-chest-press", name: "Chest Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — standing or floor press", videoUrl: "https://youtu.be/5X_gPGYWYuA" },
+  // Compound — Gorilla Gains
+  { id: "ex-bench-press", name: "Bench Press", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — primary chest movement", videoUrl: "https://www.youtube.com/watch?v=yY3SD4mVwEY" },
+  { id: "ex-overhead-press", name: "Overhead Press", category: "compound", defaultSetup: { doubled: false }, notes: "Singled — standing military press", videoUrl: "https://youtu.be/85C75KNm7Qo" },
+  { id: "ex-tricep-extension", name: "Tricep Extension", category: "isolation", defaultSetup: { doubled: true }, notes: "Doubled — overhead or pushdown", videoUrl: "https://youtu.be/SMRkz6vuBe0" },
+  { id: "ex-incline-press", name: "Incline Press", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — angled press for upper chest", videoUrl: "https://www.youtube.com/shorts/KeBeIc8CMw4" },
+  { id: "ex-chest-press", name: "Chest Press", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — standing or floor press", videoUrl: "https://www.youtube.com/watch?v=yY3SD4mVwEY" },
 
-  // Pull — Gorilla Gains
-  { id: "ex-rdl", name: "Romanian Deadlift", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — stiff-leg hip hinge", videoUrl: "https://youtu.be/2YNi18sXZtI" },
-  { id: "ex-bent-row", name: "Bent-Over Row", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — overhand or underhand grip", videoUrl: "https://youtu.be/XByIBZGh0V0" },
-  { id: "ex-ferro-curl", name: "Ferro Curl", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — Harambe bicep curl variation", videoUrl: "https://youtu.be/WPbCeZAtOaA" },
-  { id: "ex-shrugs", name: "Shrugs", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — trap isolation (optional)", optional: true, videoUrl: "https://youtu.be/-wFZjHB8zxE" },
-  { id: "ex-deadlift", name: "Deadlift", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — conventional or sumo stance", videoUrl: "https://www.youtube.com/watch?v=KjNDHw6mVIE" },
-  { id: "ex-bicep-curl", name: "Bicep Curl", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — standing curl", videoUrl: "https://youtu.be/WPbCeZAtOaA" },
-  { id: "ex-face-pull", name: "Face Pull", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — anchor at face height", videoUrl: "https://www.youtube.com/shorts/dVlfWbKr2Rw" },
+  // Compound — Gorilla Gains (continued)
+  { id: "ex-rdl", name: "Romanian Deadlift", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — stiff-leg hip hinge", videoUrl: "https://youtu.be/2YNi18sXZtI" },
+  { id: "ex-bent-row", name: "Bent-Over Row", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — overhand or underhand grip", videoUrl: "https://youtu.be/XByIBZGh0V0" },
+  { id: "ex-ferro-curl", name: "Ferro Curl", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — Harambe bicep curl variation", videoUrl: "https://www.youtube.com/shorts/VEojAZxcsx4" },
+  { id: "ex-shrugs", name: "Shrugs", category: "isolation", defaultSetup: { doubled: true }, notes: "Doubled — trap isolation (optional)", optional: true, videoUrl: "https://www.youtube.com/watch?v=ftn3fUL36A8" },
+  { id: "ex-deadlift", name: "Deadlift", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — conventional or sumo stance", videoUrl: "https://www.youtube.com/watch?v=AmE6chaRxzU" },
+  { id: "ex-bicep-curl", name: "Bicep Curl", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — standing curl", videoUrl: "https://youtu.be/WPbCeZAtOaA" },
+  { id: "ex-face-pull", name: "Face Pull", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — anchor at face height", videoUrl: "https://www.youtube.com/shorts/dVlfWbKr2Rw" },
 
-  // Legs — Gorilla Gains
-  { id: "ex-front-squat", name: "Front Squat", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — front rack position", videoUrl: "https://youtu.be/Ewrkp3n2_ak" },
-  { id: "ex-back-squat", name: "Back Squat", category: "legs", defaultSetup: { doubled: true }, notes: "Doubled — use VA Overload Strap for deep squats (optional)", optional: true, videoUrl: "https://youtu.be/nB5DgxZgy0U" },
-  { id: "ex-split-squat", name: "Split Squat", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — unilateral leg work (optional)", optional: true, videoUrl: "https://youtu.be/_n8RtIIXzp0" },
-  { id: "ex-calf-raise", name: "Calf Raise", category: "legs", defaultSetup: { doubled: true }, notes: "Doubled — standing on footplate", videoUrl: "https://youtu.be/mu54xsdYmmE" },
+  // Compound — Gorilla Gains (legs)
+  { id: "ex-front-squat", name: "Front Squat", category: "compound", defaultSetup: { doubled: false }, notes: "Singled — front rack position", videoUrl: "https://youtu.be/Ewrkp3n2_ak" },
+  { id: "ex-back-squat", name: "Back Squat", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — use VA Overload Strap for deep squats (optional)", optional: true, videoUrl: "https://youtu.be/nB5DgxZgy0U" },
+  { id: "ex-split-squat", name: "Split Squat", category: "compound", defaultSetup: { doubled: false }, notes: "Singled — unilateral leg work (optional)", optional: true, videoUrl: "https://youtu.be/_n8RtIIXzp0" },
+  { id: "ex-calf-raise", name: "Calf Raise", category: "isolation", defaultSetup: { doubled: true }, notes: "Doubled — standing on footplate", videoUrl: "https://www.youtube.com/shorts/1ewELpQNkUg" },
 
   // Core
   { id: "ex-pallof-press", name: "Pallof Press", category: "core", defaultSetup: { doubled: false }, notes: "Singled — anti-rotation core work" },
@@ -103,41 +110,42 @@ export const DEFAULT_EXERCISES: ExerciseTemplate[] = [
   { id: "ex-lateral-raise", name: "Lateral Raise", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — stand on band", videoUrl: "https://www.youtube.com/watch?v=_Joc8ySGCWU" },
 
   // HaramBro V3 — Exercises
-  { id: "ex-chest-fly", name: "Crossovers", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — band crossover / chest fly", videoUrl: "https://www.youtube.com/watch?v=BukY2sr3mrA" },
+  { id: "ex-chest-fly", name: "Crossovers", category: "isolation", defaultSetup: { doubled: true }, notes: "Doubled — band crossover / chest fly", videoUrl: "https://www.youtube.com/watch?v=BukY2sr3mrA" },
   { id: "ex-z-press", name: "Z Press", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — seated overhead press with no back support", videoUrl: "https://www.youtube.com/shorts/NtLNML9zwwY" },
-  { id: "ex-close-grip-bench", name: "Narrow Bench Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — narrow grip for tricep emphasis", videoUrl: "https://www.youtube.com/watch?v=srgkQCnfSjc" },
-  { id: "ex-yates-row", name: "Yates Row", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — underhand supinated row for back thickness", videoUrl: "https://youtu.be/XByIBZGh0V0" },
-  { id: "ex-pendlay-row", name: "Pendlay Row", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — strict barbell row from floor", videoUrl: "https://www.youtube.com/shorts/dWGlZE6_3vQ" },
-  { id: "ex-one-arm-pulldown", name: "One-Arm Pull Down", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — unilateral lat pulldown, each arm", videoUrl: "https://www.youtube.com/watch?v=rU7UNBWmBv0" },
-  { id: "ex-narrow-front-squat", name: "Angled Narrow Front Squat", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — narrow stance angled front squat", videoUrl: "https://youtu.be/Ewrkp3n2_ak" },
-  { id: "ex-one-leg-rdl", name: "One-Legged RDL", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — single-leg Romanian deadlift, each leg", videoUrl: "https://youtu.be/2YNi18sXZtI" },
-  { id: "ex-lawnmower-row", name: "Lawnmower Rows", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — one-arm row, each side", videoUrl: "https://www.youtube.com/shorts/34cqNUDyBv0" },
-  { id: "ex-wide-ferro-curl", name: "Wide Ferro Curls", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — wide-grip Ferro curl", videoUrl: "https://youtu.be/WPbCeZAtOaA" },
+  { id: "ex-close-grip-bench", name: "Narrow Bench Press", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — narrow grip for tricep emphasis", videoUrl: "https://www.youtube.com/watch?v=srgkQCnfSjc" },
+  { id: "ex-yates-row", name: "Yates Row", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — underhand supinated row for back thickness", videoUrl: "https://youtu.be/XByIBZGh0V0" },
+  { id: "ex-pendlay-row", name: "Pendlay Row", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — strict barbell row from floor", videoUrl: "https://www.youtube.com/watch?v=XByIBZGh0V0" },
+  { id: "ex-one-arm-pulldown", name: "One-Arm Pull Down", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — unilateral lat pulldown, each arm", videoUrl: "https://www.youtube.com/watch?v=rU7UNBWmBv0" },
+  { id: "ex-narrow-front-squat", name: "Angled Narrow Front Squat", category: "compound", defaultSetup: { doubled: false }, notes: "Singled — narrow stance angled front squat", videoUrl: "https://youtu.be/Ewrkp3n2_ak" },
+  { id: "ex-one-leg-rdl", name: "One-Legged RDL", category: "compound", defaultSetup: { doubled: false }, notes: "Singled — single-leg Romanian deadlift, each leg", videoUrl: "https://youtu.be/L4-x7JWy8mA" },
+  { id: "ex-lawnmower-row", name: "Lawnmower Rows", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — one-arm row, each side", videoUrl: "https://www.youtube.com/shorts/34cqNUDyBv0" },
+  { id: "ex-wide-ferro-curl", name: "Wide Ferro Curls", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — wide-grip Ferro curl", videoUrl: "https://www.youtube.com/shorts/1MkwXZpxptk" },
   { id: "ex-band-pull-apart", name: "Band Pull Aparts", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — rear delt pull apart", videoUrl: "https://www.youtube.com/watch?v=xgVgUoKP990" },
   { id: "ex-front-raise", name: "Front Raises", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — front deltoid raise", videoUrl: "https://www.youtube.com/watch?v=2VFZQOTFYqg" },
-  { id: "ex-one-arm-ohp", name: "One-Arm Overhead Press", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — unilateral overhead press, each arm" },
-  { id: "ex-tricep-press", name: "Tricep Press", category: "push", defaultSetup: { doubled: true }, notes: "Doubled — tricep press-down", videoUrl: "https://youtu.be/SMRkz6vuBe0" },
-  { id: "ex-overhead-seated-ext", name: "Overhead Seated Tricep Extension", category: "push", defaultSetup: { doubled: false }, notes: "Singled — seated overhead tricep extension", videoUrl: "https://youtu.be/SMRkz6vuBe0" },
-  { id: "ex-bicep-blaster-21s", name: "Bicep Blaster 21s", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — 7 bottom + 7 top + 7 full ROM = 21", videoUrl: "https://youtu.be/WPbCeZAtOaA" },
-  { id: "ex-arnold-curl", name: "Arnold Curls", category: "pull", defaultSetup: { doubled: false }, notes: "Singled — rotating curl variation", videoUrl: "https://www.youtube.com/shorts/xQ-mXcdNyMw" },
-  { id: "ex-angled-calf-raise", name: "Angled Calf Raises", category: "legs", defaultSetup: { doubled: false }, notes: "Singled — calf raise at an angle", videoUrl: "https://youtu.be/mu54xsdYmmE" },
-  { id: "ex-diamond-pushup", name: "Diamond Push-ups", category: "push", defaultSetup: { doubled: false }, notes: "Bodyweight — to failure" },
-  { id: "ex-ferro-pushup", name: "Ferro Push-ups", category: "push", defaultSetup: { doubled: false }, notes: "Bodyweight — push-up challenge" },
-  { id: "ex-pullup", name: "Pull-ups", category: "pull", defaultSetup: { doubled: false }, notes: "Bodyweight — pull-up challenge" },
-  { id: "ex-chinup", name: "Chin-ups", category: "pull", defaultSetup: { doubled: false }, notes: "Bodyweight — underhand pull-up (optional/advanced)" },
+  { id: "ex-one-arm-ohp", name: "One-Arm Overhead Press", category: "shoulders", defaultSetup: { doubled: false }, notes: "Singled — unilateral overhead press, each arm", videoUrl: "https://www.youtube.com/watch?v=zCwYIguYyIc" },
+  { id: "ex-tricep-press", name: "Tricep Press", category: "isolation", defaultSetup: { doubled: true }, notes: "Doubled — tricep press-down", videoUrl: "https://youtu.be/SMRkz6vuBe0" },
+  { id: "ex-overhead-seated-ext", name: "Overhead Seated Tricep Extension", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — seated overhead tricep extension", videoUrl: "https://www.youtube.com/watch?v=XuXQ38ILGAk" },
+  { id: "ex-bicep-blaster-21s", name: "Bicep Blaster 21s", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — 7 bottom + 7 top + 7 full ROM = 21", videoUrl: "https://youtu.be/WPbCeZAtOaA" },
+  { id: "ex-arnold-curl", name: "Arnold Curls", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — rotating curl variation", videoUrl: "https://www.youtube.com/watch?v=Fe3wM0ZDD54" },
+  { id: "ex-angled-calf-raise", name: "Angled Calf Raises", category: "isolation", defaultSetup: { doubled: false }, notes: "Singled — calf raise at an angle", videoUrl: "https://www.youtube.com/watch?v=-ZICUEaki20" },
+  { id: "ex-diamond-pushup", name: "Diamond Push-ups", category: "compound", defaultSetup: { doubled: false }, notes: "Bodyweight — to failure" },
+  { id: "ex-ferro-pushup", name: "Ferro Push-ups", category: "compound", defaultSetup: { doubled: false }, notes: "Bodyweight — push-up challenge" },
+  { id: "ex-pullup", name: "Pull-ups", category: "compound", defaultSetup: { doubled: false }, notes: "Bodyweight — pull-up challenge" },
+  { id: "ex-chinup", name: "Chin-ups", category: "compound", defaultSetup: { doubled: false }, notes: "Bodyweight — underhand pull-up (optional/advanced)" },
   { id: "ex-leg-raise", name: "Leg Raises", category: "core", defaultSetup: { doubled: false }, notes: "Bodyweight — hanging or lying leg raise (optional/advanced)" },
-  { id: "ex-pushup", name: "Push-ups", category: "push", defaultSetup: { doubled: false }, notes: "Bodyweight — to failure" },
-  { id: "ex-bent-row-supine", name: "Bent Rows (Supine)", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — underhand bent-over row" },
-  { id: "ex-bent-row-prone", name: "Bent Rows (Prone)", category: "pull", defaultSetup: { doubled: true }, notes: "Doubled — overhand bent-over row" },
+  { id: "ex-pushup", name: "Push-ups", category: "compound", defaultSetup: { doubled: false }, notes: "Bodyweight — to failure" },
+  { id: "ex-bent-row-supine", name: "Bent Rows (Supine)", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — underhand bent-over row" },
+  { id: "ex-bent-row-prone", name: "Bent Rows (Prone)", category: "compound", defaultSetup: { doubled: true }, notes: "Doubled — overhand bent-over row" },
 ];
 
 // --- BRAND GROUPS ---
 
 export const BRAND_GROUPS = [
   { brand: "Harambe", bandIds: ["harambe-white", "harambe-yellow", "harambe-green", "harambe-black", "harambe-red"] },
-  { brand: "Serious Steel 37\"", bandIds: ["ss-0-orange", "ss-1-purple", "ss-2-red", "ss-3-blue", "ss-4-green", "ss-5-gray"] },
   { brand: "Serious Steel 41\"", bandIds: ["ss41-0-orange", "ss41-1-purple", "ss41-2-red", "ss41-3-blue", "ss41-4-green", "ss41-5-gray"] },
   { brand: "Undersun", bandIds: ["us-yellow", "us-green", "us-blue", "us-black", "us-red"] },
+  { brand: "SS 41\" Latex-Free", bandIds: ["sslf-0-tan", "sslf-1-gray", "sslf-2-charcoal", "sslf-3-olive", "sslf-4-black"] },
+  { brand: "Serious Steel 37\"", bandIds: ["ss-0-orange", "ss-1-purple", "ss-2-red", "ss-3-blue", "ss-4-green", "ss-5-gray"] },
 ];
 
 // ============================================================
