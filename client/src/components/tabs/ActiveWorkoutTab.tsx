@@ -23,7 +23,7 @@ import {
 import {
   Plus, Minus, Check, Timer, Clock, Trash2, Play, Square,
   Dumbbell, X, ArrowUpCircle, Search, Link2, Flame, Target, Zap, Video,
-  History, TrendingUp, Trophy, Sparkles, AlertTriangle, Share2, Download,
+  History, TrendingUp, Trophy, Sparkles, AlertTriangle, Share2, Download, ChevronDown,
 } from "lucide-react";
 import VideoModal from "@/components/VideoModal";
 import JargonTip from "@/components/JargonTip";
@@ -317,6 +317,7 @@ function LastSessionHintBar({
   hint: LastSessionHint;
   ladder: { label: string; colorHexes: string[]; totalMinLbs: number; totalMaxLbs: number; bandIds: string[] }[];
 }) {
+  const [expanded, setExpanded] = useState(false);
   const lastDate = new Date(hint.date).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -326,12 +327,17 @@ function LastSessionHintBar({
     ? ladder[hint.suggestedComboIndex]
     : null;
 
+  const hasAllSets = hint.allSets && hint.allSets.length > 0;
+
   return (
-    <div className={`rounded-lg px-3 py-2 text-xs space-y-1 ${
-      hint.suggestUp
-        ? "bg-primary/8 border border-primary/20"
-        : "bg-accent/50 border border-border/40"
-    }`}>
+    <div
+      className={`rounded-lg px-3 py-2 text-xs space-y-1 transition-colors ${
+        hint.suggestUp
+          ? "bg-primary/8 border border-primary/20"
+          : "bg-accent/50 border border-border/40"
+      } ${hasAllSets ? "cursor-pointer active:bg-accent/70" : ""}`}
+      onClick={() => hasAllSets && setExpanded(!expanded)}
+    >
       <div className="flex items-center gap-2">
         <History className="w-3 h-3 text-muted-foreground/70 shrink-0" />
         <span className="text-muted-foreground">
@@ -345,6 +351,9 @@ function LastSessionHintBar({
           {hint.spacers > 0 && <span className="text-primary/60 ml-1">+SP</span>}
         </span>
         <span className="text-muted-foreground/40 ml-auto font-mono">{lastDate}</span>
+        {hasAllSets && (
+          <ChevronDown className={`w-3 h-3 text-muted-foreground/50 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        )}
       </div>
       {hint.suggestUp && suggestedCombo && (
         <div className="flex items-center gap-2 text-primary">
@@ -361,6 +370,41 @@ function LastSessionHintBar({
             ))}
             <span className="font-mono text-primary/80">{suggestedCombo.label}</span>
           </div>
+        </div>
+      )}
+      {/* Expandable previous session sets */}
+      {expanded && hasAllSets && (
+        <div className="pt-1.5 mt-1 border-t border-border/30 space-y-1">
+          <div className="flex items-center gap-4 text-muted-foreground/50 font-mono uppercase tracking-wider" style={{ fontSize: "0.6rem" }}>
+            <span className="w-6">Set</span>
+            <span className="flex-1">Bands</span>
+            <span className="w-12 text-right">Reps</span>
+          </div>
+          {hint.allSets!.map((s, i) => (
+            <div key={i} className="flex items-center gap-4">
+              <span className="w-6 font-mono text-muted-foreground/60">{s.setNumber}</span>
+              <div className="flex items-center gap-1 flex-1 min-w-0">
+                {s.bandColorHexes.map((hex, j) => (
+                  <span
+                    key={j}
+                    className="w-2 h-2 rounded-full border border-white/10 shrink-0"
+                    style={{ backgroundColor: hex }}
+                  />
+                ))}
+                <span className="text-foreground/70 truncate">{s.bandLabel}</span>
+              </div>
+              <span className="w-12 text-right font-mono">
+                <span className="text-foreground/80">{s.reps}</span>
+                <span className="text-muted-foreground/50">f</span>
+                {s.partialReps > 0 && (
+                  <><span className="text-muted-foreground/50">+</span><span className="text-foreground/80">{s.partialReps}</span><span className="text-muted-foreground/50">p</span></>
+                )}
+                {s.isometricSeconds > 0 && (
+                  <><span className="text-muted-foreground/50">+</span><span className="text-foreground/80">{s.isometricSeconds}</span><span className="text-muted-foreground/50">s</span></>
+                )}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -1094,10 +1138,15 @@ export default function ActiveWorkoutTab() {
       const template = exerciseTemplateMap.get(exerciseTemplateId);
       if (!template) return;
 
+      // Use workout intensity rep range if available, otherwise default to 8-12
+      const workoutIntensity = activeWorkout?.intensity;
+      const intensityRange = workoutIntensity ? INTENSITY_REP_RANGES[workoutIntensity] : null;
+      const targetRepsStr = intensityRange ? `${intensityRange.min}-${intensityRange.max}` : "8-12";
+
       // Smart pre-fill from history (same logic as optional exercises)
       const hint = getLastExerciseHint(
         exerciseTemplateId,
-        "8-12",
+        targetRepsStr,
         state.workoutHistory,
         ladder,
         allBands,
@@ -1127,7 +1176,7 @@ export default function ActiveWorkoutTab() {
           bandIds: [...prefillBandIds],
           spacers: hint?.spacers ?? 0,
         })),
-        targetReps: "8-12",
+        targetReps: targetRepsStr,
         lastSessionHint: hint,
         restTimerSeconds: exerciseRest,
       };
@@ -1136,7 +1185,7 @@ export default function ActiveWorkoutTab() {
       setExerciseSearch("");
       toast.success(`Added: ${template.name}`);
     },
-    [dispatch, exerciseTemplateMap, state.workoutHistory, state.userProfile.categoryRestTimers, ladder]
+    [dispatch, exerciseTemplateMap, state.workoutHistory, state.userProfile.categoryRestTimers, ladder, activeWorkout?.intensity]
   );
 
   // Add optional exercise from the modal (with proper pre-fill)
@@ -1145,10 +1194,15 @@ export default function ActiveWorkoutTab() {
       const template = exerciseTemplateMap.get(re.exerciseTemplateId);
       if (!template) return;
 
+      // Use workout intensity rep range if available, otherwise fall back to routine's targetReps
+      const workoutIntensity = activeWorkout?.intensity;
+      const intensityRange = workoutIntensity ? INTENSITY_REP_RANGES[workoutIntensity] : null;
+      const targetRepsStr = intensityRange ? `${intensityRange.min}-${intensityRange.max}` : (re.targetReps || "8-12");
+
       // Smart pre-fill from history
       const hint = getLastExerciseHint(
         re.exerciseTemplateId,
-        re.targetReps,
+        targetRepsStr,
         state.workoutHistory,
         ladder,
         allBands,
@@ -1177,14 +1231,14 @@ export default function ActiveWorkoutTab() {
           bandIds: [...prefillBandIds],
           spacers: hint?.spacers ?? 0,
         })),
-        targetReps: re.targetReps,
+        targetReps: targetRepsStr,
         lastSessionHint: hint,
         restTimerSeconds: exerciseRest,
       };
       dispatch({ type: "ADD_EXERCISE_TO_WORKOUT", payload: exercise });
       toast.success(`Added: ${template.name}`);
     },
-    [dispatch, exerciseTemplateMap, state.workoutHistory, state.userProfile.categoryRestTimers, ladder]
+    [dispatch, exerciseTemplateMap, state.workoutHistory, state.userProfile.categoryRestTimers, ladder, activeWorkout?.intensity]
   );
 
   const handleRemoveExercise = useCallback(

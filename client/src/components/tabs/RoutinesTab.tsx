@@ -5,6 +5,7 @@
 // ============================================================
 
 import { useState, useMemo } from "react";
+import { warmUpAudio, requestNotificationPermission } from "@/lib/boxing-bell";
 import { useApp, useRoutines, useWorkout, usePrograms, useBands } from "@/contexts/AppContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,14 +21,15 @@ import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Plus, Play, Trash2, Edit, Dumbbell, Zap, ChevronRight, ChevronDown,
-  Calendar, Flame, Target, Crown, Moon, Video,
+  Calendar, Flame, Target, Crown, Moon, Video, ArrowUp, ArrowDown, GripVertical, ArrowRight,
 } from "lucide-react";
 import VideoModal from "@/components/VideoModal";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import { motion } from "framer-motion";
 import type { Routine, RoutineExercise, WorkoutExercise, LoggedSet, IntensityLevel, Program, ProgramPhase } from "@/lib/types";
-import { INTENSITY_REP_RANGES, CATEGORY_REST_DEFAULTS, INTENSITY_REST_MULTIPLIERS } from "@/lib/types";
+import { INTENSITY_REP_RANGES, getCategoryRestGroup } from "@/lib/types";
+import type { CategoryRestTimers } from "@/lib/types";
 import { GORILLA_GAINS_ROUTINES, HARAMBRO_V3_ROUTINES } from "@/lib/equipment-data";
 import { getLastExerciseHint } from "@/lib/physics";
 
@@ -37,13 +39,10 @@ const ALL_PROGRAM_ROUTINES = [...GORILLA_GAINS_ROUTINES, ...HARAMBRO_V3_ROUTINES
 const WORKOUT_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/DZrBwwSrda96SBezQ91GLV/sandbox/mmcxzbXYIgxAqZLaMxBPDN-img-2_1771966179000_na1fn_d29ya291dC1hdG1vc3BoZXJl.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRFpyQnd3U3JkYTk2U0JlelE5MUdMVi9zYW5kYm94L21tY3h6YlhZSWd4QXFaTGFNeEJQRE4taW1nLTJfMTc3MTk2NjE3OTAwMF9uYTFmbl9kMjl5YTI5MWRDMWhkRzF2YzNCb1pYSmwuanBnP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=iiMdiHzIw1GPHhtifr7-aIl4ElptzSilxpaAxJsWdOna5PBJaJTu4ME~OU4nFhKJrMzAKJb63WT~YLB5qgAqUb~BGlnB7rrWs2K3WGjsttiDgKnOzTk02EvlPwyv9KU0MuRFsSEVt0iJKo8wtjMFBi~3WKMX95HofZqI9snD1cL4i-mrKSQ8lwxtt6SYiP2nVQrm1oUNZrlPjzyFkaveRwby4s-aab17ZAdTBwiSF845AketzYhkQBSiIf6CbLEsNwj00vxLz9UcSc7ibuEBzKTlCoZEUOxN86IWrteaCBwS5rg0746cn22SKbdacnx7nLv0mkTR7nP-Mnk5-S~d3Q__";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  push: "bg-amber-gold/20 text-amber-gold",
-  pull: "bg-blue-500/20 text-blue-400",
-  legs: "bg-sage-green/20 text-sage-green",
-  core: "bg-purple-500/20 text-purple-400",
-  arms: "bg-orange-500/20 text-orange-400",
+  compound: "bg-amber-gold/20 text-amber-gold",
+  isolation: "bg-blue-500/20 text-blue-400",
   shoulders: "bg-cyan-500/20 text-cyan-400",
-  other: "bg-muted text-muted-foreground",
+  core: "bg-purple-500/20 text-purple-400",
 };
 
 const INTENSITY_COLORS: Record<IntensityLevel, { bg: string; text: string; icon: typeof Flame }> = {
@@ -79,11 +78,14 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
   const { routines, exercises, exerciseTemplateMap } = useRoutines();
   const { programs } = usePrograms();
   const { activeWorkout } = useWorkout();
-  const { ladder: rawLadder } = useBands();
+  const { ladder: rawLadder, allBands } = useBands();
   const [showCreate, setShowCreate] = useState(false);
   const [routineName, setRoutineName] = useState("");
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
   const [editingRoutine, setEditingRoutine] = useState<Routine | null>(null);
+  // Per-exercise config for the builder
+  const [exerciseConfigs, setExerciseConfigs] = useState<Record<string, { targetSets: number; targetReps: string; doubled: boolean; optional: boolean }>>({}); 
+  const [builderStep, setBuilderStep] = useState<"select" | "configure">("select");
   const [expandedProgram, setExpandedProgram] = useState<string | null>("gorilla-gains");
   const [expandedPhase, setExpandedPhase] = useState<string | null>("gg-phase-1");
   const [videoModal, setVideoModal] = useState<{ url: string; name: string } | null>(null);
@@ -94,7 +96,53 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
     [routines]
   );
 
-  const handleCreateRoutine = () => {
+  // Auto-cycle tracking: compute the next suggested workout day per program phase
+  const nextSuggestedMap = useMemo(() => {
+    const result: Record<string, { dayIndex: number; routineId: string; routineName: string; intensity?: IntensityLevel }> = {};
+    for (const program of programs) {
+      for (const phase of program.phases) {
+        // Get non-rest days in this phase
+        const workoutDays = phase.schedule
+          .map((day, idx) => ({ ...day, idx }))
+          .filter(d => !d.isRest && d.routineId);
+        if (workoutDays.length === 0) continue;
+
+        // Find the most recent workout that matches any routine in this phase
+        let lastMatchIdx = -1;
+        for (const workout of state.workoutHistory) {
+          const matchIdx = workoutDays.findIndex(d => d.routineId === workout.routineId);
+          if (matchIdx !== -1) {
+            lastMatchIdx = matchIdx;
+            break; // workoutHistory is sorted newest-first
+          }
+        }
+
+        // Suggest the next day in the cycle
+        const nextIdx = lastMatchIdx === -1 ? 0 : (lastMatchIdx + 1) % workoutDays.length;
+        const nextDay = workoutDays[nextIdx];
+        const nextRoutine = ALL_PROGRAM_ROUTINES.find(r => r.id === nextDay.routineId);
+        result[phase.id] = {
+          dayIndex: nextDay.idx,
+          routineId: nextDay.routineId!,
+          routineName: nextDay.routineName,
+          intensity: nextRoutine?.intensity,
+        };
+      }
+    }
+    return result;
+  }, [programs, state.workoutHistory]);
+
+  const getDefaultConfig = (exId: string) => {
+    const ex = exerciseTemplateMap.get(exId);
+    return {
+      targetSets: 3,
+      targetReps: "8-12",
+      doubled: ex?.defaultSetup.doubled ?? false,
+      optional: false,
+    };
+  };
+
+  const handleProceedToConfigure = () => {
     if (!routineName.trim()) {
       toast.error("Please enter a routine name");
       return;
@@ -103,14 +151,46 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
       toast.error("Please select at least one exercise");
       return;
     }
+    // Initialize configs for newly selected exercises
+    const newConfigs = { ...exerciseConfigs };
+    for (const exId of selectedExercises) {
+      if (!newConfigs[exId]) {
+        newConfigs[exId] = getDefaultConfig(exId);
+      }
+    }
+    // Remove configs for deselected exercises
+    for (const key of Object.keys(newConfigs)) {
+      if (!selectedExercises.includes(key)) delete newConfigs[key];
+    }
+    setExerciseConfigs(newConfigs);
+    setBuilderStep("configure");
+  };
 
+  const handleMoveExercise = (index: number, direction: "up" | "down") => {
+    const newOrder = [...selectedExercises];
+    const swapIdx = direction === "up" ? index - 1 : index + 1;
+    if (swapIdx < 0 || swapIdx >= newOrder.length) return;
+    [newOrder[index], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[index]];
+    setSelectedExercises(newOrder);
+  };
+
+  const updateExerciseConfig = (exId: string, updates: Partial<{ targetSets: number; targetReps: string; doubled: boolean; optional: boolean }>) => {
+    setExerciseConfigs(prev => ({
+      ...prev,
+      [exId]: { ...(prev[exId] || getDefaultConfig(exId)), ...updates },
+    }));
+  };
+
+  const handleCreateRoutine = () => {
     const routineExercises: RoutineExercise[] = selectedExercises.map(exId => {
       const ex = exerciseTemplateMap.get(exId)!;
+      const config = exerciseConfigs[exId] || getDefaultConfig(exId);
       return {
         exerciseTemplateId: exId,
-        targetSets: 3,
-        targetReps: "8-12",
-        setup: { ...ex.defaultSetup },
+        targetSets: config.targetSets,
+        targetReps: config.targetReps,
+        setup: { ...ex.defaultSetup, doubled: config.doubled },
+        optional: config.optional,
       };
     });
 
@@ -143,6 +223,8 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
     setRoutineName("");
     setSelectedExercises([]);
     setEditingRoutine(null);
+    setExerciseConfigs({});
+    setBuilderStep("select");
   };
 
   const handleStartRoutine = (routine: Routine) => {
@@ -160,12 +242,17 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
       .map(re => {
         const ex = exerciseTemplateMap.get(re.exerciseTemplateId);
 
+        // Use intensity-aware rep range for hint computation
+        const intensityRange = routine.intensity ? INTENSITY_REP_RANGES[routine.intensity] : null;
+        const hintTargetReps = intensityRange ? `${intensityRange.min}-${intensityRange.max}` : re.targetReps;
+
         // Smart pre-fill: look up last session for this exercise
         const hint = getLastExerciseHint(
           re.exerciseTemplateId,
-          re.targetReps,
+          hintTargetReps,
           state.workoutHistory,
           ladder,
+          allBands,
         );
 
         // Pre-fill sets with last band combo (or suggested next combo if progression warranted)
@@ -176,11 +263,10 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
           : 0;
         const prefillBandIds = ladder[prefillComboIndex]?.bandIds ?? [];
 
-        // Compute per-exercise rest timer: exercise override > category default × intensity multiplier
-        const category = ex?.category || "other";
-        const baseRest = ex?.restTimerSeconds ?? CATEGORY_REST_DEFAULTS[category];
-        const intensityMult = routine.intensity ? INTENSITY_REST_MULTIPLIERS[routine.intensity] : 1.0;
-        const exerciseRest = Math.round(baseRest * intensityMult);
+        // Compute per-exercise rest timer: exercise override > user's category setting
+        const category = ex?.category || "isolation";
+        const restGroup = getCategoryRestGroup(category);
+        const exerciseRest = ex?.restTimerSeconds ?? state.userProfile.categoryRestTimers[restGroup];
 
         return {
           id: nanoid(),
@@ -193,12 +279,15 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
             bandIds: [...prefillBandIds],
             spacers: hint?.spacers ?? 0,
           })),
-          targetReps: re.targetReps,
+          targetReps: hintTargetReps || re.targetReps,
           lastSessionHint: hint,
           restTimerSeconds: exerciseRest,
         };
       });
 
+    // Pre-warm audio and request notification permission on workout start (user gesture)
+    warmUpAudio();
+    requestNotificationPermission();
     dispatch({
       type: "START_WORKOUT",
       payload: {
@@ -223,6 +312,8 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
       toast.error("Finish or cancel your current workout first");
       return;
     }
+    warmUpAudio();
+    requestNotificationPermission();
     dispatch({
       type: "START_WORKOUT",
       payload: {
@@ -239,6 +330,18 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
     setEditingRoutine(routine);
     setRoutineName(routine.name);
     setSelectedExercises(routine.exercises.map(e => e.exerciseTemplateId));
+    // Pre-populate configs from existing routine
+    const configs: Record<string, { targetSets: number; targetReps: string; doubled: boolean; optional: boolean }> = {};
+    routine.exercises.forEach(re => {
+      configs[re.exerciseTemplateId] = {
+        targetSets: re.targetSets,
+        targetReps: re.targetReps,
+        doubled: re.setup.doubled ?? false,
+        optional: re.optional ?? false,
+      };
+    });
+    setExerciseConfigs(configs);
+    setBuilderStep("select");
     setShowCreate(true);
   };
 
@@ -375,6 +478,32 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                       <CollapsibleContent>
                         <CardContent className="px-3 pb-3 pt-0 space-y-1.5">
                           <Separator className="mb-2" />
+                          {/* Next Up suggestion */}
+                          {nextSuggestedMap[phase.id] && (
+                            <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-primary/10 border border-primary/20">
+                              <ArrowRight className="w-3.5 h-3.5 text-primary shrink-0" />
+                              <span className="text-xs font-bold text-primary">Next Up:</span>
+                              <span className="text-xs font-medium text-foreground">
+                                {nextSuggestedMap[phase.id].routineName}
+                              </span>
+                              {nextSuggestedMap[phase.id].intensity && (
+                                <Badge variant="outline" className={`text-xs px-1.5 py-0 ${INTENSITY_COLORS[nextSuggestedMap[phase.id].intensity!].text} ${INTENSITY_COLORS[nextSuggestedMap[phase.id].intensity!].bg} border-0`}>
+                                  {nextSuggestedMap[phase.id].intensity}
+                                </Badge>
+                              )}
+                              <div className="flex-1" />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 px-2 text-xs font-bold text-primary hover:bg-primary/20"
+                                onClick={() => handleStartProgramRoutine(nextSuggestedMap[phase.id].routineId)}
+                                disabled={!!activeWorkout}
+                              >
+                                <Play className="w-3 h-3 mr-1" /> Start
+                              </Button>
+                            </div>
+                          )}
+
                           {/* Schedule Grid */}
                           {phase.schedule.map((day, i) => {
                             const routine = day.routineId
@@ -382,6 +511,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                               : null;
                             const intensity = routine?.intensity;
                             const iStyle = intensity ? INTENSITY_COLORS[intensity] : null;
+                            const isNextUp = nextSuggestedMap[phase.id]?.dayIndex === i;
 
                             return (
                               <motion.div
@@ -392,7 +522,9 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                                 className={`flex items-center gap-2.5 p-2 rounded-lg transition-colors ${
                                   day.isRest
                                     ? "bg-muted/30"
-                                    : "bg-card hover:bg-accent/30"
+                                    : isNextUp
+                                      ? "bg-primary/5 ring-1 ring-primary/30"
+                                      : "bg-card hover:bg-accent/30"
                                 }`}
                               >
                                 {/* Day label */}
@@ -636,7 +768,7 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
                           <Badge
                             key={i}
                             variant="secondary"
-                            className={`text-xs ${CATEGORY_COLORS[ex?.category || "other"]}`}
+                            className={`text-xs ${CATEGORY_COLORS[ex?.category || "isolation"]}`}
                           >
                             {ex?.name || "?"}
                           </Badge>
@@ -690,6 +822,8 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
           setEditingRoutine(null);
           setRoutineName("");
           setSelectedExercises([]);
+          setExerciseConfigs({});
+          setBuilderStep("select");
         }
       }}>
         <DialogTrigger asChild>
@@ -702,70 +836,215 @@ export default function RoutinesTab({ onStartWorkout }: Props) {
           <DialogHeader>
             <DialogTitle>{editingRoutine ? "Edit Routine" : "Create Routine"}</DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Build a custom routine from available exercises
+              {builderStep === "select" ? "Name your routine and pick exercises" : "Configure sets, reps, and options for each exercise"}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
-            <div>
-              <Label className="text-sm">Routine Name</Label>
-              <Input
-                value={routineName}
-                onChange={e => setRoutineName(e.target.value)}
-                placeholder="e.g. Push Day, Pull Day, Legs..."
-                className="mt-1.5"
-              />
+
+          {builderStep === "select" ? (
+            /* ===== STEP 1: Name + Exercise Selection ===== */
+            <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
+              <div>
+                <Label className="text-sm">Routine Name</Label>
+                <Input
+                  value={routineName}
+                  onChange={e => setRoutineName(e.target.value)}
+                  placeholder="e.g. Push Day, Pull Day, Legs..."
+                  className="mt-1.5"
+                />
+              </div>
+              <Separator />
+              <div className="flex-1 overflow-hidden">
+                <Label className="text-sm mb-2 block">
+                  Exercises ({selectedExercises.length} selected)
+                </Label>
+                <ScrollArea className="h-[40vh]">
+                  <div className="space-y-3 pr-3">
+                    {Object.entries(exercisesByCategory).map(([category, exs]) => (
+                      <div key={category}>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+                          {category}
+                        </p>
+                        {exs.map(ex => (
+                          <label
+                            key={ex.id}
+                            className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-accent/30 transition-colors cursor-pointer"
+                          >
+                            <Checkbox
+                              checked={selectedExercises.includes(ex.id)}
+                              onCheckedChange={() => toggleExercise(ex.id)}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm">{ex.name}</span>
+                              <span className="text-xs text-muted-foreground ml-2">{ex.notes}</span>
+                            </div>
+                            <span className={`text-xs font-mono px-1 py-0.5 rounded shrink-0 ${
+                              ex.defaultSetup.doubled
+                                ? "bg-primary/10 text-primary/70"
+                                : "text-muted-foreground/40"
+                            }`}>
+                              {ex.defaultSetup.doubled ? "2x" : "1x"}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <DialogClose asChild>
+                  <Button variant="outline" className="flex-1">Cancel</Button>
+                </DialogClose>
+                <Button
+                  className="flex-1 bg-primary text-primary-foreground"
+                  onClick={handleProceedToConfigure}
+                >
+                  Next: Configure
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
             </div>
-            <Separator />
-            <div className="flex-1 overflow-hidden">
-              <Label className="text-sm mb-2 block">
-                Exercises ({selectedExercises.length} selected)
-              </Label>
-              <ScrollArea className="h-[40vh]">
-                <div className="space-y-3 pr-3">
-                  {Object.entries(exercisesByCategory).map(([category, exs]) => (
-                    <div key={category}>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
-                        {category}
-                      </p>
-                      {exs.map(ex => (
-                        <label
-                          key={ex.id}
-                          className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-accent/30 transition-colors cursor-pointer"
-                        >
-                          <Checkbox
-                            checked={selectedExercises.includes(ex.id)}
-                            onCheckedChange={() => toggleExercise(ex.id)}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm">{ex.name}</span>
-                            <span className="text-xs text-muted-foreground ml-2">{ex.notes}</span>
+          ) : (
+            /* ===== STEP 2: Per-Exercise Configuration ===== */
+            <div className="space-y-3 flex-1 overflow-hidden flex flex-col">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Dumbbell className="w-3.5 h-3.5" />
+                <span>{selectedExercises.length} exercises in <span className="font-semibold text-foreground">{routineName}</span></span>
+              </div>
+              <ScrollArea className="flex-1">
+                <div className="space-y-2 pr-3">
+                  {selectedExercises.map((exId, index) => {
+                    const ex = exerciseTemplateMap.get(exId);
+                    const config = exerciseConfigs[exId] || getDefaultConfig(exId);
+                    return (
+                      <div
+                        key={exId}
+                        className={`rounded-xl border p-3 space-y-2.5 transition-colors ${
+                          config.optional
+                            ? "border-dashed border-muted-foreground/30 bg-accent/10"
+                            : "border-border bg-accent/30"
+                        }`}
+                      >
+                        {/* Exercise header with reorder buttons */}
+                        <div className="flex items-center gap-2">
+                          <div className="flex flex-col gap-0.5 shrink-0">
+                            <button
+                              type="button"
+                              className="p-0.5 rounded hover:bg-accent disabled:opacity-20 transition-colors"
+                              disabled={index === 0}
+                              onClick={() => handleMoveExercise(index, "up")}
+                            >
+                              <ArrowUp className="w-3 h-3 text-muted-foreground" />
+                            </button>
+                            <button
+                              type="button"
+                              className="p-0.5 rounded hover:bg-accent disabled:opacity-20 transition-colors"
+                              disabled={index === selectedExercises.length - 1}
+                              onClick={() => handleMoveExercise(index, "down")}
+                            >
+                              <ArrowDown className="w-3 h-3 text-muted-foreground" />
+                            </button>
                           </div>
-                          <span className={`text-xs font-mono px-1 py-0.5 rounded shrink-0 ${
-                            ex.defaultSetup.doubled
-                              ? "bg-primary/10 text-primary/70"
-                              : "text-muted-foreground/40"
-                          }`}>
-                            {ex.defaultSetup.doubled ? "2x" : "1x"}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  ))}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold truncate">{ex?.name || "?"}</p>
+                            <Badge variant="secondary" className={`text-xs h-4 mt-0.5 ${CATEGORY_COLORS[ex?.category || "isolation"]}`}>
+                              {ex?.category}
+                            </Badge>
+                          </div>
+                          <button
+                            type="button"
+                            className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground/40 hover:text-destructive transition-colors"
+                            onClick={() => {
+                              setSelectedExercises(prev => prev.filter(id => id !== exId));
+                              setExerciseConfigs(prev => { const n = { ...prev }; delete n[exId]; return n; });
+                            }}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Config row: Sets, Reps, Doubled, Optional */}
+                        <div className="grid grid-cols-4 gap-2">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Sets</Label>
+                            <select
+                              value={config.targetSets}
+                              onChange={e => updateExerciseConfig(exId, { targetSets: parseInt(e.target.value) })}
+                              className="w-full mt-0.5 h-8 rounded-md border border-border bg-background px-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-primary"
+                            >
+                              {[1, 2, 3, 4, 5, 6].map(n => (
+                                <option key={n} value={n}>{n}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Reps</Label>
+                            <select
+                              value={config.targetReps}
+                              onChange={e => updateExerciseConfig(exId, { targetReps: e.target.value })}
+                              className="w-full mt-0.5 h-8 rounded-md border border-border bg-background px-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-primary"
+                            >
+                              <option value="5-8">5-8</option>
+                              <option value="6-10">6-10</option>
+                              <option value="8-12">8-12</option>
+                              <option value="10-15">10-15</option>
+                              <option value="12-20">12-20</option>
+                              <option value="15-25">15-25</option>
+                              <option value="15-30">15-30</option>
+                              <option value="AMRAP">AMRAP</option>
+                            </select>
+                          </div>
+                          <div className="flex flex-col items-center justify-end">
+                            <Label className="text-xs text-muted-foreground mb-1">2x</Label>
+                            <button
+                              type="button"
+                              onClick={() => updateExerciseConfig(exId, { doubled: !config.doubled })}
+                              className={`h-8 w-full rounded-md border text-xs font-mono transition-colors ${
+                                config.doubled
+                                  ? "bg-primary/15 border-primary/40 text-primary font-semibold"
+                                  : "bg-background border-border text-muted-foreground/60"
+                              }`}
+                            >
+                              {config.doubled ? "2x" : "1x"}
+                            </button>
+                          </div>
+                          <div className="flex flex-col items-center justify-end">
+                            <Label className="text-xs text-muted-foreground mb-1">Opt</Label>
+                            <button
+                              type="button"
+                              onClick={() => updateExerciseConfig(exId, { optional: !config.optional })}
+                              className={`h-8 w-full rounded-md border text-xs font-mono transition-colors ${
+                                config.optional
+                                  ? "bg-amber-gold/15 border-amber-gold/40 text-amber-gold font-semibold"
+                                  : "bg-background border-border text-muted-foreground/60"
+                              }`}
+                            >
+                              {config.optional ? "Yes" : "No"}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </ScrollArea>
+              <div className="flex gap-2 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setBuilderStep("select")}
+                >
+                  Back
+                </Button>
+                <Button
+                  className="flex-1 bg-primary text-primary-foreground"
+                  onClick={handleCreateRoutine}
+                >
+                  {editingRoutine ? "Update Routine" : "Create Routine"}
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-2 pt-2">
-              <DialogClose asChild>
-                <Button variant="outline" className="flex-1">Cancel</Button>
-              </DialogClose>
-              <Button
-                className="flex-1 bg-primary text-primary-foreground"
-                onClick={handleCreateRoutine}
-              >
-                {editingRoutine ? "Update" : "Create"}
-              </Button>
-            </div>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
 

@@ -5,7 +5,7 @@
 // ladder generation, and Joules-based volume calculation.
 // ============================================================
 
-import type { Band, BandCombo, UserProfile, Footplate, Workout, LastSessionHint } from "./types";
+import type { Band, BandCombo, UserProfile, Footplate, Workout, LastSessionHint, LastSessionSetInfo } from "./types";
 
 /**
  * Calculate the spring constant k (lbs/inch) for a band
@@ -415,6 +415,28 @@ export function getLastExerciseHint(
       }
     }
 
+    // Build allSets for the quick-view
+    const allSets: LastSessionSetInfo[] = completedSets.map(s => {
+      const sortedSetBandIds = [...(s.bandIds || [])].sort();
+      let setComboIndex = 0;
+      for (let i = 0; i < ladder.length; i++) {
+        const sortedIds = [...ladder[i].bandIds].sort();
+        if (sortedIds.length === sortedSetBandIds.length && sortedIds.every((id, j) => id === sortedSetBandIds[j])) {
+          setComboIndex = i;
+          break;
+        }
+      }
+      const setCombo = ladder[setComboIndex];
+      return {
+        setNumber: s.setNumber,
+        bandLabel: setCombo?.label || "No Bands",
+        bandColorHexes: (setCombo as any)?.colorHexes || [],
+        reps: s.reps || 0,
+        partialReps: s.partialReps || 0,
+        isometricSeconds: s.isometricSeconds || 0,
+      };
+    });
+
     return {
       date: workout.startedAt,
       bandComboIndex,
@@ -424,6 +446,7 @@ export function getLastExerciseHint(
       spacers: bestSet.spacers || 0,
       suggestUp,
       suggestedComboIndex,
+      allSets,
     };
   }
 

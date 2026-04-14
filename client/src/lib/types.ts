@@ -67,24 +67,49 @@ export interface BandCombo {
 
 // --- User Profile ---
 
+export interface CategoryRestTimers {
+  compound: number;   // compound multi-joint movements (default 90s)
+  shoulders: number;  // shoulder exercises (default 75s)
+  isolation: number;  // single-joint isolation + core (default 60s)
+}
+
+export const DEFAULT_CATEGORY_REST_TIMERS: CategoryRestTimers = {
+  compound: 90,
+  shoulders: 75,
+  isolation: 60,
+};
+
+// Map exercise categories to rest timer groups
+export function getCategoryRestGroup(category: ExerciseCategory): keyof CategoryRestTimers {
+  switch (category) {
+    case "compound":
+      return "compound";
+    case "shoulders":
+      return "shoulders";
+    case "isolation":
+    case "core":
+    default:
+      return "isolation";
+  }
+}
+
 export interface UserProfile {
   heightInches: number;
   activeGymProfileId: string | null;
-  restTimerSeconds: number;
+  restTimerSeconds: number; // legacy fallback
+  categoryRestTimers: CategoryRestTimers;
   amrapTargetReps: number; // default target for AMRAP progression
   units: "lbs" | "kg";
+  keepScreenOn: boolean; // Wake Lock: keep screen on during active workouts
 }
 
 // --- Exercise Templates ---
 
 export type ExerciseCategory =
-  | "push"
-  | "pull"
-  | "legs"
-  | "core"
-  | "arms"
+  | "compound"
+  | "isolation"
   | "shoulders"
-  | "other";
+  | "core";
 
 export interface ExerciseTemplate {
   id: string;
@@ -107,13 +132,10 @@ export type IntensityLevel = "medium" | "heavy" | "light";
 
 // Category-based rest timer defaults (seconds)
 export const CATEGORY_REST_DEFAULTS: Record<ExerciseCategory, number> = {
-  push: 90,
-  pull: 90,
-  legs: 90,
-  core: 60,
-  arms: 60,
+  compound: 90,
+  isolation: 60,
   shoulders: 75,
-  other: 60,
+  core: 60,
 };
 
 // Intensity-based rest timer multipliers
@@ -212,6 +234,15 @@ export interface LoggedSet {
   notes: string;
 }
 
+export interface LastSessionSetInfo {
+  setNumber: number;
+  bandLabel: string;
+  bandColorHexes: string[];
+  reps: number;
+  partialReps: number;
+  isometricSeconds: number;
+}
+
 export interface LastSessionHint {
   date: string;           // ISO date of last workout
   bandComboIndex: number; // ladder index they used
@@ -221,6 +252,7 @@ export interface LastSessionHint {
   spacers: number;
   suggestUp: boolean;     // true if reps exceeded target max → recommend next combo
   suggestedComboIndex?: number; // the next combo up, if suggestUp is true
+  allSets?: LastSessionSetInfo[]; // all completed sets from last session (for quick-view)
 }
 
 export interface WorkoutExercise {
@@ -261,6 +293,18 @@ export interface ExerciseAnalytics {
   totalSets: number;
 }
 
+// --- Personal Records ---
+
+export interface PersonalRecord {
+  exerciseTemplateId: string;
+  bandComboIndex: number; // ladder position
+  bandIds: string[];      // specific bands used
+  bestReps: number;       // highest full reps achieved
+  bestPartials: number;   // partials on that best set
+  achievedAt: string;     // ISO date when PR was set
+  workoutId: string;      // which workout it was set in
+}
+
 // --- App State ---
 
 export interface AppState {
@@ -277,4 +321,6 @@ export interface AppState {
   activeWorkout: Workout | null;
   resistanceLadder: BandCombo[];
   onboardingComplete: boolean;
+  personalRecords: PersonalRecord[];
+  customRoutines: Routine[];
 }
