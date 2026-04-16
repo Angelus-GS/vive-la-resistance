@@ -74,12 +74,20 @@ export function loadState(): AppState {
       return [...updated, ...newDefaults];
     })();
 
-    // For bands: merge user's saved ones with any new defaults (preserve owned state)
+    // For bands: merge user's saved ownership with latest defaults (color, hex, label always from code)
     const mergedBands = (() => {
       const saved = parsed.bands || [];
-      const savedIds = new Set(saved.map(b => b.id));
-      const newDefaults = defaults.bands.filter(b => !savedIds.has(b.id));
-      return saved.length ? [...saved, ...newDefaults] : defaults.bands;
+      if (!saved.length) return defaults.bands;
+      const savedMap = new Map(saved.map(b => [b.id, b]));
+      const defaultIds = new Set(defaults.bands.map(b => b.id));
+      // Start with defaults, overlay user's owned flag
+      const merged = defaults.bands.map(def => {
+        const s = savedMap.get(def.id);
+        return s ? { ...def, owned: s.owned } : def;
+      });
+      // Keep any user-saved bands that no longer exist in defaults (custom / removed)
+      const extras = saved.filter(b => !defaultIds.has(b.id));
+      return [...merged, ...extras];
     })();
 
     return {
