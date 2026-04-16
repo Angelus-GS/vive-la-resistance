@@ -68,7 +68,15 @@ export default function Home() {
         {activeTab === "routines" && (
           <RoutinesTab onStartWorkout={() => setActiveTab("workout")} />
         )}
-        {activeTab === "workout" && <ActiveWorkoutTab />}
+        {/* Keep ActiveWorkoutTab mounted (hidden) during active workouts
+            so the RestTimer state persists across tab switches */}
+        {state.activeWorkout ? (
+          <div className={activeTab === "workout" ? "" : "hidden"}>
+            <ActiveWorkoutTab />
+          </div>
+        ) : (
+          activeTab === "workout" && <ActiveWorkoutTab />
+        )}
         {activeTab === "history" && <HistoryTab />}
       </div>
 

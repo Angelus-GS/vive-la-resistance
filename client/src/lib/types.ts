@@ -101,6 +101,8 @@ export interface UserProfile {
   amrapTargetReps: number; // default target for AMRAP progression
   units: "lbs" | "kg";
   keepScreenOn: boolean; // Wake Lock: keep screen on during active workouts
+  activeProgramId: string | null; // selected program for streak tracking
+  activePhaseId: string | null; // selected phase within the program
 }
 
 // --- Exercise Templates ---

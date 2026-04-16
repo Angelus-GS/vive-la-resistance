@@ -160,6 +160,9 @@ const plugins = [
   // Skip Manus-specific plugins for GitHub Pages builds
   ...(!isGitHubPages ? [vitePluginManusRuntime(), vitePluginManusDebugCollector()] : []),
   VitePWA({
+    strategies: "injectManifest",
+    srcDir: "src",
+    filename: "sw.ts",
     registerType: "autoUpdate",
     includeAssets: ["favicon.ico", "apple-touch-icon.png", "icon-192x192.png", "icon-512x512.png"],
     manifest: {
@@ -191,38 +194,9 @@ const plugins = [
         },
       ],
     },
-    workbox: {
+    injectManifest: {
       globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
       globIgnores: ["__manus__/**"],
-      runtimeCaching: [
-        {
-          urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "google-fonts-cache",
-            expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-            cacheableResponse: { statuses: [0, 200] },
-          },
-        },
-        {
-          urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "gstatic-fonts-cache",
-            expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-            cacheableResponse: { statuses: [0, 200] },
-          },
-        },
-        {
-          urlPattern: /^https:\/\/.*\.manus\.storage\..*/i,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "image-cache",
-            expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            cacheableResponse: { statuses: [0, 200] },
-          },
-        },
-      ],
     },
   }),
 ];

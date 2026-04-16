@@ -5,11 +5,13 @@
 // ============================================================
 
 import { useState, useMemo } from "react";
-import { useApp, useProfile, useBands } from "@/contexts/AppContext";
+import { useApp, useProfile, useBands, usePersonalRecords, usePrograms } from "@/contexts/AppContext";
+import JargonTip from "@/components/JargonTip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -18,12 +20,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Ruler, Package, Settings, ChevronDown, Trash2, Download,
-  Lightbulb, Shield, Wrench, Info, BarChart3
+  Lightbulb, Shield, Wrench, Info, BarChart3, Flame, Trophy, Calendar, Smartphone, Target
 } from "lucide-react";
 import BandComparisonChart from "@/components/BandComparisonChart";
 import { BRAND_GROUPS } from "@/lib/equipment-data";
 import { APP_VERSION } from "@shared/const";
+import { getComboTensionAtHeight, lbsToKg } from "@/lib/physics";
 import { downloadCSV } from "@/lib/storage";
+import { calculateStreak, calculateProgramStreak, getWeeklyWorkoutCount } from "@/lib/streaks";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -61,7 +65,31 @@ export default function ProfileTab() {
   const { state, dispatch } = useApp();
   const { profile, updateProfile } = useProfile();
   const { allBands, toggleBand, ownedBands, ladder, bandMap } = useBands();
+  const { personalRecords, workoutHistory } = usePersonalRecords();
+  const { programs } = usePrograms();
   const [openBrands, setOpenBrands] = useState<Record<string, boolean>>({});
+  const simpleStreak = useMemo(() => calculateStreak(workoutHistory), [workoutHistory]);
+  const weeklyCount = useMemo(() => getWeeklyWorkoutCount(workoutHistory), [workoutHistory]);
+
+  // Program-aware streak
+  const activeProgram = useMemo(
+    () => programs.find(p => p.id === profile.activeProgramId) ?? null,
+    [programs, profile.activeProgramId]
+  );
+  const activePhase = useMemo(
+    () => activeProgram?.phases.find(p => p.id === profile.activePhaseId) ?? activeProgram?.phases[0] ?? null,
+    [activeProgram, profile.activePhaseId]
+  );
+  const programStreak = useMemo(() => {
+    if (!activeProgram || !activePhase) return null;
+    return calculateProgramStreak(workoutHistory, activeProgram, activePhase);
+  }, [workoutHistory, activeProgram, activePhase]);
+
+  // Use program streak if active, otherwise simple streak
+  const streakValue = programStreak ? programStreak.currentDays : simpleStreak.current;
+  const streakLabel = programStreak
+    ? (programStreak.isActive ? "program streak" : "program streak")
+    : "day streak";
   const [showTips, setShowTips] = useState(false);
   const [ladderShowAll, setLadderShowAll] = useState(false);
   const LADDER_PREVIEW_COUNT = 30;
@@ -109,6 +137,66 @@ export default function ProfileTab() {
         </div>
       </div>
 
+      {/* Streak & Stats Bar */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-card border border-border">
+          <Flame className={`w-5 h-5 ${streakValue > 0 ? "text-orange-500" : "text-muted-foreground"}`} />
+          <div>
+            <p className="text-lg font-bold tabular-nums leading-none">{streakValue}</p>
+            <p className="text-[10px] text-muted-foreground">{streakLabel}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-card border border-border">
+          <Calendar className={`w-5 h-5 ${weeklyCount > 0 ? "text-primary" : "text-muted-foreground"}`} />
+          <div>
+            <p className="text-lg font-bold tabular-nums leading-none">{weeklyCount}</p>
+            <p className="text-[10px] text-muted-foreground">this week</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-card border border-border">
+          <Trophy className={`w-5 h-5 ${personalRecords.length > 0 ? "text-amber-gold" : "text-muted-foreground"}`} />
+          <div>
+            <p className="text-lg font-bold tabular-nums leading-none">{personalRecords.length}</p>
+            <p className="text-[10px] text-muted-foreground">PRs set</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Program Streak Details */}
+      {programStreak && activeProgram && activePhase && (
+        <Card className="bg-card border-border">
+          <CardContent className="py-3 px-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-4 h-4 text-primary" />
+              <span className="text-xs font-semibold">{activeProgram.name}</span>
+              <span className="text-xs text-muted-foreground">·</span>
+              <span className="text-xs text-muted-foreground">{activePhase.name}</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs">
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Cycles:</span>
+                <span className="font-bold tabular-nums text-primary">{programStreak.currentCycles}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Days:</span>
+                <span className="font-bold tabular-nums">{programStreak.currentDays}</span>
+              </div>
+              {programStreak.nextExpected && (
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <span className="text-muted-foreground">Next:</span>
+                  <span className={`font-medium ${programStreak.nextExpected.isRest ? "text-muted-foreground" : "text-amber-gold"}`}>
+                    {programStreak.nextExpected.routineName}
+                  </span>
+                </div>
+              )}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
+              Rest days count toward your streak. It only breaks if you miss a scheduled workout day (1-day grace period).
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Height */}
       <Card className="bg-card border-border">
         <CardHeader className="pb-3">
@@ -147,7 +235,7 @@ export default function ProfileTab() {
             <Package className="w-4 h-4 text-primary" />
             <CardTitle className="text-sm">Band Inventory</CardTitle>
           </div>
-          <CardDescription className="text-xs">Select the bands you own to build your résistance ladder</CardDescription>
+          <CardDescription className="text-xs">Select the bands you own to build your résistance ladder <JargonTip term="ladder" /></CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
           {BRAND_GROUPS.map(group => {
@@ -219,7 +307,7 @@ export default function ProfileTab() {
               </Badge>
             </div>
             <CardDescription className="text-xs">
-              All possible band stacking combinations, lightest to heaviest
+              Estimated peak tension at your height ({formatHeight(profile.heightInches)}), lightest to heaviest
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-0.5 max-h-64 overflow-y-auto">
@@ -241,9 +329,17 @@ export default function ProfileTab() {
                   ))}
                 </div>
                 <span className="flex-1 text-xs truncate">{combo.label}</span>
-                <span className="text-xs font-mono text-primary shrink-0 tabular-nums">
-                  {combo.totalMinLbs}–{combo.totalMaxLbs}
-                </span>
+                {(() => {
+                  const bands = combo.bandIds.map(id => bandMap.get(id)).filter(Boolean) as import("@/lib/types").Band[];
+                  const tension = getComboTensionAtHeight(bands, profile.heightInches);
+                  const displayTension = profile.units === "kg" ? lbsToKg(tension).toFixed(0) : tension.toFixed(0);
+                  const unit = profile.units === "kg" ? "kg" : "lbs";
+                  return (
+                    <span className="text-xs font-mono text-primary shrink-0 tabular-nums" title={`${combo.totalMinLbs}–${combo.totalMaxLbs} lbs range`}>
+                      ~{displayTension} {unit}
+                    </span>
+                  );
+                })()}
               </div>
             ))}
             {!ladderShowAll && ladder.length > LADDER_PREVIEW_COUNT && (
@@ -334,6 +430,51 @@ export default function ProfileTab() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Active Program */}
+          <div>
+            <Label className="text-sm">Active Program</Label>
+            <p className="text-xs text-muted-foreground mb-2">Streak tracking follows this program's schedule</p>
+            <Select
+              value={profile.activeProgramId ?? "none"}
+              onValueChange={(v) => {
+                const programId = v === "none" ? null : v;
+                const program = programs.find(p => p.id === programId);
+                updateProfile({
+                  activeProgramId: programId,
+                  activePhaseId: program?.phases[0]?.id ?? null,
+                });
+              }}
+            >
+              <SelectTrigger className="h-8">
+                <SelectValue placeholder="No program selected" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (simple day streak)</SelectItem>
+                {programs.map(p => (
+                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {activeProgram && activeProgram.phases.length > 1 && (
+            <div>
+              <Label className="text-xs text-muted-foreground">Phase</Label>
+              <Select
+                value={profile.activePhaseId ?? activeProgram.phases[0]?.id ?? ""}
+                onValueChange={(v) => updateProfile({ activePhaseId: v })}
+              >
+                <SelectTrigger className="h-8 mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeProgram.phases.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          <Separator />
           <div className="flex items-center justify-between">
             <Label className="text-sm">Units</Label>
             <Select
@@ -350,27 +491,64 @@ export default function ProfileTab() {
             </Select>
           </div>
           <Separator />
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-sm">Rest Timer</Label>
-              <p className="text-xs text-muted-foreground">Default rest between sets</p>
+          <div>
+            <Label className="text-sm">Rest Timers</Label>
+            <p className="text-xs text-muted-foreground mb-3">Rest duration per exercise type</p>
+            <div className="space-y-2">
+              {([
+                { key: "compound" as const, label: "Compounds", desc: "Bench, Squat, Row, Deadlift, etc." },
+                { key: "shoulders" as const, label: "Shoulders", desc: "Lateral Raise, Z-Press, OHP, etc." },
+                { key: "isolation" as const, label: "Isolation", desc: "Curls, Extensions, Flys, Core, etc." },
+              ]).map(({ key, label, desc }) => (
+                <div key={key} className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-medium">{label}</span>
+                    <span className="text-xs text-muted-foreground ml-1.5">({desc})</span>
+                  </div>
+                  <Select
+                    value={String(profile.categoryRestTimers?.[key] ?? (key === "compound" ? 90 : key === "shoulders" ? 75 : 60))}
+                    onValueChange={(v) => updateProfile({
+                      categoryRestTimers: {
+                        ...(profile.categoryRestTimers ?? { compound: 90, shoulders: 75, isolation: 60 }),
+                        [key]: Number(v),
+                      },
+                    })}
+                  >
+                    <SelectTrigger className="w-20 h-7 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30">30s</SelectItem>
+                      <SelectItem value="45">45s</SelectItem>
+                      <SelectItem value="60">60s</SelectItem>
+                      <SelectItem value="75">75s</SelectItem>
+                      <SelectItem value="90">90s</SelectItem>
+                      <SelectItem value="120">2m</SelectItem>
+                      <SelectItem value="150">2.5m</SelectItem>
+                      <SelectItem value="180">3m</SelectItem>
+                      <SelectItem value="240">4m</SelectItem>
+                      <SelectItem value="300">5m</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
             </div>
-            <Select
-              value={String(profile.restTimerSeconds)}
-              onValueChange={(v) => updateProfile({ restTimerSeconds: Number(v) })}
-            >
-              <SelectTrigger className="w-24 h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="60">60s</SelectItem>
-                <SelectItem value="90">90s</SelectItem>
-                <SelectItem value="120">2 min</SelectItem>
-                <SelectItem value="180">3 min</SelectItem>
-                <SelectItem value="240">4 min</SelectItem>
-                <SelectItem value="300">5 min</SelectItem>
-              </SelectContent>
-            </Select>
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between">
+            <div className="flex items-start gap-3">
+              <Smartphone className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <div>
+                <Label className="text-sm">Keep Screen On</Label>
+                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
+                  Prevents the screen from locking during active workouts so the rest timer bell always fires on time.
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={profile.keepScreenOn ?? true}
+              onCheckedChange={(checked) => updateProfile({ keepScreenOn: checked })}
+            />
           </div>
           <Separator />
           <div className="flex items-start gap-3 py-1">
@@ -378,7 +556,7 @@ export default function ProfileTab() {
             <div>
               <Label className="text-sm">Band Progression</Label>
               <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">
-                Automatic — when your reps exceed the prescribed range for an exercise (e.g. hitting 13 on an 8–12 range), the app suggests moving up the ladder.
+                Automatic — when your reps exceed the prescribed range for an exercise (e.g. hitting 13 on an 8–12 range), the app suggests moving up the ladder. <JargonTip term="progression" />
               </p>
             </div>
           </div>

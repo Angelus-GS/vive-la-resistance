@@ -20,6 +20,8 @@ export function getDefaultState(): AppState {
       amrapTargetReps: 12,
       units: "lbs",
       keepScreenOn: true,
+      activeProgramId: null,
+      activePhaseId: null,
     },
     bands: DEFAULT_BANDS.map(b => ({ ...b })),
     bars: DEFAULT_BARS.map(b => ({ ...b })),
