@@ -31,7 +31,7 @@ import { calculateStreak, calculateProgramStreak, getWeeklyWorkoutCount } from "
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
-const HERO_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/DZrBwwSrda96SBezQ91GLV/sandbox/mmcxzbXYIgxAqZLaMxBPDN-img-4_1771966174000_na1fn_YmFuZC1zdGFjay1kZXRhaWw.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRFpyQnd3U3JkYTk2U0JlelE5MUdMVi9zYW5kYm94L21tY3h6YlhZSWd4QXFaTGFNeEJQRE4taW1nLTRfMTc3MTk2NjE3NDAwMF9uYTFmbl9ZbUZ1WkMxemRHRmpheTFrWlhSaGFXdy5qcGc~eC1vc3MtcHJvY2Vzcz1pbWFnZS9yZXNpemUsd18xOTIwLGhfMTkyMC9mb3JtYXQsd2VicC9xdWFsaXR5LHFfODAiLCJDb25kaXRpb24iOnsiRGF0ZUxlc3NUaGFuIjp7IkFXUzpFcG9jaFRpbWUiOjE3OTg3NjE2MDB9fX1dfQ__&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=FLTzgfZ5GQJ8b0n99hHtII5ODsfhIcWir-~kkexzHXWY2eIr1A7DxhOTTozMQf7lpUEghGvln9icwTiy9HsThNnU3ec912i5IutuEwSe1btRCFtI~OPFgZgNJnrSPhCrtomWf2KaE8-wOMk3PXHRWxQGlZNVNGqnpzVftDwWjNTy4xYDGGq8d9VeOtogsjIX9PMnrYes3X4eo42w7Ub6F6ypVGmmj2nLMDkity9eQ7~TM6cqDXmhrywjC9C3I2jtWtXYZGBdXX4hKH00bsKxqCyVhEHaw86lvTrDxjITEjBNrS8OVRwbEL2lVggE91EdTOraOFxnRDZPPyopClpxSA__";
+const HERO_IMG = `${import.meta.env.BASE_URL}images/band-stack-detail.webp`;
 
 function formatHeight(inches: number): string {
   const ft = Math.floor(inches / 12);
