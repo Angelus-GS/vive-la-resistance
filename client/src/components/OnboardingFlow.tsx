@@ -15,7 +15,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, ArrowLeft, Ruler, Package, Zap } from "lucide-react";
 import { BRAND_GROUPS } from "@/lib/equipment-data";
 
-const HERO_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/DZrBwwSrda96SBezQ91GLV/sandbox/mmcxzbXYIgxAqZLaMxBPDN-img-1_1771966185000_na1fn_aGVyby1yZXNpc3RhbmNlLWJhbmRz.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRFpyQnd3U3JkYTk2U0JlelE5MUdMVi9zYW5kYm94L21tY3h6YlhZSWd4QXFaTGFNeEJQRE4taW1nLTFfMTc3MTk2NjE4NTAwMF9uYTFmbl9hR1Z5YnkxeVpYTnBjM1JoYm1ObExXSmhibVJ6LmpwZz94LW9zcy1wcm9jZXNzPWltYWdlL3Jlc2l6ZSx3XzE5MjAsaF8xOTIwL2Zvcm1hdCx3ZWJwL3F1YWxpdHkscV84MCIsIkNvbmRpdGlvbiI6eyJEYXRlTGVzc1RoYW4iOnsiQVdTOkVwb2NoVGltZSI6MTc5ODc2MTYwMH19fV19&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=OEHIdyAdctLxCwSaEIeNNGqLtpcLtfeQnGQU-WezK-NHxeXf2rGVl1nO8F0HMGYHp6RL7xrQtUZqAhjWza0zUdgKzuLpp5bdHUrgryXam~Q8jPfrGf-3ijHtAe8WJ-lIWgdEhwLgmmGZeKC57QWDhCH-MSU2F2aslWybn7eNW626Uvlc~WWd5MoYk5AMslZcbS3dCoAwnCxyRG3AOr~Y59bUEJM6ktyHqXMAofqRbIfJUGF6hzeXeTs25vCe9aDbi4k88XKHpbCZSfh8KvTIv1n7iCPSKJJi39R3aCjQCV-CLhNr3WoNw8e5u~cGlnoLfbnN2g2Uq8R7wx317ZJu8Q__";
+const HERO_IMG = `${import.meta.env.BASE_URL}images/hero-resistance-bands.webp`;
 
 function formatHeight(inches: number): string {
   const ft = Math.floor(inches / 12);
