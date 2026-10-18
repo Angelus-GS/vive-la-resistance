@@ -107,6 +107,9 @@ temp/
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
-.manus-logs/
 attached_assets/
 .github/workflows/
+
+# Build output (deploy lives on the gh-pages branch)
+client/dist-gh/
+dist/
