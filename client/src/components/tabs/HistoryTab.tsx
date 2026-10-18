@@ -26,7 +26,7 @@ import {
   BarChart, Bar
 } from "recharts";
 
-const ANALYTICS_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/DZrBwwSrda96SBezQ91GLV/sandbox/mmcxzbXYIgxAqZLaMxBPDN-img-3_1771966181000_na1fn_YW5hbHl0aWNzLWFic3RyYWN0.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRFpyQnd3U3JkYTk2U0JlelE5MUdMVi9zYW5kYm94L21tY3h6YlhZSWd4QXFaTGFNeEJQRE4taW1nLTNfMTc3MTk2NjE4MTAwMF9uYTFmbl9ZVzVoYkhsMGFXTnpMV0ZpYzNSeVlXTjAuanBnP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=Z4kh~jeRxMenAGPuCZ38kwKQlaPXlJoazWykS1klMNQXvv6Q72R~8FC8MbEK7s1pk8wvJ~xd~y4b~NYsqRMUZ1NJxz9IfA8bDlrMuPPZoiBk3dVdQ0uz6CM-VhWf3yCCvVs75p6n4rxMGSQKI-AwqrtXHCPv5YmV83~SjIol9mlGhUgYe2XDVCEqeI2tnXxsOF0W~ED57xw3wB4~emwviC74iMiMIqupypcLYym9vP-Sv1rVI8ZkZ4ezwltfbF0ZH1u0qj0bJuCoPkyodST0VSkSx2uT4K8PV4JxFcJtZB8vPF9Eo-KPe1ZRI34RDS5NOvEmkPKzPuOaYm9N-9cxZQ__";
+const ANALYTICS_IMG = `${import.meta.env.BASE_URL}images/analytics-abstract.webp`;
 
 const INTENSITY_STYLES: Record<IntensityLevel, { bg: string; text: string; icon: typeof Flame }> = {
   heavy: { bg: "bg-red-500/15", text: "text-red-400", icon: Flame },
