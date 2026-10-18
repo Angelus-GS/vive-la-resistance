@@ -34,12 +34,13 @@ registerRoute(
   })
 );
 
+// Runtime caching for the app's own images (self-hosted in /images)
 registerRoute(
-  /^https:\/\/.*\.manus\.storage\..*/i,
+  ({ request, url }) => request.destination === "image" && url.origin === self.location.origin,
   new CacheFirst({
-    cacheName: "image-cache",
+    cacheName: "local-images",
     plugins: [
-      new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 30 }),
+      new ExpirationPlugin({ maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 30 }),
       new CacheableResponsePlugin({ statuses: [0, 200] }),
     ],
   })
