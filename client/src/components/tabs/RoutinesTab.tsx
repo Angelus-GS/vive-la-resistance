@@ -36,7 +36,7 @@ import { getLastExerciseHint } from "@/lib/physics";
 // Combined built-in routines from all programs
 const ALL_PROGRAM_ROUTINES = [...GORILLA_GAINS_ROUTINES, ...HARAMBRO_V3_ROUTINES];
 
-const WORKOUT_IMG = "https://private-us-east-1.manuscdn.com/sessionFile/DZrBwwSrda96SBezQ91GLV/sandbox/mmcxzbXYIgxAqZLaMxBPDN-img-2_1771966179000_na1fn_d29ya291dC1hdG1vc3BoZXJl.jpg?x-oss-process=image/resize,w_1920,h_1920/format,webp/quality,q_80&Expires=1798761600&Policy=eyJTdGF0ZW1lbnQiOlt7IlJlc291cmNlIjoiaHR0cHM6Ly9wcml2YXRlLXVzLWVhc3QtMS5tYW51c2Nkbi5jb20vc2Vzc2lvbkZpbGUvRFpyQnd3U3JkYTk2U0JlelE5MUdMVi9zYW5kYm94L21tY3h6YlhZSWd4QXFaTGFNeEJQRE4taW1nLTJfMTc3MTk2NjE3OTAwMF9uYTFmbl9kMjl5YTI5MWRDMWhkRzF2YzNCb1pYSmwuanBnP3gtb3NzLXByb2Nlc3M9aW1hZ2UvcmVzaXplLHdfMTkyMCxoXzE5MjAvZm9ybWF0LHdlYnAvcXVhbGl0eSxxXzgwIiwiQ29uZGl0aW9uIjp7IkRhdGVMZXNzVGhhbiI6eyJBV1M6RXBvY2hUaW1lIjoxNzk4NzYxNjAwfX19XX0_&Key-Pair-Id=K2HSFNDJXOU9YS&Signature=iiMdiHzIw1GPHhtifr7-aIl4ElptzSilxpaAxJsWdOna5PBJaJTu4ME~OU4nFhKJrMzAKJb63WT~YLB5qgAqUb~BGlnB7rrWs2K3WGjsttiDgKnOzTk02EvlPwyv9KU0MuRFsSEVt0iJKo8wtjMFBi~3WKMX95HofZqI9snD1cL4i-mrKSQ8lwxtt6SYiP2nVQrm1oUNZrlPjzyFkaveRwby4s-aab17ZAdTBwiSF845AketzYhkQBSiIf6CbLEsNwj00vxLz9UcSc7ibuEBzKTlCoZEUOxN86IWrteaCBwS5rg0746cn22SKbdacnx7nLv0mkTR7nP-Mnk5-S~d3Q__";
+const WORKOUT_IMG = `${import.meta.env.BASE_URL}images/workout-atmosphere.webp`;
 
 const CATEGORY_COLORS: Record<string, string> = {
   compound: "bg-amber-gold/20 text-amber-gold",
