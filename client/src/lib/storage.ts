@@ -6,7 +6,7 @@
 
 import type { AppState, Workout, WorkoutExercise, LoggedSet, Band } from "./types";
 import { DEFAULT_CATEGORY_REST_TIMERS } from "./types";
-import { DEFAULT_BANDS, DEFAULT_BARS, DEFAULT_FOOTPLATES, DEFAULT_ACCESSORIES, DEFAULT_EXERCISES, GORILLA_GAINS_PROGRAM, GORILLA_GAINS_ROUTINES, HARAMBRO_V3_PROGRAM, HARAMBRO_V3_ROUTINES } from "./equipment-data";
+import { DEFAULT_BANDS, DEFAULT_BARS, DEFAULT_FOOTPLATES, DEFAULT_ACCESSORIES, DEFAULT_EXERCISES, GORILLA_GAINS_PROGRAM, GORILLA_GAINS_ROUTINES, HARAMBRO_V3_PROGRAM, HARAMBRO_V3_ROUTINES, MUSCLE_LADDER_PROGRAM } from "./equipment-data";
 
 const STORAGE_KEY = "vive-la-resistance-v1";
 
@@ -30,7 +30,7 @@ export function getDefaultState(): AppState {
     gymProfiles: [],
     exerciseTemplates: DEFAULT_EXERCISES.map(e => ({ ...e })),
     routines: [],
-    programs: [GORILLA_GAINS_PROGRAM, HARAMBRO_V3_PROGRAM],
+    programs: [GORILLA_GAINS_PROGRAM, HARAMBRO_V3_PROGRAM, MUSCLE_LADDER_PROGRAM],
     workoutHistory: [],
     activeWorkout: null,
     resistanceLadder: [],
