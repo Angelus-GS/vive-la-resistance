@@ -177,7 +177,7 @@ export interface Routine {
   updatedAt: string;
   programId?: string; // links to a program
   intensity?: IntensityLevel;
-  dayType?: "push" | "pull" | "chest" | "back" | "shoulders" | "upper-back" | "legs" | "chest-push" | "back-pull" | "shoulder-tricep-push" | "biceps-pull" | "legs-push" | "light-pull"; // for program-based routines
+  dayType?: "push" | "pull" | "chest" | "back" | "shoulders" | "upper-back" | "legs" | "chest-push" | "back-pull" | "shoulder-tricep-push" | "biceps-pull" | "legs-push" | "light-pull" | "full-body" | "upper" | "lower"; // for program-based routines
   isBuiltIn?: boolean; // true for Gorilla Gains pre-built routines
   challenge?: { // end-of-workout challenge (HaramBro V3)
     name: string;
