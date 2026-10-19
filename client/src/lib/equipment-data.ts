@@ -417,3 +417,262 @@ export const HARAMBRO_V3_PROGRAM: Program = {
     },
   ],
 };
+
+// ============================================================
+// THE MUSCLE LADDER — BAND EDITION
+// Inspired by "The Muscle Ladder" by Jeff Nippard (2024).
+// Adaptation for resistance bands — not affiliated with or
+// endorsed by Jeff Nippard. Principles applied (from the book):
+// technique first (full ROM, controlled reps), exercise selection
+// built around the "big six" patterns (squat, hinge, vertical and
+// horizontal push/pull), compounds before isolations, most work at
+// 1-2 RIR with true failure reserved for the last set of the final
+// isolation movement. Phases literally climb: full body →
+// upper/lower → push/pull/legs + pump.
+// ============================================================
+
+export const MUSCLE_LADDER_ROUTINES: Routine[] = [
+  // --- Phase 1: Full Body (3x/week) ---
+  {
+    id: "ml-fb-a",
+    name: "ML: Full Body A",
+    exercises: [
+      makeRoutineExercise("ex-front-squat", 3, "8-12", false),
+      makeRoutineExercise("ex-bench-press", 3, "8-12", true),
+      makeRoutineExercise("ex-bent-row", 3, "10-15", true),
+      makeRoutineExercise("ex-lateral-raise", 2, "12-20", false),
+      makeRoutineExercise("ex-pallof-press", 2, "10-15", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "full-body",
+    isBuiltIn: true,
+  },
+  {
+    id: "ml-fb-b",
+    name: "ML: Full Body B",
+    exercises: [
+      makeRoutineExercise("ex-rdl", 3, "8-12", true),
+      makeRoutineExercise("ex-overhead-press", 3, "8-12", false),
+      makeRoutineExercise("ex-one-arm-pulldown", 3, "10-15", false, false, false, true),
+      makeRoutineExercise("ex-bicep-curl", 2, "12-15", false),
+      makeRoutineExercise("ex-calf-raise", 2, "15-20", true),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "full-body",
+    isBuiltIn: true,
+  },
+  {
+    id: "ml-fb-c",
+    name: "ML: Full Body C",
+    exercises: [
+      makeRoutineExercise("ex-split-squat", 3, "8-12", false, false, false, true),
+      makeRoutineExercise("ex-incline-press", 3, "10-15", true),
+      makeRoutineExercise("ex-yates-row", 3, "10-15", true),
+      makeRoutineExercise("ex-face-pull", 2, "15-20", false),
+      makeRoutineExercise("ex-ab-crunch", 2, "12-20", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "full-body",
+    isBuiltIn: true,
+  },
+  // --- Phase 2: Upper / Lower (4x/week) ---
+  {
+    id: "ml-upper-a",
+    name: "ML: Upper A",
+    exercises: [
+      makeRoutineExercise("ex-bench-press", 3, "6-10", true),
+      makeRoutineExercise("ex-bent-row", 3, "8-12", true),
+      makeRoutineExercise("ex-overhead-press", 3, "8-12", false),
+      makeRoutineExercise("ex-lateral-raise", 3, "12-20", false),
+      makeRoutineExercise("ex-tricep-press", 2, "12-15", true),
+      makeRoutineExercise("ex-bicep-curl", 2, "12-15", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "upper",
+    isBuiltIn: true,
+  },
+  {
+    id: "ml-lower-a",
+    name: "ML: Lower A",
+    exercises: [
+      makeRoutineExercise("ex-front-squat", 3, "6-10", false),
+      makeRoutineExercise("ex-rdl", 3, "8-12", true),
+      makeRoutineExercise("ex-split-squat", 2, "10-12", false, false, false, true),
+      makeRoutineExercise("ex-calf-raise", 3, "12-20", true),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "lower",
+    isBuiltIn: true,
+  },
+  {
+    id: "ml-upper-b",
+    name: "ML: Upper B",
+    exercises: [
+      makeRoutineExercise("ex-incline-press", 3, "8-12", true),
+      makeRoutineExercise("ex-one-arm-pulldown", 3, "10-12", false, false, false, true),
+      makeRoutineExercise("ex-z-press", 3, "8-12", false),
+      makeRoutineExercise("ex-chest-fly", 3, "12-15", true),
+      makeRoutineExercise("ex-face-pull", 2, "15-20", false),
+      makeRoutineExercise("ex-ferro-curl", 3, "10-15", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "upper",
+    isBuiltIn: true,
+  },
+  {
+    id: "ml-lower-b",
+    name: "ML: Lower B",
+    exercises: [
+      makeRoutineExercise("ex-deadlift", 3, "5-8", true),
+      makeRoutineExercise("ex-narrow-front-squat", 3, "8-12", false),
+      makeRoutineExercise("ex-one-leg-rdl", 2, "10", false, false, false, true),
+      makeRoutineExercise("ex-angled-calf-raise", 3, "15-20", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "lower",
+    isBuiltIn: true,
+  },
+  // --- Phase 3: Push / Pull / Legs / Upper Pump (4-5x/week) ---
+  {
+    id: "ml-push",
+    name: "ML: Push",
+    exercises: [
+      makeRoutineExercise("ex-bench-press", 4, "6-10", true),
+      makeRoutineExercise("ex-incline-press", 3, "8-12", true),
+      makeRoutineExercise("ex-z-press", 3, "8-12", false),
+      makeRoutineExercise("ex-lateral-raise", 4, "12-20", false),
+      makeRoutineExercise("ex-tricep-extension", 3, "10-15", true),
+      makeRoutineExercise("ex-overhead-seated-ext", 2, "12-15", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "push",
+    isBuiltIn: true,
+  },
+  {
+    id: "ml-pull",
+    name: "ML: Pull",
+    exercises: [
+      makeRoutineExercise("ex-pendlay-row", 4, "6-10", true),
+      makeRoutineExercise("ex-one-arm-pulldown", 3, "10-12", false, false, false, true),
+      makeRoutineExercise("ex-yates-row", 3, "8-12", true),
+      makeRoutineExercise("ex-band-pull-apart", 3, "15-20", false),
+      makeRoutineExercise("ex-wide-ferro-curl", 3, "10-12", false),
+      makeRoutineExercise("ex-bicep-blaster-21s", 1, "21", false, false, true),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "pull",
+    isBuiltIn: true,
+  },
+  {
+    id: "ml-legs",
+    name: "ML: Legs",
+    exercises: [
+      makeRoutineExercise("ex-back-squat", 4, "6-10", true),
+      makeRoutineExercise("ex-rdl", 3, "8-12", true),
+      makeRoutineExercise("ex-split-squat", 3, "10-12", false, false, false, true),
+      makeRoutineExercise("ex-calf-raise", 4, "12-20", true),
+      makeRoutineExercise("ex-pallof-press", 2, "10-15", false),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "legs",
+    isBuiltIn: true,
+  },
+  {
+    id: "ml-upper-pump",
+    name: "ML: Upper Pump",
+    exercises: [
+      makeRoutineExercise("ex-chest-press", 3, "10-15", true),
+      makeRoutineExercise("ex-lawnmower-row", 3, "10-12", false, false, false, true),
+      makeRoutineExercise("ex-one-arm-ohp", 3, "10-12", false, false, false, true),
+      makeRoutineExercise("ex-chest-fly", 2, "12-20", true),
+      makeRoutineExercise("ex-arnold-curl", 2, "12-15", false),
+      makeRoutineExercise("ex-tricep-press", 2, "12-15", true),
+    ],
+    createdAt: "2025-01-01T00:00:00Z",
+    updatedAt: "2025-01-01T00:00:00Z",
+    programId: "muscle-ladder",
+    dayType: "upper",
+    isBuiltIn: true,
+  },
+];
+
+export const MUSCLE_LADDER_PROGRAM: Program = {
+  id: "muscle-ladder",
+  name: "The Muscle Ladder — Band Edition",
+  description: "Science-based hypertrophy adapted from Jeff Nippard's Muscle Ladder to resistance bands. Climb the ladder in phases: full body, upper/lower, then push/pull/legs. Big-six movement patterns, compounds first, most sets at 1-2 RIR.",
+  source: "Inspired by The Muscle Ladder (Jeff Nippard)",
+  overview: {
+    warmup: "1-2 light sets of the day's first big movement. Technique is Rung 1: full range of motion, every rep controlled.",
+    rest: "Rest 2-3 minutes on compounds, 60-90 seconds on isolations.",
+    cadence: "2-3 second eccentric, no bouncing. With bands, the stretched position is where the growth is.",
+    failure: "Most sets at 1-2 reps in reserve. Take ONLY the last set of the day's final isolation exercise to true failure.",
+    keepTension: "Never let the band go slack — constant tension through the whole range.",
+  },
+  phases: [
+    {
+      id: "ml-phase-1",
+      name: "Rungs 1-3: Foundation",
+      description: "Full body 3x/week. Master technique, build the habit, 2-3 RIR on everything.",
+      weekRange: "Weeks 1-4",
+      schedule: [
+        { dayLabel: "Mon", routineId: "ml-fb-a", routineName: "Full Body A" },
+        { dayLabel: "Tue", routineId: null, routineName: "Rest", isRest: true },
+        { dayLabel: "Wed", routineId: "ml-fb-b", routineName: "Full Body B" },
+        { dayLabel: "Thu", routineId: null, routineName: "Rest", isRest: true },
+        { dayLabel: "Fri", routineId: "ml-fb-c", routineName: "Full Body C" },
+        { dayLabel: "Sat", routineId: null, routineName: "Rest", isRest: true },
+        { dayLabel: "Sun", routineId: null, routineName: "Rest", isRest: true },
+      ],
+    },
+    {
+      id: "ml-phase-2",
+      name: "Rungs 4-7: Build",
+      description: "Upper/lower 4x/week. More volume per muscle, 1-2 RIR, compounds get heavier rep ranges.",
+      weekRange: "Weeks 5-8",
+      schedule: [
+        { dayLabel: "Mon", routineId: "ml-upper-a", routineName: "Upper A" },
+        { dayLabel: "Tue", routineId: "ml-lower-a", routineName: "Lower A" },
+        { dayLabel: "Wed", routineId: null, routineName: "Rest", isRest: true },
+        { dayLabel: "Thu", routineId: "ml-upper-b", routineName: "Upper B" },
+        { dayLabel: "Fri", routineId: "ml-lower-b", routineName: "Lower B" },
+        { dayLabel: "Sat", routineId: null, routineName: "Rest", isRest: true },
+        { dayLabel: "Sun", routineId: null, routineName: "Rest", isRest: true },
+      ],
+    },
+    {
+      id: "ml-phase-3",
+      name: "Rungs 8-10: Peak",
+      description: "Push/pull/legs + upper pump. Highest volume of the ladder; final isolation set to failure.",
+      weekRange: "Week 9+",
+      schedule: [
+        { dayLabel: "Mon", routineId: "ml-push", routineName: "Push" },
+        { dayLabel: "Tue", routineId: "ml-pull", routineName: "Pull" },
+        { dayLabel: "Wed", routineId: null, routineName: "Rest", isRest: true },
+        { dayLabel: "Thu", routineId: "ml-legs", routineName: "Legs" },
+        { dayLabel: "Fri", routineId: "ml-upper-pump", routineName: "Upper Pump" },
+        { dayLabel: "Sat", routineId: null, routineName: "Rest", isRest: true },
+        { dayLabel: "Sun", routineId: null, routineName: "Rest", isRest: true },
+      ],
+    },
+  ],
+};
