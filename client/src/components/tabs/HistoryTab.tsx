@@ -16,7 +16,7 @@ import {
   TrendingUp, Zap, Flame, Activity, Target
 } from "lucide-react";
 import { downloadCSV, importFromCSV, matchExerciseTemplates } from "@/lib/storage";
-import { calculateSetJoules, estimateElongation, getPeakTension } from "@/lib/physics";
+import { calculateSetJoules, estimateElongation, getPeakTension, lbsToKg } from "@/lib/physics";
 import { toast } from "sonner";
 import type { Band, IntensityLevel } from "@/lib/types";
 import ExerciseProgressChart from "@/components/ExerciseProgressChart";
@@ -71,6 +71,7 @@ function ChartTooltip({ active, payload, label }: any) {
 export default function HistoryTab() {
   const { state, dispatch } = useApp();
   const { allBands, bandMap } = useBands();
+  const units = state.userProfile.units;
 
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null);
 
@@ -284,7 +285,7 @@ export default function HistoryTab() {
                 <Activity className="w-3.5 h-3.5 text-amber-gold" />
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Peak Tension</p>
               </div>
-              <p className="text-2xl font-bold font-mono tabular-nums">{peakEver}<span className="text-sm text-muted-foreground ml-0.5">lbs</span></p>
+              <p className="text-2xl font-bold font-mono tabular-nums">{units === "kg" ? Math.round(lbsToKg(peakEver)) : peakEver}<span className="text-sm text-muted-foreground ml-0.5">{units}</span></p>
             </CardContent>
           </Card>
         </div>
@@ -300,12 +301,12 @@ export default function HistoryTab() {
                 <TrendingUp className="w-4 h-4 text-primary" />
                 <CardTitle className="text-sm">Peak Tension Progression</CardTitle>
               </div>
-              <CardDescription className="text-xs">Maximum tension per workout (lbs)</CardDescription>
+              <CardDescription className="text-xs">Maximum tension per workout ({units})</CardDescription>
             </CardHeader>
             <CardContent className="pb-3">
               <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={analyticsData}>
+                  <AreaChart data={analyticsData.map(d => ({ ...d, peakTension: units === "kg" ? Math.round(lbsToKg(d.peakTension)) : d.peakTension }))}>
                     <defs>
                       <linearGradient id="tensionGrad" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="oklch(0.78 0.12 80)" stopOpacity={0.3} />
@@ -319,7 +320,7 @@ export default function HistoryTab() {
                     <Area
                       type="monotone"
                       dataKey="peakTension"
-                      name="Peak Tension (lbs)"
+                      name={`Peak Tension (${units})`}
                       stroke="oklch(0.78 0.12 80)"
                       strokeWidth={2}
                       fill="url(#tensionGrad)"
