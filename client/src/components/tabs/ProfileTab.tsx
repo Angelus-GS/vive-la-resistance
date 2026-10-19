@@ -27,6 +27,7 @@ import { BRAND_GROUPS } from "@/lib/equipment-data";
 import { APP_VERSION } from "@shared/const";
 import { getComboTensionAtHeight, lbsToKg } from "@/lib/physics";
 import { downloadCSV } from "@/lib/storage";
+import DriveSyncSection from "@/components/DriveSyncSection";
 import { calculateStreak, calculateProgramStreak, getWeeklyWorkoutCount } from "@/lib/streaks";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -583,6 +584,8 @@ export default function ProfileTab() {
           </div>
         </CardContent>
       </Card>
+
+      <DriveSyncSection />
 
       <div className="h-6" />
     </div>
