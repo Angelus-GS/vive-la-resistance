@@ -36,10 +36,10 @@ import { shareWorkoutCard } from "@/lib/share-card";
 import type { LoggedSet, WorkoutExercise, IntensityLevel, ExerciseTemplate, LastSessionHint, Routine, RoutineExercise, PersonalRecord } from "@/lib/types";
 import { INTENSITY_REP_RANGES, getCategoryRestGroup } from "@/lib/types";
 import { shouldProgressBand, getLastExerciseHint, getComboTensionAtHeight, lbsToKg } from "@/lib/physics";
-import { GORILLA_GAINS_ROUTINES, HARAMBRO_V3_ROUTINES } from "@/lib/equipment-data";
+import { GORILLA_GAINS_ROUTINES, HARAMBRO_V3_ROUTINES, MUSCLE_LADDER_ROUTINES } from "@/lib/equipment-data";
 import { useWakeLock } from "@/hooks/useWakeLock";
 
-const ALL_PROGRAM_ROUTINES = [...GORILLA_GAINS_ROUTINES, ...HARAMBRO_V3_ROUTINES];
+const ALL_PROGRAM_ROUTINES = [...GORILLA_GAINS_ROUTINES, ...HARAMBRO_V3_ROUTINES, ...MUSCLE_LADDER_ROUTINES];
 
 const INTENSITY_STYLES: Record<IntensityLevel, { bg: string; text: string; icon: typeof Flame }> = {
   heavy: { bg: "bg-red-500/15", text: "text-red-400", icon: Flame },
