@@ -30,11 +30,11 @@ import { motion } from "framer-motion";
 import type { Routine, RoutineExercise, WorkoutExercise, LoggedSet, IntensityLevel, Program, ProgramPhase } from "@/lib/types";
 import { INTENSITY_REP_RANGES, getCategoryRestGroup } from "@/lib/types";
 import type { CategoryRestTimers } from "@/lib/types";
-import { GORILLA_GAINS_ROUTINES, HARAMBRO_V3_ROUTINES } from "@/lib/equipment-data";
+import { GORILLA_GAINS_ROUTINES, HARAMBRO_V3_ROUTINES, MUSCLE_LADDER_ROUTINES } from "@/lib/equipment-data";
 import { getLastExerciseHint } from "@/lib/physics";
 
 // Combined built-in routines from all programs
-const ALL_PROGRAM_ROUTINES = [...GORILLA_GAINS_ROUTINES, ...HARAMBRO_V3_ROUTINES];
+const ALL_PROGRAM_ROUTINES = [...GORILLA_GAINS_ROUTINES, ...HARAMBRO_V3_ROUTINES, ...MUSCLE_LADDER_ROUTINES];
 
 const WORKOUT_IMG = `${import.meta.env.BASE_URL}images/workout-atmosphere.webp`;
 
