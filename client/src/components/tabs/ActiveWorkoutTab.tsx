@@ -465,163 +465,170 @@ function SetRow({
       }`}
     >
       <div className="p-3 space-y-2.5">
-        {/* Row 1: Set number + Band combo selector */}
+        {/* Row 1: Set number + band combo stepper bar + spacer toggle */}
         <div className="flex items-center gap-2">
           {/* Set number badge */}
-          <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-xs font-bold font-mono ${
+          <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-sm font-bold font-mono ${
             isCompleted ? "bg-sage-green/20 text-sage-green" : "bg-accent text-muted-foreground"
           }`}>
             {set.setNumber}
           </div>
 
-          {/* Band combo selector */}
-          <div className="flex-1 flex items-center gap-1 min-w-0">
-            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 rounded-lg"
+          {/* Band combo selector — a bordered stepper bar, obviously a control */}
+          <div className={`flex-1 flex items-center min-w-0 h-11 rounded-xl border overflow-hidden ${
+            isCompleted ? "border-sage-green/25 bg-sage-green/5" : "border-border bg-accent/30"
+          }`}>
+            <button
+              type="button"
+              aria-label="Lighter band combination"
+              className="h-full w-10 shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/60 active:bg-accent disabled:opacity-30 disabled:pointer-events-none transition-colors"
               onClick={handleBandDown} disabled={comboIndex <= 0 || isCompleted}>
-              <Minus className="w-3.5 h-3.5" />
-            </Button>
+              <Minus className="w-4 h-4" />
+            </button>
 
-            <div className="flex-1 min-w-0 flex items-center gap-1.5 px-1">
+            <div className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-1">
               {combo ? (
                 combo.colorHexes.length > 0 ? (
                   <>
                     <div className="flex gap-0.5 shrink-0">
                       {combo.colorHexes.map((hex, j) => (
-                        <span key={j} className="w-3 h-3 rounded-full border border-white/10 shadow-sm"
+                        <span key={j} className="w-3.5 h-3.5 rounded-full border border-white/10 shadow-sm"
                           style={{ backgroundColor: hex }} />
                       ))}
                     </div>
-                    <span className="text-xs font-medium truncate">{combo.label}</span>
+                    <span className="text-sm font-medium truncate">{combo.label}</span>
+                    {(() => {
+                      const bands = combo.bandIds.map(id => ownedBands.find(b => b.id === id)).filter(Boolean) as import("@/lib/types").Band[];
+                      const tension = getComboTensionAtHeight(bands, heightInches);
+                      const display = units === "kg" ? lbsToKg(tension).toFixed(0) : tension.toFixed(0);
+                      const unit = units === "kg" ? "kg" : "lbs";
+                      return (
+                        <span className="text-sm font-mono text-primary shrink-0 tabular-nums">
+                          ~{display} {unit}
+                        </span>
+                      );
+                    })()}
                   </>
                 ) : (
-                  <span className="text-xs text-muted-foreground/70 italic flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full border border-dashed border-muted-foreground/30 shrink-0" />
+                  <span className="text-sm text-muted-foreground/70 italic flex items-center gap-1.5">
+                    <span className="w-3.5 h-3.5 rounded-full border border-dashed border-muted-foreground/30 shrink-0" />
                     No Bands
                   </span>
                 )
               ) : (
-                <span className="text-xs text-muted-foreground">No bands</span>
+                <span className="text-sm text-muted-foreground">No bands</span>
               )}
             </div>
 
-            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 rounded-lg"
+            <button
+              type="button"
+              aria-label="Heavier band combination"
+              className="h-full w-10 shrink-0 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent/60 active:bg-accent disabled:opacity-30 disabled:pointer-events-none transition-colors"
               onClick={handleBandUp} disabled={comboIndex >= ladder.length - 1 || isCompleted}>
-              <Plus className="w-3.5 h-3.5" />
-            </Button>
+              <Plus className="w-4 h-4" />
+            </button>
           </div>
 
-          {/* Estimated tension at user height */}
-          {combo && combo.colorHexes.length > 0 && (() => {
-            const bands = combo.bandIds.map(id => ownedBands.find(b => b.id === id)).filter(Boolean) as import("@/lib/types").Band[];
-            const tension = getComboTensionAtHeight(bands, heightInches);
-            const display = units === "kg" ? lbsToKg(tension).toFixed(0) : tension.toFixed(0);
-            const unit = units === "kg" ? "kg" : "lbs";
-            return (
-              <span className="text-xs font-mono text-primary shrink-0 tabular-nums">
-                ~{display} {unit}
-              </span>
-            );
-          })()}
-          {combo && combo.colorHexes.length === 0 && (
-            <span className="text-xs font-mono text-muted-foreground/50 shrink-0">
-              0 {units}
-            </span>
-          )}
-        </div>
-
-        {/* Row 2: Spacers + Full Reps + Partial Reps + Iso + Complete */}
-        <div className="flex items-center gap-1.5">
           {/* Spacer toggle */}
           <button
             onClick={() => !isCompleted && onUpdate({ ...set, spacers: set.spacers > 0 ? 0 : 1 })}
             disabled={isCompleted}
-            className={`h-7 px-2 rounded-lg text-xs font-mono flex items-center gap-1 transition-all shrink-0 ${
+            className={`h-11 px-2.5 rounded-xl text-xs font-mono flex items-center gap-1 transition-all shrink-0 ${
               set.spacers > 0
                 ? "bg-primary/15 text-primary border border-primary/25"
-                : "bg-accent/50 text-muted-foreground border border-transparent hover:border-border/50"
+                : "bg-accent/50 text-muted-foreground border border-border/40 hover:border-border"
             }`}
           >
-            <Link2 className="w-3 h-3" />
+            <Link2 className="w-3.5 h-3.5" />
             SP{set.spacers > 0 ? ` ${set.spacers}` : ""}
           </button>
+        </div>
 
-          <Separator orientation="vertical" className="h-5 mx-0.5" />
-
-          {/* Full Reps */}
-          <div className="flex items-center gap-1">
-            <label className="text-xs text-foreground/70 font-semibold tracking-wide">
-              Full
-            </label>
-            <Input
-              type="number"
-              min={0}
-              value={set.reps || ""}
-              onChange={e => onUpdate({ ...set, reps: parseInt(e.target.value) || 0 })}
-              className="w-12 h-7 text-xs text-center font-mono px-1 tabular-nums"
-              disabled={isCompleted}
-              placeholder="0"
-            />
+        {/* Row 2: Full reps stepper + Part + Iso — 44px targets, reps tappable or typeable */}
+        <div className="flex items-end gap-2">
+          {/* Full Reps with steppers */}
+          <div className="space-y-1">
+            <label className="text-xs text-foreground/70 font-semibold tracking-wide block">Full</label>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                aria-label="One fewer rep"
+                className="h-11 w-9 shrink-0 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border active:bg-accent disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                onClick={() => onUpdate({ ...set, reps: Math.max(0, set.reps - 1) })}
+                disabled={isCompleted || set.reps <= 0}>
+                <Minus className="w-4 h-4" />
+              </button>
+              <Input
+                type="number"
+                min={0}
+                value={set.reps || ""}
+                onChange={e => onUpdate({ ...set, reps: parseInt(e.target.value) || 0 })}
+                className="w-14 h-11 text-base text-center font-mono px-1 tabular-nums"
+                disabled={isCompleted}
+                placeholder="0"
+              />
+              <button
+                type="button"
+                aria-label="One more rep"
+                className="h-11 w-9 shrink-0 rounded-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border active:bg-accent disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                onClick={() => onUpdate({ ...set, reps: set.reps + 1 })}
+                disabled={isCompleted}>
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Partial Reps */}
-          <div className="flex items-center gap-1">
-            <label className="text-xs text-primary/70 font-semibold tracking-wide">
-              Part
-            </label>
+          <div className="space-y-1">
+            <label className="text-xs text-primary/70 font-semibold tracking-wide block">Part</label>
             <Input
               type="number"
               min={0}
               value={set.partialReps || ""}
               onChange={e => onUpdate({ ...set, partialReps: parseInt(e.target.value) || 0 })}
-              className="w-12 h-7 text-xs text-center font-mono px-1 tabular-nums"
+              className="w-14 h-11 text-base text-center font-mono px-1 tabular-nums"
               disabled={isCompleted}
               placeholder="0"
             />
           </div>
 
           {/* Isometric */}
-          <div className="flex items-center gap-1">
-            <label className="text-xs text-sage-green/70 font-semibold tracking-wide">
-              Iso
-            </label>
+          <div className="space-y-1">
+            <label className="text-xs text-sage-green/70 font-semibold tracking-wide block">Iso</label>
             <Input
               type="number"
               min={0}
               value={set.isometricSeconds || ""}
               onChange={e => onUpdate({ ...set, isometricSeconds: parseInt(e.target.value) || 0 })}
-              className="w-11 h-7 text-xs text-center font-mono px-1 tabular-nums"
+              className="w-14 h-11 text-base text-center font-mono px-1 tabular-nums"
               disabled={isCompleted}
               placeholder="0"
             />
           </div>
+        </div>
 
-          <div className="flex-1" />
-
-          {/* Remove */}
+        {/* Row 3: Remove + Complete Set — the most-tapped control is now the biggest */}
+        <div className="flex items-center gap-2">
           {!isCompleted && (
             <Button variant="ghost" size="icon"
-              className="h-7 w-7 text-destructive/40 hover:text-destructive shrink-0"
+              className="h-11 w-11 text-destructive/40 hover:text-destructive shrink-0"
               onClick={onRemove}>
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </Button>
           )}
-
-          {/* Complete */}
           <Button
             variant={isCompleted ? "default" : "outline"}
-            size="icon"
-            className={`h-7 w-7 shrink-0 rounded-lg transition-all ${
+            className={`flex-1 h-11 rounded-xl text-sm font-semibold transition-all ${
               isCompleted
                 ? "bg-sage-green text-white hover:bg-sage-green/90 border-sage-green"
-                : "border-border/60 hover:border-primary/40 hover:text-primary"
+                : "border-border hover:border-primary/50 hover:text-primary"
             }`}
             onClick={onComplete}
           >
-            <Check className="w-3.5 h-3.5" />
+            <Check className="w-4 h-4 mr-1.5" />
+            {isCompleted ? "Set Completed" : "Complete Set"}
           </Button>
         </div>
-
-
       </div>
     </motion.div>
   );
