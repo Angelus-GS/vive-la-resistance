@@ -17,7 +17,7 @@ import {
   ComposedChart, Area, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { estimateElongation, getPeakTension, getBandDisplayName } from "@/lib/physics";
+import { estimateElongation, getPeakTension, getBandDisplayName, lbsToKg } from "@/lib/physics";
 import type { Band } from "@/lib/types";
 
 // ---- Chart colors (Chalk & Iron palette) ----
@@ -27,13 +27,13 @@ const GRID_COLOR = "oklch(0.28 0.01 250)";        // border
 const TICK_COLOR = "oklch(0.60 0.015 250)";        // muted-foreground
 
 // ---- Custom tooltip ----
-function ProgressTooltip({ active, payload, label }: any) {
+function ProgressTooltip({ active, payload, label, unit }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-popover text-popover-foreground border border-border rounded-lg p-2.5 shadow-xl text-xs">
       <p className="text-muted-foreground mb-1.5 font-medium">{label}</p>
       {payload.map((p: any, i: number) => {
-        const unit = p.dataKey === "peakTension" ? " lbs" : "";
+        const unitStr = p.dataKey === "peakTension" ? ` ${unit ?? "lbs"}` : "";
         return (
           <div key={i} className="flex items-center gap-2 py-0.5">
             <span
@@ -42,7 +42,7 @@ function ProgressTooltip({ active, payload, label }: any) {
             />
             <span className="text-muted-foreground">{p.name}:</span>
             <span className="font-mono font-semibold" style={{ color: p.color }}>
-              {typeof p.value === "number" ? Math.round(p.value) : p.value}{unit}
+              {typeof p.value === "number" ? Math.round(p.value) : p.value}{unitStr}
             </span>
           </div>
         );
@@ -100,6 +100,7 @@ interface DataPoint {
 export default function ExerciseProgressChart() {
   const { state } = useApp();
   const { bandMap } = useBands();
+  const units = state.userProfile.units;
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>("");
 
   // Build a list of exercises that appear in workout history, grouped by category
@@ -207,7 +208,7 @@ export default function ExerciseProgressChart() {
         points.push({
           date: dateStr,
           fullDate: workout.startedAt,
-          peakTension: Math.round(bestTension),
+          peakTension: Math.round(units === "kg" ? lbsToKg(bestTension) : bestTension),
           maxReps: maxRepsAtBest,
           totalReps,
           bandLabel: bestBands.length > 0
@@ -220,7 +221,7 @@ export default function ExerciseProgressChart() {
     }
 
     return points;
-  }, [effectiveId, state.workoutHistory, bandMap, state.userProfile.heightInches]);
+  }, [effectiveId, state.workoutHistory, bandMap, state.userProfile.heightInches, units]);
 
   // Don't render if no workout history
   const hasExercises = Object.keys(exerciseOptions).length > 0;
@@ -302,7 +303,7 @@ export default function ExerciseProgressChart() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground truncate">
-                {summary.currentBandLabel} · {summary.currentTension} lbs · {summary.currentReps} reps
+                {summary.currentBandLabel} · {summary.currentTension} {units} · {summary.currentReps} reps
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -310,7 +311,7 @@ export default function ExerciseProgressChart() {
                 <span className={`text-xs font-mono font-semibold ${
                   summary.tensionDelta > 0 ? "text-sage-green" : "text-destructive/70"
                 }`}>
-                  {summary.tensionDelta > 0 ? "+" : ""}{summary.tensionDelta} lbs
+                  {summary.tensionDelta > 0 ? "+" : ""}{summary.tensionDelta} {units}
                 </span>
               )}
               {summary.repsDelta !== 0 && (
@@ -355,7 +356,7 @@ export default function ExerciseProgressChart() {
                   axisLine={false}
                   width={35}
                   label={{
-                    value: "lbs",
+                    value: units,
                     position: "insideTopLeft",
                     offset: 0,
                     style: { fontSize: 9, fill: TICK_COLOR },
@@ -375,7 +376,7 @@ export default function ExerciseProgressChart() {
                     style: { fontSize: 9, fill: TICK_COLOR },
                   }}
                 />
-                <Tooltip content={<ProgressTooltip />} />
+                <Tooltip content={<ProgressTooltip unit={units} />} />
                 <Legend content={<ProgressLegend />} />
                 <Area
                   yAxisId="tension"
